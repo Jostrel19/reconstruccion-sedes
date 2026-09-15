@@ -1,0 +1,192 @@
+{
+ "type": "object",
+ "properties": {
+  "accion": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "esquema": {
+   "type": "integer"
+  },
+  "version_app": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "municipio": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "enviado": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "registros": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "id_radicado": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "version": {
+      "type": "integer"
+     },
+     "dane_sede": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "municipio": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "dane_ie": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "institucion": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "sede": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "zona": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "matricula": {
+      "type": "integer"
+     },
+     "tipo_censo": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "nivel_censo": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "declara_afectacion": {
+      "type": "boolean"
+     },
+     "hay_discrepancia": {
+      "type": "boolean"
+     },
+     "justificacion_discrepancia": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "descripcion_afectacion": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "alcalde": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "rector": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "correo": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "celular": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "costo_directo": {
+      "type": "integer"
+     },
+     "pct_admin": {
+      "type": "integer"
+     },
+     "pct_utilidad": {
+      "type": "integer"
+     },
+     "valor_admin": {
+      "type": "integer"
+     },
+     "valor_utilidad": {
+      "type": "integer"
+     },
+     "valor_iva": {
+      "type": "integer"
+     },
+     "total_presupuesto": {
+      "type": "integer"
+     },
+     "plazo_dias": {
+      "type": "integer"
+     },
+     "actividades": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "estado": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "fecha_radicacion": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "items": {
+      "type": "array",
+      "items": {}
+     },
+     "fotos": {
+      "type": "array",
+      "items": {}
+     }
+    }
+   }
+  }
+ }
+}
