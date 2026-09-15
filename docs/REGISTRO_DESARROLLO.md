@@ -200,3 +200,36 @@ módulo de roles. Son dos capas separadas — autenticación ("¿quién sos?") y
 hacer?") — y solo cambió la primera. El reparto de roles (Administrador / Verificador / Responsable
 de sede / Consulta) y sus alcances sigue exactamente como se diseñó en el mockup v5 y en la pestaña
 `Usuarios`.
+
+## 2026-09-15 — Repositorio git, alcance de roles (D-24/D-25) y borrador de Usuarios
+
+Se decidió publicar bajo la cuenta personal del practicante (`Jostrel19`), no bajo la organización
+`sedcaldas` en GitHub: esa organización resultó ser la cuenta personal de otro funcionario, no una
+cuenta institucional, así que meter el trabajo ahí solo traslada el mismo riesgo que se quería
+evitar (que un tercero pueda borrar o editar el repositorio sin control del autor).
+
+Se inicializó el repositorio local (no existía pese a que ya había un `.gitignore` preparado) y se
+corrigió ese `.gitignore` dos veces antes del primer commit: no excluía `data/entregas_excel/` ni
+`data/insumos/` (presupuestos reales de municipios, con datos como el teléfono personal del contacto
+de Belalcázar), y `web/assets/js/data.js` —el catálogo del sistema viejo— seguía trayendo
+`correo_ie`/`celular_ie`/`rector` de las 1.021 sedes: el mismo dato que motivó Q-9 y obligó a poner
+en privado el repositorio anterior (D-18). Confirmado que el resto de archivos `.js` solo mencionan
+esos nombres de campo en el código, no los valores reales. Primer commit hecho, limpio.
+
+Se resolvió una pregunta que había quedado abierta desde la discusión de autenticación: **"Responsable
+de sede" sí incluye a alcaldes y rectores, no solo personal de la SED** (D-24) — lo que retiró D-18
+fue el mecanismo inseguro (enlace público + catálogo con contactos expuesto), no el acceso directo en
+sí. Con el login por código y los contactos viviendo en el backend, pueden volver a entrar de forma
+segura. Alcance: alcalde = todo su municipio; rector = las sedes de su institución en el catálogo
+(entre 1 y 18, según `fctMaestra`); mismos permisos para ambos. Verificador (D-25) ve todas las sedes
+del departamento, sin restricción por municipio.
+
+Con eso, `tools/generar_usuarios_borrador.py` generó automáticamente 187 filas (26 alcaldes + 161
+rectores) desde el catálogo ya construido, en vez de recopilarlas a mano — quedan pendientes de
+confirmar vigencia antes de invitar a alguien real, y de sumarles Administrador y Consulta, que no
+salen de ningún catálogo.
+
+**Sesión cerrada aquí.** Pendiente exacto para retomar: nombre y visibilidad del repositorio remoto,
+lista de Administrador/Consulta, prueba de despliegue de Apps Script, y crear el Google Sheet real
+con las 6 pestañas. Nada de esto bloquea empezar a escribir el backend de Apps Script ni el frontend
+de Fase 0.
