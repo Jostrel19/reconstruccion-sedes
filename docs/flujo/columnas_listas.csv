@@ -1,0 +1,65 @@
+﻿LISTA;COLUMNA;TIPO;INDEXADA;ORIGEN
+PresupuestosSedes;Título;Texto;;cabecera/id_radicado
+PresupuestosSedes;dane_sede;Texto;SI;cabecera/dane_sede
+PresupuestosSedes;municipio;Elección;SI;cabecera/municipio
+PresupuestosSedes;dane_ie;Texto;;cabecera/dane_ie
+PresupuestosSedes;institucion;Texto;;cabecera/institucion
+PresupuestosSedes;sede;Texto;;cabecera/sede
+PresupuestosSedes;zona;Elección;;cabecera/zona
+PresupuestosSedes;matricula;Número entero;;cabecera/matricula
+PresupuestosSedes;tipo_censo;Texto;;cabecera/tipo_censo
+PresupuestosSedes;nivel_censo;Texto;;cabecera/nivel_censo
+PresupuestosSedes;declara_afectacion;Sí/No;SI;cabecera/declara_afectacion
+PresupuestosSedes;hay_discrepancia;Sí/No;SI;cabecera/hay_discrepancia
+PresupuestosSedes;justificacion_discrepancia;Varias líneas;;cabecera/justificacion_discrepancia
+PresupuestosSedes;descripcion_afectacion;Varias líneas;;cabecera/descripcion_afectacion
+PresupuestosSedes;alcalde;Texto;;cabecera/alcalde
+PresupuestosSedes;rector;Texto;;cabecera/rector
+PresupuestosSedes;correo;Texto;;cabecera/correo
+PresupuestosSedes;celular;Texto;;cabecera/celular
+PresupuestosSedes;costo_directo;Moneda;;cabecera/costo_directo
+PresupuestosSedes;pct_admin;Número 2 dec;;cabecera/pct_admin
+PresupuestosSedes;pct_utilidad;Número 2 dec;;cabecera/pct_utilidad
+PresupuestosSedes;valor_admin;Moneda;;cabecera/valor_admin
+PresupuestosSedes;valor_utilidad;Moneda;;cabecera/valor_utilidad
+PresupuestosSedes;valor_iva;Moneda;;cabecera/valor_iva
+PresupuestosSedes;total_presupuesto;Moneda;;cabecera/total_presupuesto
+PresupuestosSedes;plazo_dias;Número entero;;cabecera/plazo_dias
+PresupuestosSedes;actividades;Varias líneas;;cabecera/actividades
+PresupuestosSedes;estado;Elección;SI;cabecera/estado
+PresupuestosSedes;version;Número entero;;cabecera/version
+PresupuestosSedes;fecha_radicacion;Fecha y hora;;cabecera/fecha_radicacion
+PresupuestosSedes;valor_modelo;Moneda;;lo escribe el flujo desde CatalogoSedes
+PresupuestosSedes;desviacion_pct;Número 2 dec;;lo calcula el flujo
+PresupuestosSedes;archivo_origen;Texto;;nombre del archivo subido
+PresupuestosSedes;resultado_verificacion;Elección;;lo diligencia la SED
+PresupuestosSedes;observaciones_verificacion;Varias líneas;;lo diligencia la SED
+PresupuestosSedes;verificador;Texto;;lo diligencia la SED
+PresupuestosSedes;cedula_verificador;Texto;;lo diligencia la SED
+PresupuestosSedes;fecha_verificacion;Fecha y hora;;lo diligencia la SED
+ItemsPresupuesto;Título;Texto;;id_radicado + '-' + n_item
+ItemsPresupuesto;id_radicado;Texto;SI;cabecera/id_radicado
+ItemsPresupuesto;dane_sede;Texto;SI;cabecera/dane_sede
+ItemsPresupuesto;n_item;Número entero;;items/n_item
+ItemsPresupuesto;capitulo_dano;Número entero;;items/capitulo_dano
+ItemsPresupuesto;capitulo_nombre;Texto;;items/capitulo_nombre
+ItemsPresupuesto;descripcion;Varias líneas;;items/descripcion
+ItemsPresupuesto;unidad;Elección;;items/unidad
+ItemsPresupuesto;cantidad;Número 2 dec;;items/cantidad
+ItemsPresupuesto;valor_unitario;Moneda;;items/valor_unitario
+ItemsPresupuesto;valor_total;Moneda;;items/valor_total
+CatalogoSedes;Título;Texto;;dane_sede
+CatalogoSedes;dane_sede;Texto;SI;catalogo_sedes.json
+CatalogoSedes;municipio;Elección;SI;catalogo_sedes.json
+CatalogoSedes;dane_ie;Texto;;catalogo_sedes.json
+CatalogoSedes;institucion;Texto;;catalogo_sedes.json
+CatalogoSedes;sede;Texto;;catalogo_sedes.json
+CatalogoSedes;zona;Elección;;catalogo_sedes.json
+CatalogoSedes;matricula;Número entero;;catalogo_sedes.json
+CatalogoSedes;estado_sede;Texto;;catalogo_sedes.json
+CatalogoSedes;tipo_censo;Texto;SI;catalogo_sedes.json
+CatalogoSedes;nivel_censo;Texto;;catalogo_sedes.json
+CatalogoSedes;valor_modelo;Moneda;;catalogo_sedes.json
+CatalogoSedes;orden_priorizacion;Número entero;;catalogo_sedes.json
+CatalogoSedes;rector;Texto;;catalogo_sedes.json
+CatalogoSedes;correo_ie;Texto;;catalogo_sedes.json

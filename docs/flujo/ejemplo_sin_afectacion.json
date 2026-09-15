@@ -1,0 +1,43 @@
+{
+ "accion": "declararSinAfectacion",
+ "esquema": 1,
+ "version_app": "0.5.0",
+ "municipio": "MARULANDA",
+ "enviado": "2026-09-08T21:40:00.000Z",
+ "registros": [
+  {
+   "id_radicado": "SED-PRE-217446000097-v1",
+   "version": 1,
+   "dane_sede": "217446000097",
+   "municipio": "MARULANDA",
+   "dane_ie": "117446000157",
+   "institucion": "INSTITUCION EDUCATIVA EFREN CARDONA CHICA",
+   "sede": "ESCUELA RURAL HERVEO",
+   "zona": "RURAL",
+   "matricula": 19,
+   "tipo_censo": "5. SIN AFECTACIÓN",
+   "nivel_censo": "",
+   "declara_afectacion": false,
+   "hay_discrepancia": false,
+   "justificacion_discrepancia": "",
+   "descripcion_afectacion": "",
+   "alcalde": "LEONARDO ANDRES GIRALDO BOTERO",
+   "rector": "NOMBRE DEL RECTOR",
+   "correo": "correo@sedcaldas.gov.co",
+   "celular": "3000000000",
+   "costo_directo": 0,
+   "pct_admin": 0,
+   "pct_utilidad": 0,
+   "valor_admin": 0,
+   "valor_utilidad": 0,
+   "valor_iva": 0,
+   "total_presupuesto": 0,
+   "plazo_dias": 0,
+   "actividades": "",
+   "estado": "SIN_AFECTACION",
+   "fecha_radicacion": "2026-09-08T21:40:00.000Z",
+   "items": [],
+   "fotos": []
+  }
+ ]
+}

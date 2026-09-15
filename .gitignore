@@ -1,0 +1,42 @@
+# --- SECRETOS -----------------------------------------------------------
+# Tokens en claro: quien los tenga puede abrir el tablero de cualquier
+# municipio. Nunca deben publicarse.
+data/privado/
+
+# --- USO INTERNO DE LA SECRETARÍA ---------------------------------------
+# Llevan el valor estimado por el modelo paramétrico, que por decisión D-6 no
+# debe llegar a los municipios. Se despliegan aparte, en un sitio no público.
+web/assets/js/data-sed.js
+web/consola.html
+
+# Catálogo del sistema viejo (D-18, retirado): trae correo_ie/celular_ie/rector
+# de las 1.021 sedes — el mismo dato de Q-9 que hizo poner el repo anterior en
+# privado. No tiene uso en el sistema nuevo (D-17) y no debe volver a
+# publicarse. Se regenera con tools/build_catalogo.py si algún día hace falta.
+web/assets/js/data.js
+
+# --- ARTEFACTOS INTERMEDIOS ---------------------------------------------
+data/generado/
+
+# --- DATOS REALES DE MUNICIPIOS Y CATÁLOGO OFICIAL ----------------------
+# Presupuestos reales entregados por las alcaldías (cifras institucionales,
+# contactos personales de rectores/alcaldías) y los insumos de priorización
+# (fctMaestra, PrimerasPriorizadas). Nunca deben publicarse ni entrar al
+# historial de git, ni siquiera en un repositorio privado.
+data/entregas/
+data/entregas_excel/
+data/insumos/
+
+# Datos de demostración: no deben confundirse con radicaciones reales.
+docs/demo/
+web/demo/
+
+# --- PYTHON --------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# --- SISTEMA -------------------------------------------------------------
+Thumbs.db
+.DS_Store

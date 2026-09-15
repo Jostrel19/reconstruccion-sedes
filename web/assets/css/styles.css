@@ -1,0 +1,266 @@
+/* Aplicativo presupuestal — SED Caldas */
+
+:root {
+  --azul: #12395f;
+  --azul-osc: #0c2842;
+  --azul-cl: #1f6fb2;
+  --verde: #1d7a55;
+  --ambar: #b5741a;
+  --rojo: #a32b28;
+  --gris-bg: #f4f6f8;
+  --gris-bd: #d8dee5;
+  --gris-tx: #5b6874;
+  --tinta: #1c2733;
+  --radio: 6px;
+  --sombra: 0 1px 3px rgba(16, 32, 48, .12);
+  --fuente: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--fuente);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--tinta);
+  background: var(--gris-bg);
+}
+
+h1, h2, h3 { margin: 0 0 .5rem; line-height: 1.25; }
+h1 { font-size: 1.35rem; }
+h2 { font-size: 1.1rem; }
+h3 { font-size: .95rem; }
+p { margin: 0 0 .75rem; }
+a { color: var(--azul-cl); }
+
+/* ---------------------------------------------------------------- cabecera */
+.barra {
+  background: var(--azul);
+  color: #fff;
+  padding: .7rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.barra .marca { font-weight: 700; letter-spacing: .01em; }
+.barra .marca small { display: block; font-weight: 400; opacity: .8; font-size: .75rem; }
+.barra .sep { flex: 1; }
+.barra .chip {
+  background: rgba(255, 255, 255, .14);
+  padding: .2rem .6rem;
+  border-radius: 999px;
+  font-size: .78rem;
+}
+
+.aviso-prueba {
+  background: #fdf3d8;
+  border-bottom: 1px solid #e8d199;
+  color: #6b4e14;
+  padding: .4rem 1.25rem;
+  font-size: .82rem;
+}
+
+.envoltura { max-width: 1180px; margin: 0 auto; padding: 1.25rem; }
+
+/* ------------------------------------------------------------------ tarjeta */
+.tarjeta {
+  background: #fff;
+  border: 1px solid var(--gris-bd);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+.tarjeta > h2 {
+  border-bottom: 1px solid var(--gris-bd);
+  padding-bottom: .5rem;
+  margin-bottom: .9rem;
+  color: var(--azul);
+}
+.sub { color: var(--gris-tx); font-size: .85rem; }
+
+/* ---------------------------------------------------------------- controles */
+label { display: block; font-size: .8rem; font-weight: 600; margin-bottom: .25rem; color: var(--gris-tx); }
+input, select, textarea {
+  width: 100%;
+  padding: .45rem .55rem;
+  border: 1px solid var(--gris-bd);
+  border-radius: 4px;
+  font: inherit;
+  font-size: .9rem;
+  background: #fff;
+  color: var(--tinta);
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--azul-cl); outline-offset: -1px; }
+input[readonly], input:disabled, select:disabled {
+  background: #eef1f4; color: var(--gris-tx); cursor: not-allowed;
+}
+textarea { resize: vertical; min-height: 5rem; }
+.campo { margin-bottom: .8rem; }
+.rejilla { display: grid; gap: .8rem; }
+.r2 { grid-template-columns: repeat(2, 1fr); }
+.r3 { grid-template-columns: repeat(3, 1fr); }
+.r4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 780px) { .r2, .r3, .r4 { grid-template-columns: 1fr; } }
+
+.btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .5rem .9rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font: inherit; font-size: .88rem; font-weight: 600;
+  cursor: pointer;
+  background: var(--azul); color: #fff;
+}
+.btn:hover { background: var(--azul-osc); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.sec { background: #fff; color: var(--azul); border-color: var(--gris-bd); }
+.btn.sec:hover { background: #eef2f6; }
+.btn.ok { background: var(--verde); }
+.btn.peligro { background: var(--rojo); }
+.btn.mini { padding: .25rem .5rem; font-size: .78rem; }
+.acciones { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ------------------------------------------------------------------- tablas */
+table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+th, td { padding: .45rem .5rem; border-bottom: 1px solid var(--gris-bd); text-align: left; vertical-align: top; }
+th { background: #eef2f6; font-size: .75rem; text-transform: uppercase; letter-spacing: .02em; color: var(--gris-tx); }
+tbody tr:hover { background: #f8fafc; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.tabla-scroll { overflow-x: auto; }
+
+/* ---------------------------------------------------------------- etiquetas */
+.et {
+  display: inline-block; padding: .12rem .45rem; border-radius: 999px;
+  font-size: .72rem; font-weight: 600; white-space: nowrap;
+}
+.e-pendiente { background: #eceff2; color: #56616d; }
+.e-sin       { background: #e4f0ea; color: #1d6a4b; }
+.e-borrador  { background: #fdf1d8; color: #8a5a12; }
+.e-radicado  { background: #dfe9f5; color: #17517f; }
+.e-verif     { background: #e6e2f5; color: #4a3d8f; }
+.e-ajuste    { background: #fbe2e1; color: #8f2422; }
+.e-aprobado  { background: #d9efe2; color: #14603f; }
+
+.t1 { background: #fbe2e1; color: #8f2422; }
+.t2 { background: #fbe8dd; color: #91461a; }
+.t3 { background: #fdf1d8; color: #7d5310; }
+.t4 { background: #eef2d9; color: #556016; }
+.t5 { background: #e4f0ea; color: #1d6a4b; }
+.t6, .t7 { background: #eceff2; color: #56616d; }
+
+/* ------------------------------------------------------------------ avances */
+.avance { height: 8px; background: #e4e9ee; border-radius: 999px; overflow: hidden; }
+.avance > i { display: block; height: 100%; background: var(--verde); transition: width .3s; }
+
+.metricas { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: .7rem; }
+.metrica {
+  background: #fff; border: 1px solid var(--gris-bd); border-radius: var(--radio);
+  padding: .6rem .75rem;
+}
+.metrica b { display: block; font-size: 1.35rem; line-height: 1.1; color: var(--azul); font-variant-numeric: tabular-nums; }
+.metrica span { font-size: .74rem; color: var(--gris-tx); text-transform: uppercase; letter-spacing: .02em; }
+
+/* -------------------------------------------------------------------- notas */
+.nota {
+  border-left: 3px solid var(--azul-cl);
+  background: #eef4fa;
+  padding: .55rem .75rem;
+  border-radius: 0 4px 4px 0;
+  font-size: .84rem;
+  margin-bottom: .8rem;
+}
+.nota.alerta { border-color: var(--ambar); background: #fdf6e6; }
+.nota.error  { border-color: var(--rojo);  background: #fbeceb; }
+
+/* Los dos modos de llenar una fila del presupuesto: medible y global. */
+.ejemplos { display: grid; gap: .5rem; margin: .5rem 0; }
+@media (min-width: 720px) { .ejemplos { grid-template-columns: 1fr 1fr; } }
+.ejemplos > div {
+  background: #fff; border: 1px solid var(--gris-bd); border-radius: 4px;
+  padding: .45rem .6rem; font-size: .82rem;
+}
+.ejemplos .ej {
+  display: block; margin-top: .3rem; padding-top: .3rem;
+  border-top: 1px dashed var(--gris-bd);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: .76rem; color: var(--azul);
+}
+
+.error-txt { color: var(--rojo); font-size: .78rem; margin-top: .2rem; }
+input.malo, select.malo, textarea.malo { border-color: var(--rojo); background: #fffafa; }
+
+/* ------------------------------------------------------------------- fotos */
+.fotos { display: flex; gap: .6rem; flex-wrap: wrap; }
+.foto {
+  position: relative; width: 108px; height: 82px; border-radius: 4px;
+  overflow: hidden; border: 1px solid var(--gris-bd); background: #eef1f4;
+}
+.foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto button {
+  position: absolute; top: 2px; right: 2px; width: 20px; height: 20px;
+  border: 0; border-radius: 50%; background: rgba(20, 30, 40, .72); color: #fff;
+  cursor: pointer; font-size: .8rem; line-height: 1;
+}
+
+/* ------------------------------------------------------------------ firmas */
+.firma-caja { display: flex; gap: .8rem; align-items: flex-start; flex-wrap: wrap; }
+.firma-lienzo {
+  width: 190px; height: 62px; flex: none;
+  border: 1px dashed var(--gris-bd); border-radius: 4px; background: #fff;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.firma-lienzo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+/* ------------------------------------------------------------------ diálogo */
+.velo {
+  position: fixed; inset: 0; background: rgba(14, 24, 35, .55);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 1.5rem 1rem; overflow-y: auto; z-index: 50;
+}
+.dialogo {
+  background: var(--gris-bg); border-radius: 8px; width: 100%; max-width: 1000px;
+  box-shadow: 0 12px 32px rgba(10, 20, 30, .3);
+}
+.dialogo > header {
+  background: var(--azul); color: #fff; padding: .8rem 1.1rem;
+  border-radius: 8px 8px 0 0; display: flex; align-items: center; gap: 1rem;
+  position: sticky; top: 0; z-index: 2;
+}
+.dialogo > header .sep { flex: 1; }
+.dialogo > header button {
+  background: rgba(255, 255, 255, .16); border: 0; color: #fff;
+  width: 28px; height: 28px; border-radius: 4px; cursor: pointer; font-size: 1rem;
+}
+.dialogo > .cuerpo { padding: 1.1rem; }
+.dialogo > footer {
+  position: sticky; bottom: 0; background: #fff; border-top: 1px solid var(--gris-bd);
+  padding: .75rem 1.1rem; border-radius: 0 0 8px 8px;
+  display: flex; gap: .6rem; align-items: center; flex-wrap: wrap;
+}
+
+/* ------------------------------------------------------------------- avisos */
+#avisos { position: fixed; right: 1rem; bottom: 1rem; z-index: 90; display: grid; gap: .5rem; }
+.aviso {
+  background: var(--azul-osc); color: #fff; padding: .55rem .9rem;
+  border-radius: 4px; font-size: .85rem; box-shadow: var(--sombra); max-width: 380px;
+}
+.aviso.ok { background: var(--verde); }
+.aviso.mal { background: var(--rojo); }
+
+/* ------------------------------------------------------------------ totales */
+.totales { display: grid; gap: .35rem; max-width: 420px; margin-left: auto; font-size: .9rem; }
+.totales div { display: flex; justify-content: space-between; gap: 1rem; }
+.totales div.grande {
+  border-top: 2px solid var(--azul); margin-top: .3rem; padding-top: .4rem;
+  font-weight: 700; font-size: 1.05rem; color: var(--azul);
+}
+.totales span:last-child { font-variant-numeric: tabular-nums; }
+
+.filtros { display: flex; gap: .6rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: .9rem; }
+.filtros .campo { margin: 0; min-width: 160px; }
+.filtros .crece { flex: 1; min-width: 220px; }
+
+.pie { text-align: center; color: var(--gris-tx); font-size: .78rem; padding: 1.5rem 1rem; }

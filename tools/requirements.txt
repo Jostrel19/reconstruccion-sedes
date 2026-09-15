@@ -1,0 +1,4 @@
+# Dependencias de los scripts de construcción (tools/).
+# El sitio publicado NO tiene dependencias: es HTML, CSS y JavaScript sin librerías.
+openpyxl>=3.1
+python-docx>=1.1

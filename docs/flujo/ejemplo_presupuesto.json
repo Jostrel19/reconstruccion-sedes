@@ -1,0 +1,57 @@
+{
+ "accion": "radicarPresupuesto",
+ "esquema": 1,
+ "version_app": "0.5.0",
+ "enviado": "2026-09-08T21:40:00.000Z",
+ "cabecera": {
+  "id_radicado": "SED-PRE-117446000157-v1",
+  "version": 1,
+  "dane_sede": "117446000157",
+  "municipio": "MARULANDA",
+  "dane_ie": "117446000157",
+  "institucion": "INSTITUCION EDUCATIVA EFREN CARDONA CHICA",
+  "sede": "INSTITUCION EDUCATIVA EFREN CARDONA CHICA - SEDE PRINCIPAL",
+  "zona": "URBANA",
+  "matricula": 68,
+  "tipo_censo": "3. AFECTACIONES ESTRUCTURALES O FUNCIONALES PARCIALES",
+  "nivel_censo": "Grave",
+  "declara_afectacion": true,
+  "hay_discrepancia": false,
+  "justificacion_discrepancia": "",
+  "descripcion_afectacion": "Agrietamiento en muros de fachada y desprendimiento parcial de la cubierta sobre dos aulas.",
+  "alcalde": "LEONARDO ANDRES GIRALDO BOTERO",
+  "rector": "NOMBRE DEL RECTOR",
+  "correo": "correo@sedcaldas.gov.co",
+  "celular": "3000000000",
+  "costo_directo": 18000000,
+  "pct_admin": 10,
+  "pct_utilidad": 5,
+  "valor_admin": 1800000,
+  "valor_utilidad": 900000,
+  "valor_iva": 171000,
+  "total_presupuesto": 20871000,
+  "plazo_dias": 75,
+  "actividades": "Desmonte de cubierta: 15 dias\nInstalacion: 30 dias",
+  "estado": "RADICADO",
+  "fecha_radicacion": "2026-09-08T21:40:00.000Z"
+ },
+ "items": [
+  {
+   "n_item": 1,
+   "capitulo_dano": 3,
+   "capitulo_nombre": "3. Cubierta",
+   "descripcion": "Reposicion de cubierta en teja de fibrocemento",
+   "unidad": "M2",
+   "cantidad": 200,
+   "valor_unitario": 90000,
+   "valor_total": 18000000
+  }
+ ],
+ "fotos": [
+  {
+   "nombre": "fachada.jpg",
+   "tipo": "image/jpeg",
+   "contenido_b64": "/9j/4AAQSkZJRg..."
+  }
+ ]
+}
