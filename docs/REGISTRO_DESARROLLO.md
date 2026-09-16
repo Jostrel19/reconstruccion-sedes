@@ -427,6 +427,40 @@ bloqueado de Hallazgos (no es de su incumbencia); Verificador y Administrador s�
 
 ---
 
+### Repo publicado, usuarios internos cerrados, y un residuo de diseño corregido
+
+**Repositorio en línea:** `https://github.com/Jostrel19/reconstruccion-sedes`, público, 4 commits.
+El push lo corrió el usuario en su terminal (token de acceso personal, GitHub ya no acepta
+contraseña por HTTPS) — confirmado desde acá con `git fetch` + `git log origin/master`.
+
+**Pendiente #2 cerrado.** Lista real de usuarios internos, dada por el usuario:
+
+| Correo | Nombre | Rol |
+|---|---|---|
+| data@sedcaldas.edu.co | José Andrés Saavedra Higuera | Administrador |
+| gmartinez@sedcaldas.edu.co | Gustavo Martínez Murillo | Administrador |
+| lhvargas@sedcaldas.edu.co | Luis Herney Vargas Barrera (Secretario de Educación) | Consulta |
+| wgonzalez@sedcaldas.edu.co | Wilmar Gonzales Orozco (Jefe de Planeación) | Consulta |
+| jtmejia@sedcaldas.edu.co | Jessica Tatiana Mejía Ruiz (arquitecta) | Verificador |
+| falopez@sedcaldas.edu.co | Fabián López (arquitecto) | Verificador |
+
+Se guardaron en `data/insumos/usuarios_manual.csv` (fuera de git, como todo dato personal) y
+`tools/generar_usuarios_borrador.py` se extendió para leerlo y fusionarlo con el borrador
+autogenerado de alcaldes/rectores — antes el script decía explícitamente que estos roles "los da
+el jefe/practicante a mano" sin un lugar donde ponerlos; ahora hay uno. Borrador final:
+**193 filas** (26 alcaldes + 161 rectores + 6 internos).
+
+**Hallazgo del usuario, corregido:** el formulario de "Entrar" del mockup todavía tenía campos
+`Usuario` / `Contraseña` con autocomplete de navegador — residuo de cuando se restauró el Artifact
+v5 completo sin revisarlo línea por línea; ese diseño es anterior a que D-20 cerrara el login por
+código de un solo uso (2026-09-15). Se reemplazó por el flujo real de dos pasos: correo
+institucional → botón "Enviar código" → campo de 6 dígitos → "Entrar", con el aviso de que un
+correo no autorizado no recibe nada (para que no se pueda enumerar quién tiene cuenta). Verificado
+en navegador: cero campos de contraseña en todo el archivo, las dos pantallas alternan bien, sin
+errores de consola.
+
+---
+
 ### Pendiente
 
 Lo de siempre (repo remoto, lista de Administrador/Consulta, despliegue de prueba de Apps Script,

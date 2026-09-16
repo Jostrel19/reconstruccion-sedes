@@ -4,6 +4,12 @@
 **Para retomar:** 2026-09-10
 **Estado:** definido el rumbo, **bloqueado por insumos** (ver §6)
 
+> **Vigencia parcial.** La arquitectura de 4 módulos (§3) sigue siendo la base — es lo que se usó
+> para armar `docs/PLAN_DESARROLLO.md`. Lo que ya NO aplica: cualquier mención a SharePoint/Power
+> Automate como backend (superado por D-19, Apps Script) y el bloqueo de §6 (Q-10 se resolvió,
+> llegaron 6 municipios con archivo real). Para el plan operativo vigente, ver
+> `docs/PLAN_DESARROLLO.md`; para decisiones, `CLAUDE.md` §2.
+
 ---
 
 ## 1. Qué cambia

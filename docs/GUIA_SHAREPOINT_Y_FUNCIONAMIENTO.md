@@ -1,5 +1,10 @@
 # Guía de montaje en SharePoint y funcionamiento del aplicativo
 
+> **SUPERADO por D-19 (2026-09-15).** SharePoint queda fuera del backend nuevo — Apps Script
+> escribe directo en Google Sheets/Drive, no hay montaje que hacer aquí. Se conserva como registro
+> del sistema viejo (D-10, opción A′), retirado por D-17/D-18. Ver `CLAUDE.md` §6 y
+> `docs/PLAN_DESARROLLO.md` para el backend vigente.
+
 Secretaría de Educación de Caldas — Dirección de Planeación
 Informe técnico-presupuestal por sede · sismo del 10 de agosto de 2026
 

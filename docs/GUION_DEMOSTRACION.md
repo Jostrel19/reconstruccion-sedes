@@ -1,5 +1,9 @@
 # Guion de la demostración
 
+> **Histórico.** Guion para la demostración del aplicativo viejo (formulario para alcaldes,
+> retirado por D-17/D-18). Se conserva como evidencia de esa etapa; no describe el sistema actual.
+> Para el estado y el plan vigentes, ver `CLAUDE.md` y `docs/PLAN_DESARROLLO.md`.
+
 Doce minutos. El objetivo es que se avale el instrumento y se autorice continuar, no lucir el
 desarrollo.
 

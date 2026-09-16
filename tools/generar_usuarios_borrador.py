@@ -7,8 +7,11 @@ alcalde y una fila por rector con el rol «Responsable de sede» y su alcance:
 - Rector: alcance = las sedes de su institución en el catálogo (puede ser una
   sola o hasta 18 — depende de lo que diga `fctMaestra`, nunca se asume).
 
-No incluye a los usuarios internos de la SED (Administrador, Verificador): esos
-los da el jefe/practicante a mano, porque no salen de ninguna fuente de datos.
+Los usuarios internos de la SED (Administrador, Verificador, Consulta) no salen
+de ninguna fuente de datos — no hay catálogo de funcionarios con rol de sistema.
+Si existe `data/insumos/usuarios_manual.csv` (mismas columnas, dado a mano por
+el jefe/practicante), sus filas se agregan tal cual al final del borrador; si
+no existe, el borrador sale solo con alcaldes y rectores, como antes.
 
 Esto es un BORRADOR para revisar, no se sube solo al backend — el correo de
 contacto del catálogo puede estar desactualizado y conviene que alguien lo
@@ -20,6 +23,9 @@ import csv
 import json
 
 import rutas
+
+COLUMNAS = ["correo", "nombre", "rol", "tipo", "municipio",
+            "alcance", "n_sedes_alcance", "celular"]
 
 
 def generar():
@@ -66,18 +72,26 @@ def generar():
             "celular": ie["celular"],
         })
 
+    manual = rutas.RAIZ / "data" / "insumos" / "usuarios_manual.csv"
+    internos = 0
+    if manual.exists():
+        with open(manual, newline="", encoding="utf-8-sig") as f:
+            for r in csv.DictReader(f, delimiter=";"):
+                filas.append({k: r.get(k, "") for k in COLUMNAS})
+                internos += 1
+
     salida = rutas.RAIZ / "data" / "generado" / "usuarios_borrador.csv"
     with open(salida, "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.DictWriter(f, fieldnames=[
-            "correo", "nombre", "rol", "tipo", "municipio",
-            "alcance", "n_sedes_alcance", "celular",
-        ], delimiter=";")
+        w = csv.DictWriter(f, fieldnames=COLUMNAS, delimiter=";")
         w.writeheader()
         w.writerows(filas)
 
     alcaldes = sum(1 for f in filas if f["tipo"] == "alcalde")
     rectores = sum(1 for f in filas if f["tipo"] == "rector")
-    print(f"{len(filas)} filas generadas ({alcaldes} alcaldes, {rectores} rectores) -> {salida}")
+    print(f"{len(filas)} filas generadas ({alcaldes} alcaldes, {rectores} rectores, "
+          f"{internos} internos) -> {salida}")
+    if not manual.exists():
+        print(f"AVISO: no existe {manual} — el borrador sale sin Administrador/Verificador/Consulta")
 
     sin_correo_m = sum(1 for m in data["municipios"] if not m.get("correo_alcaldia"))
     sin_correo_ie = len({s.get("dane_ie") for s in data["sedes"] if s.get("dane_ie")}) - len(por_ie)
