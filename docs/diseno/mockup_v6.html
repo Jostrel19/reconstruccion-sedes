@@ -1,0 +1,1502 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modelo de diseño v6 — Reconstrucción de sedes SED Caldas</title>
+<style>:root{color-scheme:light dark}html,body{margin:0;padding:0}img{max-width:100%}</style>
+</head>
+<body>
+<meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style>
+<style>
+  /* ═══ CAPA 1 — TOKENS DEL ARTEFACTO (el "papel"). Sigue al visor. ═══ */
+  :root{ --a-bg:#efece4; --a-bg2:#e4e0d5; --a-text:#2a2723; --a-text-sec:#6b655c;
+         --a-line:#d8d2c4; --a-accent:#8a6a3a; --a-chip-bg:#fff; --a-chip-line:#d8d2c4; }
+  @media (prefers-color-scheme:dark){
+    :root{ --a-bg:#1c1a17; --a-bg2:#26221d; --a-text:#ece6da; --a-text-sec:#a89f8e;
+           --a-line:#3a352c; --a-accent:#d8ae67; --a-chip-bg:#26221d; --a-chip-line:#3a352c; }
+  }
+  :root[data-theme="dark"]{ --a-bg:#1c1a17; --a-bg2:#26221d; --a-text:#ece6da; --a-text-sec:#a89f8e; --a-line:#3a352c; --a-accent:#d8ae67; --a-chip-bg:#26221d; --a-chip-line:#3a352c; }
+  :root[data-theme="light"]{ --a-bg:#efece4; --a-bg2:#e4e0d5; --a-text:#2a2723; --a-text-sec:#6b655c; --a-line:#d8d2c4; --a-accent:#8a6a3a; --a-chip-bg:#fff; --a-chip-line:#d8d2c4; }
+
+  /* ═══ CAPA 2 — TOKENS DEL PRODUCTO. Fijos: la identidad institucional
+         no cambia con el modo oscuro de quien lo abra. ═══ */
+  .device{
+    --gris:#6E7A7B; --gris-osc:#454E4F; --rail:#2C3334; --rail-alto:#3B4344;
+    --verde:#006B39; --verde-cl:#0A8349; --oro:#D8AE23; --oro-osc:#9C7B0B;
+    --fondo:#F4F3F0; --panel:#FFFFFF; --borde:#E0DDD6; --borde-f:#AFB8B8;
+    --tx:#232928; --tx-sec:#556060; --tx-inv:#FFFFFF;
+    --ok:#1C7048; --ok-bg:#E5F1E9; --alerta:#8A5F09; --alerta-bg:#FAEFD7;
+    --err:#952E27; --err-bg:#FAE6E4; --neutro:#556060; --neutro-bg:#EAE9E5;
+    --f-tit:Georgia,"Iowan Old Style","Palatino Linotype","Book Antiqua",serif;
+    --f-ui:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --f-mono:ui-monospace,"Cascadia Mono",Consolas,"SF Mono",monospace;
+    --r:3px;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ background:var(--a-bg); color:var(--a-text); font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
+
+  .stage{ max-width:1320px; margin:0 auto; padding:2.25rem 1.5rem 4rem; }
+  .stage-head h1{ font-family:Georgia,serif; font-size:1.5rem; font-weight:600; margin:0 0 .35rem; text-wrap:balance; }
+  .stage-head p{ margin:0 0 1.2rem; color:var(--a-text-sec); font-size:.92rem; max-width:66ch; line-height:1.55; }
+  .stage-head .tag{ display:inline-block; font-size:.7rem; letter-spacing:.09em; text-transform:uppercase; color:var(--a-accent); margin-bottom:.6rem; font-weight:700; }
+  .changelog{ font-size:.8rem; color:var(--a-text-sec); border-left:2px solid var(--a-accent); padding-left:.75rem; margin:0 0 1.3rem; line-height:1.7; max-width:80ch; }
+  .changelog b{ color:var(--a-text); }
+
+  .ctl{ display:flex; gap:.4rem; flex-wrap:wrap; align-items:center; margin-bottom:.7rem; }
+  .ctl .lbl{ font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; font-weight:700; color:var(--a-text-sec); margin-right:.2rem; }
+  .ctl button{ font:inherit; font-size:.8rem; font-weight:600; cursor:pointer; background:var(--a-chip-bg); color:var(--a-text-sec); border:1px solid var(--a-chip-line); border-radius:999px; padding:.4rem .85rem; transition:background .15s,color .15s,border-color .15s; }
+  .ctl button:hover{ border-color:var(--a-accent); color:var(--a-text); }
+  .ctl button.active{ background:var(--a-accent); border-color:var(--a-accent); color:#fff; }
+  .ctl button:focus-visible{ outline:2px solid var(--a-accent); outline-offset:2px; }
+  .ctl.roles{ margin-bottom:1.4rem; padding-bottom:1.1rem; border-bottom:1px solid var(--a-line); }
+  .ctl.roles button.active{ background:var(--a-text); border-color:var(--a-text); }
+
+  .caption{ font-size:.8rem; color:var(--a-text-sec); margin:.9rem .1rem 0; line-height:1.6; }
+  .caption b{ color:var(--a-text); }
+
+  .browser{ border:1px solid var(--a-line); border-radius:10px; overflow:hidden; box-shadow:0 18px 44px -26px rgba(0,0,0,.4); }
+  .browser .chrome{ display:flex; align-items:center; gap:.5rem; padding:.55rem .8rem; background:var(--a-bg2); border-bottom:1px solid var(--a-line); }
+  .browser .dot{ width:9px; height:9px; border-radius:50%; background:var(--a-line); }
+  .browser .url{ flex:1; margin-left:.4rem; font-size:.72rem; color:var(--a-text-sec); background:var(--a-bg); border:1px solid var(--a-line); border-radius:5px; padding:.3rem .6rem; font-family:ui-monospace,Consolas,monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* ═══ CAPA 3 — EL PRODUCTO ═══ */
+  .device{ font-family:var(--f-ui); color:var(--tx); background:var(--fondo); font-size:14px; line-height:1.5; }
+  .device h1,.device h2,.device h3{ font-family:var(--f-tit); margin:0; text-wrap:balance; font-weight:600; }
+  .n{ font-variant-numeric:tabular-nums; }
+  .device a:focus-visible,.device button:focus-visible,.device input:focus-visible,.device [tabindex]:focus-visible{
+    outline:3px solid var(--oro); outline-offset:2px; border-radius:2px;
+  }
+  .view{ display:none; } .view.on{ display:block; }
+  .flex{ flex:1; }
+  .oculto{ display:none !important; }
+
+  /* ─── armazón ─── */
+  .shell{ display:grid; grid-template-columns:212px 1fr; min-height:700px; }
+  @media (max-width:880px){ .shell{ grid-template-columns:1fr; } }
+  .riel{ background:var(--rail); color:#fff; display:flex; flex-direction:column; padding:.9rem 0; }
+  .riel .marca{ padding:0 1rem 1rem; border-bottom:1px solid rgba(255,255,255,.1); margin-bottom:.6rem; }
+  .riel .marca img{ width:100%; max-width:146px; display:block; }
+  .riel .grupo{ font-size:.68rem; letter-spacing:.13em; text-transform:uppercase; color:rgba(255,255,255,.45); padding:.7rem 1rem .3rem; font-weight:700; }
+  .riel a{ display:flex; align-items:center; gap:.65rem; padding:.55rem 1rem; color:rgba(255,255,255,.84); text-decoration:none; font-size:.87rem; font-weight:500; border-left:3px solid transparent; transition:background .14s,color .14s; }
+  .riel a:hover{ background:var(--rail-alto); color:#fff; }
+  .riel a.sel{ background:var(--rail-alto); color:#fff; border-left-color:var(--oro); font-weight:700; }
+  .riel a svg{ width:16px; height:16px; flex:none; opacity:.9; }
+  .riel a.bloq{ opacity:.34; cursor:not-allowed; }
+  .riel a .cand{ margin-left:auto; font-size:.72rem; }
+  .riel .base{ margin-top:auto; padding:1rem 1rem 0; border-top:1px solid rgba(255,255,255,.1); font-size:.73rem; color:rgba(255,255,255,.55); line-height:1.6; }
+  .riel .base .mono{ font-family:var(--f-mono); font-size:.69rem; }
+
+  .col{ display:flex; flex-direction:column; min-width:0; }
+  .top{ background:var(--panel); border-bottom:1px solid var(--borde); padding:.6rem 1.35rem; display:flex; align-items:center; gap:1rem; }
+  .migas{ display:flex; align-items:center; gap:.45rem; font-size:.86rem; color:var(--tx-sec); flex-wrap:wrap; min-width:0; }
+  .migas a{ color:var(--tx-sec); text-decoration:none; }
+  .migas a:hover{ text-decoration:underline; }
+  .migas .sep{ color:var(--borde-f); }
+  .migas .hoy{ font-family:var(--f-tit); color:var(--tx); font-size:1rem; }
+  .kbd{ display:inline-flex; font-family:var(--f-mono); font-size:.72rem; color:var(--tx-sec); background:var(--fondo); border:1px solid var(--borde); border-bottom-width:2px; border-radius:4px; padding:.16rem .42rem; }
+  .buscar{ display:flex; align-items:center; gap:.6rem; background:var(--fondo); border:1px solid var(--borde); border-radius:999px; padding:.28rem .45rem .28rem .8rem; font-size:.8rem; color:var(--tx-sec); cursor:pointer; min-width:210px; }
+  .buscar:hover{ border-color:var(--borde-f); }
+  .yo{ display:flex; align-items:center; gap:.55rem; font-size:.8rem; white-space:nowrap; }
+  .yo .av{ width:28px; height:28px; border-radius:50%; background:var(--verde); color:#fff; display:grid; place-items:center; font-size:.72rem; font-weight:700; }
+  .yo .av.ext{ background:var(--gris); }
+  .yo b{ display:block; font-size:.8rem; line-height:1.15; }
+  .yo .rol{ color:var(--tx-sec); font-size:.74rem; }
+
+  .lienzo{ padding:1.2rem 1.35rem 1.5rem; overflow-x:hidden; flex:1; }
+  .pie-inst{ border-top:1px solid var(--borde); background:var(--panel); padding:.7rem 1.35rem; display:flex; gap:1.2rem; align-items:center; flex-wrap:wrap; font-size:.75rem; color:var(--tx-sec); }
+  .pie-inst .sello{ font-weight:700; color:var(--gris-osc); }
+  .pie-inst a{ color:var(--tx-sec); text-decoration:none; border-bottom:1px solid var(--borde-f); }
+  .pie-inst a:hover{ color:var(--verde); border-bottom-color:var(--verde); }
+
+  /* ─── panel: dos pesos, primario y de soporte ─── */
+  .p{ background:var(--panel); border:1px solid var(--borde); border-radius:var(--r); margin-bottom:1rem; }
+  .p > header{ display:flex; align-items:center; gap:.8rem; padding:.85rem 1.1rem; border-bottom:1px solid var(--borde); flex-wrap:wrap; }
+  .p > header h2{ font-size:1.12rem; color:var(--gris-osc); letter-spacing:-.005em; }
+  .p .cuerpo{ padding:1.05rem 1.1rem; }
+  .p .cuerpo.ras{ padding:0; }
+  .p .pie{ padding:.62rem 1.1rem; border-top:1px solid var(--borde); font-size:.79rem; color:var(--tx-sec); line-height:1.55; }
+  /* soporte: sin caja, solo una regla superior — rompe el muro de rectángulos */
+  .p.soporte{ background:transparent; border:none; border-top:2px solid var(--gris-osc); border-radius:0; }
+  .p.soporte > header{ padding:.7rem 0 .5rem; border-bottom:1px solid var(--borde); }
+  .p.soporte > header h2{ font-size:.94rem; }
+  .p.soporte .cuerpo{ padding:.85rem 0; }
+  .p.soporte .pie{ padding:.55rem 0; }
+  .eyebrow{ font-size:.71rem; letter-spacing:.1em; text-transform:uppercase; color:var(--tx-sec); font-weight:700; }
+
+  /* ─── franja de cifras oscura: ancla del tablero ─── */
+  .franja{ background:var(--rail); border-radius:var(--r); display:grid; grid-template-columns:repeat(auto-fit,minmax(142px,1fr)); overflow:hidden; margin-bottom:1rem; }
+  .franja .c{ padding:.95rem 1.05rem; border-right:1px solid rgba(255,255,255,.1); }
+  .franja .c:last-child{ border-right:none; }
+  .franja .c b{ display:block; font-family:var(--f-tit); font-size:1.85rem; line-height:1.02; color:#fff; font-variant-numeric:tabular-nums; }
+  .franja .c b .u{ font-size:.8rem; opacity:.7; font-family:var(--f-ui); font-weight:400; }
+  .franja .c span{ display:block; font-size:.75rem; color:rgba(255,255,255,.62); margin-top:.3rem; }
+  .franja .c.er b{ color:#F0A49D; } .franja .c.al b{ color:#F0CE7A; } .franja .c.ok b{ color:#7FD3A8; }
+
+  .cifras{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--borde); border:1px solid var(--borde); border-radius:var(--r); overflow:hidden; }
+  .cifra{ background:var(--panel); padding:.85rem .95rem; }
+  .cifra b{ display:block; font-family:var(--f-tit); font-size:1.7rem; line-height:1.05; color:var(--gris-osc); font-variant-numeric:tabular-nums; }
+  .cifra span{ display:block; font-size:.75rem; color:var(--tx-sec); margin-top:.25rem; }
+  .cifra.ok b{ color:var(--ok); } .cifra.al b{ color:var(--alerta); } .cifra.er b{ color:var(--err); }
+
+  /* ─── tablas ─── */
+  .scroll{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; font-size:.85rem; }
+  thead th{ background:#EDEFEC; font-size:.72rem; text-transform:uppercase; letter-spacing:.045em; color:var(--tx-sec); font-weight:700; padding:.5rem .75rem; text-align:left; border-bottom:1px solid var(--borde); white-space:nowrap; }
+  tbody td{ padding:.6rem .75rem; border-bottom:1px solid var(--borde); vertical-align:middle; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr.click{ cursor:pointer; }
+  tbody tr.click:hover{ background:var(--fondo); }
+  td.n,th.n{ text-align:right; font-variant-numeric:tabular-nums; }
+  tr.tenue td{ color:var(--tx-sec); }
+
+  .est{ display:inline-flex; align-items:center; gap:.35rem; padding:.16rem .5rem .16rem .45rem; font-size:.75rem; font-weight:700; border-left:3px solid var(--s); background:var(--sbg); color:var(--stx); border-radius:0 3px 3px 0; white-space:nowrap; }
+  .e-pend{ --s:var(--borde-f); --sbg:var(--neutro-bg); --stx:var(--tx-sec); }
+  .e-rad{ --s:var(--oro); --sbg:var(--alerta-bg); --stx:var(--alerta); }
+  .e-ver{ --s:var(--oro); --sbg:var(--alerta-bg); --stx:var(--alerta); }
+  .e-apr{ --s:var(--ok); --sbg:var(--ok-bg); --stx:var(--ok); }
+  .e-sin{ --s:var(--neutro); --sbg:var(--neutro-bg); --stx:var(--tx-sec); }
+
+  .sig{ display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; font-size:.72rem; font-weight:800; vertical-align:middle; flex:none; }
+  .sig.hall{ background:var(--err-bg); color:var(--err); }
+  .sig.cerr{ background:var(--ok-bg); color:var(--ok); }
+  .orig{ display:inline-flex; align-items:center; gap:.25rem; font-family:var(--f-mono); font-size:.69rem; font-weight:700; padding:.1rem .32rem; border-radius:2px; border:1px solid; white-space:nowrap; }
+  .orig.xls{ color:var(--verde); border-color:#AFD3C1; background:#EFF7F2; }
+  .orig.man{ color:var(--gris-osc); border-color:var(--borde-f); background:var(--fondo); }
+  .pri{ display:inline-block; font-size:.71rem; font-weight:800; font-family:var(--f-mono); padding:.08rem .32rem; border-radius:2px; }
+  .pri.p1{ background:#F6E0DE; color:var(--err); }
+  .pri.p2{ background:var(--alerta-bg); color:var(--alerta); }
+  .dane{ font-family:var(--f-mono); font-size:.8rem; color:var(--tx-sec); }
+  .hace{ font-size:.75rem; color:var(--tx-sec); font-variant-numeric:tabular-nums; }
+
+  .seg{ display:flex; height:8px; width:100%; max-width:170px; border-radius:999px; overflow:hidden; background:var(--neutro-bg); gap:1px; }
+  .seg i{ display:block; height:100%; }
+  .seg-tx{ font-size:.75rem; color:var(--tx-sec); margin-top:.28rem; }
+  .leyenda{ display:flex; gap:.9rem; flex-wrap:wrap; font-size:.75rem; color:var(--tx-sec); }
+  .leyenda span{ display:inline-flex; align-items:center; gap:.32rem; }
+  .leyenda i{ width:9px; height:9px; border-radius:2px; }
+
+  .b{ display:inline-flex; align-items:center; gap:.4rem; font:inherit; font-size:.84rem; font-weight:700; padding:.45rem .9rem; border-radius:4px; border:1px solid transparent; cursor:pointer; background:var(--verde); color:#fff; white-space:nowrap; }
+  .b:hover{ background:var(--verde-cl); }
+  .b.sec{ background:var(--panel); color:var(--gris-osc); border-color:var(--borde-f); }
+  .b.sec:hover{ background:var(--fondo); }
+  .b.mini{ padding:.3rem .62rem; font-size:.78rem; }
+
+  /* ─── tablero ─── */
+  .lat{ display:grid; grid-template-columns:1.6fr 1fr; gap:1.4rem; align-items:start; }
+  @media (max-width:1000px){ .lat{ grid-template-columns:1fr; } }
+  .vivo{ display:inline-flex; align-items:center; gap:.4rem; font-size:.75rem; color:var(--tx-sec); }
+  .vivo .pt{ width:7px; height:7px; border-radius:50%; background:var(--ok); position:relative; }
+  .vivo .pt::after{ content:""; position:absolute; inset:0; border-radius:50%; background:var(--ok); animation:lat 2.4s ease-out infinite; }
+  @keyframes lat{ 0%{ transform:scale(1); opacity:.6 } 100%{ transform:scale(3.2); opacity:0 } }
+
+  .mosaico{ display:grid; grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:5px; }
+  .tsl{ border:1px solid var(--borde); border-radius:2px; padding:.55rem .6rem; background:var(--panel); border-left-width:4px; border-left-color:var(--borde-f); min-height:62px; display:flex; flex-direction:column; justify-content:space-between; }
+  .tsl b{ font-size:.8rem; font-weight:700; line-height:1.2; }
+  .tsl .sub{ font-size:.73rem; color:var(--tx-sec); font-variant-numeric:tabular-nums; }
+  .tsl.s-curso{ border-left-color:var(--oro); }
+  .tsl.s-apr{ border-left-color:var(--ok); }
+  .resto{ margin-top:.7rem; padding-top:.6rem; border-top:1px dashed var(--borde); font-size:.78rem; color:var(--tx-sec); line-height:1.6; }
+  .resto b{ color:var(--tx); font-weight:600; }
+
+  .rk{ display:grid; grid-template-columns:96px 1fr auto; gap:.6rem; align-items:center; padding:.28rem 0; font-size:.82rem; }
+  .rk .nb{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rk .pista{ height:14px; background:var(--fondo); border-radius:2px; overflow:hidden; }
+  .rk .pista i{ display:block; height:100%; background:var(--gris); }
+  .rk .pista i.alto{ background:var(--gris-osc); }
+  .rk .vl{ font-variant-numeric:tabular-nums; font-size:.8rem; color:var(--tx-sec); white-space:nowrap; }
+
+  .emb{ display:grid; gap:.5rem; }
+  .emb .fila{ display:grid; grid-template-columns:148px 1fr 54px; gap:.7rem; align-items:center; font-size:.82rem; }
+  .emb .pista{ height:17px; background:var(--fondo); border-radius:2px; overflow:hidden; }
+  .emb .pista i{ display:block; height:100%; min-width:2px; }
+  .emb .vl{ font-variant-numeric:tabular-nums; text-align:right; font-weight:700; }
+
+  .dist{ display:flex; height:30px; border-radius:3px; overflow:hidden; font-size:.75rem; font-weight:700; }
+  .dist div{ display:grid; place-items:center; color:#fff; }
+
+  .fi{ display:grid; grid-template-columns:auto 1fr auto; gap:.6rem; align-items:start; padding:.55rem .1rem; border-bottom:1px solid var(--borde); font-size:.82rem; }
+  .fi:last-child{ border-bottom:none; }
+  .fi .pto{ width:8px; height:8px; border-radius:50%; margin-top:.4rem; }
+  .fi .tx span{ display:block; color:var(--tx-sec); font-size:.79rem; }
+
+  /* ─── estado vacío ─── */
+  .vacio{ text-align:center; padding:2.2rem 1.5rem; }
+  .vacio svg{ width:34px; height:34px; color:var(--borde-f); margin-bottom:.6rem; }
+  .vacio h3{ font-size:1rem; margin-bottom:.3rem; }
+  .vacio p{ font-size:.83rem; color:var(--tx-sec); margin:0 auto; max-width:46ch; line-height:1.6; }
+  .soltar{ border:2px dashed var(--borde-f); border-radius:var(--r); background:var(--panel); }
+  .soltar:hover{ border-color:var(--verde); background:#FAFCFB; }
+
+  /* ─── login ─── */
+  .login{ display:grid; grid-template-columns:1.1fr 1fr; min-height:700px; }
+  @media (max-width:880px){ .login{ grid-template-columns:1fr; } }
+  .mast{ position:relative; overflow:hidden; background:var(--gris-osc); color:#fff; padding:2.4rem 2.5rem; display:flex; flex-direction:column; justify-content:space-between; }
+  .mast > svg{ position:absolute; inset:0; width:100%; height:100%; }
+  .mast .z{ position:relative; z-index:1; }
+  .mast .eyebrow{ color:rgba(255,255,255,.66); margin-bottom:1rem; }
+  .mast h1{ font-size:2.35rem; line-height:1.12; color:#fff; max-width:12ch; letter-spacing:-.01em; }
+  .mast .fecha{ margin-top:1rem; font-size:.85rem; color:rgba(255,255,255,.78); border-left:2px solid var(--oro); padding-left:.75rem; line-height:1.55; }
+  .contacto{ position:relative; z-index:1; border-top:1px solid rgba(255,255,255,.2); padding-top:1rem; font-size:.77rem; line-height:1.7; color:rgba(255,255,255,.76); display:grid; gap:.8rem; }
+  .contacto b{ display:block; color:#fff; font-size:.72rem; letter-spacing:.09em; text-transform:uppercase; margin-bottom:.22rem; }
+  .contacto a{ color:#fff; text-decoration:none; border-bottom:1px solid rgba(216,174,35,.55); }
+  .contacto .redes{ display:flex; gap:.8rem; flex-wrap:wrap; font-family:var(--f-mono); font-size:.73rem; }
+  .acceso{ display:flex; align-items:center; justify-content:center; padding:2.5rem 2rem; background:var(--panel); }
+  .form{ width:100%; max-width:300px; }
+  .form > img{ height:32px; margin-bottom:1.7rem; }
+  .form h2{ font-size:1.2rem; margin-bottom:.2rem; }
+  .form .sub{ color:var(--tx-sec); font-size:.82rem; margin-bottom:1.5rem; }
+  .campo{ margin-bottom:.85rem; }
+  .campo label{ display:block; font-size:.74rem; font-weight:700; color:var(--tx-sec); margin-bottom:.3rem; text-transform:uppercase; letter-spacing:.05em; }
+  .campo input{ width:100%; padding:.55rem .65rem; border:1px solid var(--borde-f); border-radius:4px; font:inherit; font-size:.9rem; background:var(--panel); color:var(--tx); }
+  .form .b{ width:100%; justify-content:center; padding:.62rem; margin-top:.4rem; }
+  .form .pie2{ margin-top:1.4rem; padding-top:.9rem; border-top:1px solid var(--borde); font-size:.77rem; color:var(--tx-sec); line-height:1.6; }
+  .roles-mini{ display:flex; gap:.3rem; flex-wrap:wrap; margin-top:.55rem; }
+  .roles-mini span{ font-size:.71rem; background:var(--fondo); border:1px solid var(--borde); color:var(--tx-sec); padding:.1rem .45rem; border-radius:999px; }
+
+  /* ─── cargas ─── */
+  .archivo{ display:flex; align-items:center; gap:.85rem; padding:.85rem 1.1rem; background:var(--fondo); border-bottom:1px solid var(--borde); }
+  .archivo .ico{ width:36px; height:42px; background:var(--panel); border:1px solid var(--borde-f); border-radius:3px; display:grid; place-items:center; font-family:var(--f-mono); font-size:.63rem; font-weight:800; color:var(--verde); flex:none; }
+  .archivo .meta b{ display:block; font-size:.86rem; font-family:var(--f-mono); word-break:break-all; }
+  .archivo .meta span{ font-size:.77rem; color:var(--tx-sec); }
+  .barra-val{ display:flex; height:28px; border-radius:3px; overflow:hidden; font-size:.75rem; font-weight:700; }
+  .barra-val div{ display:grid; place-items:center; color:#fff; font-variant-numeric:tabular-nums; }
+  .gh{ border-left:3px solid var(--g); }
+  .gh > .cab{ display:flex; align-items:center; gap:.5rem; padding:.5rem .8rem; background:var(--gbg); font-size:.77rem; font-weight:800; text-transform:uppercase; letter-spacing:.045em; color:var(--gtx); }
+  .gh > .cab .cnt{ margin-left:auto; font-family:var(--f-mono); }
+  .hf{ display:grid; grid-template-columns:auto 165px 1fr; gap:.7rem; align-items:start; padding:.55rem .8rem; border-bottom:1px solid var(--borde); font-size:.83rem; }
+  .hf:last-child{ border-bottom:none; }
+  .hf .ref{ font-family:var(--f-mono); font-size:.78rem; color:var(--tx-sec); }
+
+  /* ─── ficha ─── */
+  .rejilla{ display:grid; grid-template-columns:1.25fr 1fr; gap:1rem; align-items:start; }
+  @media (max-width:900px){ .rejilla{ grid-template-columns:1fr; } }
+  .kv{ display:grid; grid-template-columns:auto 1fr; gap:.42rem 1.1rem; font-size:.86rem; }
+  .kv dt{ color:var(--tx-sec); }
+  .kv dd{ margin:0; }
+  .cmp{ margin-bottom:.85rem; }
+  .cmp:last-child{ margin-bottom:0; }
+  .cmp .et{ display:flex; justify-content:space-between; font-size:.82rem; margin-bottom:.3rem; }
+  .cmp .et b{ font-variant-numeric:tabular-nums; }
+  .cmp .pista{ height:20px; background:var(--fondo); border-radius:2px; overflow:hidden; display:flex; }
+  .cmp .pista i{ display:block; height:100%; }
+  .paso-sec{ display:flex; align-items:center; gap:.7rem; padding:.55rem .85rem; border-bottom:1px solid var(--borde); font-size:.86rem; }
+  .paso-sec:last-child{ border-bottom:none; }
+  .paso-sec .no{ width:21px; height:21px; border-radius:50%; display:grid; place-items:center; font-size:.72rem; font-weight:800; font-family:var(--f-mono); background:var(--neutro-bg); color:var(--tx-sec); flex:none; }
+  .paso-sec.done .no{ background:var(--ok-bg); color:var(--ok); }
+
+  .perm{ text-align:center; font-family:var(--f-mono); font-weight:700; }
+  .perm.si{ color:var(--ok); } .perm.no{ color:var(--borde-f); }
+  .perm.lim{ color:var(--alerta); font-size:.77rem; }
+
+  /* ─── v6: capítulos de daño (reemplaza el % de desviación) ─── */
+  .caps{ display:grid; grid-template-columns:repeat(auto-fill,minmax(216px,1fr)); gap:4px; }
+  .cap{ display:flex; align-items:center; gap:.5rem; padding:.42rem .6rem; font-size:.81rem;
+        border:1px solid var(--borde); border-left:3px solid var(--borde); border-radius:0 2px 2px 0;
+        background:var(--fondo); color:var(--tx-sec); }
+  .cap .cn{ font-family:var(--f-mono); font-size:.72rem; opacity:.65; min-width:1.3em; text-align:right; }
+  .cap.dano{ border-left-color:var(--err); background:var(--err-bg); color:var(--tx); font-weight:600; }
+  .cap.dano.pres{ border-left-color:var(--ok); background:var(--ok-bg); }
+  .cap.solop{ border-left-color:var(--oro); background:var(--alerta-bg); color:var(--tx); }
+  .cap .cok{ font-size:.72rem; font-weight:800; color:var(--ok); }
+  .cap .cer{ font-size:.72rem; font-weight:800; color:var(--err); }
+  .cap .cal{ font-size:.72rem; font-weight:800; color:var(--alerta); }
+  /* 12-14: trabajo transversal, no lugar de daño (D-34). Nunca se marcan
+     como «presupuesto sin daño» porque no le corresponde ningún capítulo del censo. */
+  .cap.trans{ border-left-color:var(--gris); background:var(--panel); color:var(--tx);
+              border-left-style:dashed; }
+  .cap .ctr{ font-size:.68rem; font-weight:700; color:var(--tx-sec);
+             text-transform:uppercase; letter-spacing:.05em; }
+
+  /* ─── v6: totales del presupuesto a detalle ─── */
+  .tot{ display:grid; grid-template-columns:1fr auto; gap:.4rem 2rem; max-width:430px;
+        margin:0 0 0 auto; font-variant-numeric:tabular-nums; }
+  .tot dt{ font-size:.84rem; color:var(--tx-sec); }
+  .tot dd{ margin:0; text-align:right; font-weight:700; font-size:.86rem; }
+  .tot .pct{ font-family:var(--f-mono); font-size:.72rem; background:var(--fondo);
+             border:1px solid var(--borde); border-radius:2px; padding:0 .25rem; margin-left:.3rem; }
+  .tot dt.gt{ font-family:var(--f-tit); font-size:1rem; color:var(--tx); border-top:2px solid var(--borde-f);
+              padding-top:.45rem; margin-top:.2rem; }
+  .tot dd.gt{ font-size:1.12rem; border-top:2px solid var(--borde-f); padding-top:.45rem; margin-top:.2rem; }
+
+  /* ─── v6: formulario de verificación ─── */
+  .campo-v{ margin-bottom:1.2rem; }
+  /* :not(.op) — si no, este selector (0,1,1) le gana a .op (0,1,0) y aplasta
+     su display:flex, porque las opciones también son <label> hijos directos. */
+  .campo-v > label:not(.op){ display:block; font-size:.86rem; font-weight:700; margin-bottom:.15rem; }
+  .campo-v .ayuda{ font-size:.79rem; color:var(--tx-sec); line-height:1.5; margin-bottom:.55rem; }
+  .campo-v textarea{ width:100%; min-height:74px; resize:vertical; font:inherit; font-size:.86rem;
+        padding:.5rem .65rem; border:1px solid var(--borde-f); border-radius:3px;
+        background:var(--panel); color:var(--tx); }
+  .campo-v textarea:focus{ outline:3px solid var(--oro); outline-offset:2px; }
+  .op{ display:flex; gap:.65rem; align-items:flex-start; padding:.6rem .7rem; cursor:pointer;
+       border:1px solid var(--borde); border-radius:3px; margin-bottom:.35rem; background:var(--panel); }
+  .op:hover{ background:var(--fondo); border-color:var(--borde-f); }
+  .op input{ margin-top:.2rem; flex:none; }
+  .op b{ display:block; font-size:.86rem; }
+  .op small{ color:var(--tx-sec); font-size:.79rem; line-height:1.45; }
+  .firma{ border:1px solid var(--borde); border-left:3px solid var(--verde); border-radius:0 3px 3px 0;
+          background:var(--ok-bg); padding:.7rem .9rem; font-size:.8rem; line-height:1.55;
+          color:var(--tx); margin-bottom:1.1rem; }
+  .firma b{ display:block; font-family:var(--f-tit); margin-bottom:.12rem; }
+  .acciones-v{ display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
+
+  /* ─── v6: diligenciamiento manual (alcalde / rector) ─── */
+  .pasos-f{ display:flex; gap:.35rem; flex-wrap:wrap; }
+  .pf{ display:flex; align-items:center; gap:.45rem; font-size:.82rem; color:var(--tx-sec);
+       border:1px solid var(--borde); border-radius:3px; padding:.35rem .7rem; background:var(--fondo); }
+  .pf .no{ display:grid; place-items:center; width:19px; height:19px; border-radius:50%;
+           background:var(--borde); color:var(--tx-sec); font-size:.72rem; font-weight:800; }
+  .pf.hecho{ border-color:#AFD3C1; background:var(--ok-bg); color:var(--ok); font-weight:600; }
+  .pf.hecho .no{ background:var(--ok); color:#fff; }
+  .pf.act{ border-color:var(--oro); background:var(--alerta-bg); color:var(--alerta); font-weight:700; }
+  .pf.act .no{ background:var(--oro); color:#3B2F05; }
+
+  table.edit td{ padding:.3rem .35rem; }
+  table.edit input, table.edit select{ width:100%; font:inherit; font-size:.82rem;
+       padding:.32rem .4rem; border:1px solid var(--borde); border-radius:2px;
+       background:var(--panel); color:var(--tx); }
+  table.edit input:focus, table.edit select:focus{ outline:2px solid var(--oro); outline-offset:1px; }
+  table.edit input.n{ text-align:right; font-variant-numeric:tabular-nums; }
+  table.edit td.calc{ font-weight:700; background:var(--fondo); font-variant-numeric:tabular-nums;
+       white-space:nowrap; }
+  .quitar{ border:none; background:none; color:var(--borde-f); font-size:1.15rem; line-height:1;
+       cursor:pointer; padding:0 .2rem; }
+  .quitar:hover{ color:var(--err); }
+
+  .au{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:1.1rem;
+       margin-bottom:1.1rem; }
+  .au input{ width:100%; font:inherit; font-size:.9rem; padding:.45rem .6rem;
+       border:1px solid var(--borde-f); border-radius:3px; background:var(--panel);
+       color:var(--tx); text-align:right; font-variant-numeric:tabular-nums; }
+  .au input:focus{ outline:3px solid var(--oro); outline-offset:2px; }
+  .alerta-au{ border:1px solid var(--borde); border-left:3px solid var(--oro);
+       background:var(--alerta-bg); border-radius:0 3px 3px 0; padding:.7rem .9rem;
+       font-size:.8rem; line-height:1.55; margin-bottom:1.2rem; }
+  .alerta-au b:first-child{ display:block; font-family:var(--f-tit); margin-bottom:.12rem; }
+
+  .fotos{ display:grid; grid-template-columns:repeat(auto-fill,minmax(132px,1fr)); gap:.6rem;
+       margin-bottom:1rem; }
+  .foto{ border:1px solid var(--borde); border-radius:3px; padding:.6rem; text-align:center;
+       background:var(--fondo); }
+  .foto .ph{ display:grid; place-items:center; height:56px; background:var(--borde);
+       color:var(--tx-sec); font-family:var(--f-mono); font-size:.72rem; border-radius:2px;
+       margin-bottom:.4rem; }
+  .foto b{ display:block; font-size:.76rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .foto small{ color:var(--tx-sec); font-size:.72rem; }
+  .foto.add{ border-style:dashed; border-color:var(--borde-f); cursor:pointer; }
+  .foto.add:hover{ background:var(--panel); border-color:var(--verde); }
+  .foto.add .mas{ display:grid; place-items:center; height:56px; font-size:1.5rem;
+       color:var(--borde-f); margin-bottom:.4rem; }
+  .aviso-foto{ border:1px solid var(--borde); border-left:3px solid var(--err);
+       background:var(--err-bg); border-radius:0 3px 3px 0; padding:.7rem .9rem;
+       font-size:.8rem; line-height:1.55; }
+  .aviso-foto b:first-child{ display:block; font-family:var(--f-tit); margin-bottom:.12rem; }
+</style>
+
+<div class="stage">
+  <div class="stage-head">
+    <span class="tag">Modelo de diseño — v6</span>
+    <h1>Sistema de reconstrucción de sedes — recorrido completo</h1>
+    <p>
+      Nueve pantallas, cinco módulos, <b>cuatro roles</b>. Cambia el rol abajo: las pantallas que
+      ese rol no alcanza quedan tachadas, y el valor de referencia de la SED desaparece para quien
+      no debe verlo.
+    </p>
+    <div class="changelog">
+      <b>Cambios de v5 a v6</b> — el diseño no se tocó; entra lo que cambió en el negocio.<br>
+      <b>Sale el modelo paramétrico (D-26):</b> la fuente del censo pasa a ser
+      <span class="mono">dimDañosInfraestructura.xlsx</span>, que mantienen los arquitectos.
+      Verificado: 975 DANE, cruce exacto con el catálogo, 0 discrepancias.<br>
+      <b>Lote 1 pasa de 33 a 37 sedes (D-31):</b> priorizada = afectación tipo 1 o 2, los que el
+      censo marca <i>prioritario</i>. Se deriva del tipo, no de una lista aparte que se pueda
+      desincronizar. $9.718.464.165 de referencia, las 37 con valor.<br>
+      <b>Desaparece el contraste y el % de desviación (D-28):</b> los dos valores —referencia del
+      arquitecto y presupuesto recibido— se muestran lado a lado, sin restarlos. En su lugar entra
+      un cruce que sí significa algo: <b>capítulos con daño contra capítulos con presupuesto</b>.<br>
+      <b>Vuelve el registro a detalle (D-29):</b> ítems por capítulo, A y U separados, IVA sobre la
+      utilidad. Vive dentro de la Ficha, no en pantalla aparte.<br>
+      <b>Verificación es pantalla propia (D-30):</b> los arquitectos trabajan por bandeja, no
+      entrando sede por sede.<br>
+      <b>14 capítulos, no 11 (D-34):</b> medido sobre el presupuesto real de Belalcázar, el
+      <b>13,6 % del costo directo no mapea a ningún capítulo del censo</b> — demoliciones 10,6 %,
+      preliminares 2,2 %, desmontes 0,8 %. Se agregan los 3 transversales. Los 11 del censo no se
+      tocan.<br>
+      <b>Valores reales:</b> el ejemplo de presupuesto ya no trae cifras inventadas — son
+      actividades y precios unitarios del APU de Belalcázar, sobre la sede real de Guayaquil
+      (Samaná), cuyo censo marca daño en los capítulos 2, 3 y 6.
+    </div>
+  </div>
+
+  <div class="ctl">
+    <span class="lbl">Pantalla</span>
+    <button data-v="login" class="active">① Entrar</button>
+    <button data-v="tablero">② Tablero</button>
+    <button data-v="inicio">③ Sedes</button>
+    <button data-v="muni">④ Municipio</button>
+    <button data-v="ficha">⑤ Ficha</button>
+    <button data-v="registrar">⑥ Registrar presupuesto</button>
+    <button data-v="verif">⑦ Verificación</button>
+    <button data-v="cargas">⑧ Cargas</button>
+    <button data-v="hallazgos">⑨ Hallazgos</button>
+    <button data-v="usuarios">⑩ Usuarios</button>
+  </div>
+  <div class="ctl roles">
+    <span class="lbl">Ver como</span>
+    <button data-r="admin" class="active">Administrador</button>
+    <button data-r="verif">Verificador · arquitecto</button>
+    <button data-r="resp">Responsable de sede · alcalde/rector</button>
+    <button data-r="consulta">Consulta · directivo</button>
+  </div>
+
+  <div class="browser">
+    <div class="chrome">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="url" id="urlbar">reconstruccion.sedcaldas.gov.co/entrar</span>
+    </div>
+
+    <div class="device">
+
+      <!-- ════ ENTRAR ════ -->
+      <section class="view on" id="v-login">
+        <div class="login">
+          <div class="mast">
+            <svg viewBox="0 0 420 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <defs><linearGradient id="fd" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#fff" stop-opacity=".13"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+              </linearGradient></defs>
+              <g fill="none" stroke="#fff" stroke-width="1.1">
+                <path d="M-40 690 C 60 640, 130 660, 210 620 S 360 585, 470 610" stroke-opacity=".20"/>
+                <path d="M-40 655 C 55 603, 126 625, 205 583 S 356 549, 470 574" stroke-opacity=".18"/>
+                <path d="M-40 620 C 50 566, 122 590, 200 546 S 352 513, 470 538" stroke-opacity=".16"/>
+                <path d="M-40 585 C 45 529, 118 555, 195 509 S 348 477, 470 502" stroke-opacity=".14"/>
+                <path d="M-40 550 C 40 492, 114 520, 190 472 S 344 441, 470 466" stroke-opacity=".12"/>
+                <path d="M-40 515 C 35 455, 110 485, 185 435 S 340 405, 470 430" stroke-opacity=".10"/>
+                <path d="M-40 480 C 30 418, 106 450, 180 398 S 336 369, 470 394" stroke-opacity=".085"/>
+                <path d="M-40 445 C 25 381, 102 415, 175 361 S 332 333, 470 358" stroke-opacity=".07"/>
+                <path d="M-40 410 C 20 344, 98 380, 170 324 S 328 297, 470 322" stroke-opacity=".055"/>
+                <path d="M-40 375 C 15 307, 94 345, 165 287 S 324 261, 470 286" stroke-opacity=".04"/>
+              </g>
+              <path d="M-40 700 L-40 690 C 60 640, 130 660, 210 620 S 360 585, 470 610 L470 700 Z" fill="url(#fd)"/>
+            </svg>
+            <div class="z">
+              <div class="eyebrow">Gobierno de Caldas · Secretaría de Educación</div>
+              <h1>Reconstrucción de sedes</h1>
+              <div class="fecha">
+                Infraestructura educativa afectada por el sismo del 10 de agosto de 2026<br>
+                26 municipios · 975 sedes oficiales · lote 1: 37 sedes priorizadas
+              </div>
+            </div>
+            <div class="contacto">
+              <div>
+                <b>Gobernación de Caldas — sede principal</b>
+                Carrera 21 entre Calles 22 y 23, Manizales, Caldas · C.P. 170001<br>
+                Conmutador +57 68 98 24 44 ·
+                <a href="mailto:atencionalciudadano@caldas.gov.co">atencionalciudadano@caldas.gov.co</a>
+              </div>
+              <div>
+                <b>Secretaría de Educación</b>
+                Cl. 14 #2-58, pisos -1 y 2 · Parque Tecnológico, Villamaría, Caldas<br>
+                Lunes a jueves 8:00–12:00 y 14:00–18:00 · viernes 7:00–15:00 jornada continua
+              </div>
+              <div class="redes"><span>@GobernaciondeCaldas</span><span>@GoberCaldas</span><span>@gobercaldas</span></div>
+            </div>
+          </div>
+          <div class="acceso">
+            <div class="form">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAckAAABtCAMAAAD9G2oPAAADAFBMVEVMaXFue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3xue3zJvDJue3xue3zGuzIIbjvMvjICbDnu9O/WuSfRtifZqyLYqiLYtCS1z7dann7c6uItglPo7+fz9/HLuizYryMGZY0QckHP388dekt8rozm6trYsSSz0L5ppIEceEe+1cLUvCjRvzDSpCmSu6BopofI28no05zUoSHVrUPOuShqqItIkGSCtJhbmm8VdURzrpJ2pn3esEbcrjrkwGTu1Zviyozav26/uTLQqiPVqiRue3wAazn///8AY5PZqyTVuSfZsyXWuSjALS3YriLPwDLYrSLXryTPwTLaqyPYsCTZsCTYtiTSvS7RvSzRvi/RvzDbtSTPvSnXuCfYqiLSvSjUvCjXqiLXuijUuyjVuijZtCPYpyHZpiDZpR/YoB8Aazi/LCzZoSAbbYTBOS3IUy/OazXBPywGbDcUaogNZ4t3jVa0ozcrdHxPhTD8/fv69ebKiCnMZTXJVzLFXivIqipdimQEZJCqqj5EfW9SgWnUsCY7fjPLYTTMjynBNC3TuSjDRC0kcYDMuyx9ilHDRysreDRJgW7Hhi3TpiSvpCgziWHari3LoyS2nCTBoCUPbzbTqyXRcziGk047eHSRnCo4fHbO49rv3afkxGdJfTDiwV17iirLXjLBTizVoyI0dXeQjkRqkV7OrSaDnFHFtjCfpULUhzC/rTFZiDBykC15ky0veHu5tjsGbj19s5vC3NBop4obek3t2ZzbrzKekyceczUAaFCLk0vNsC9whleapkiClyyWnUbTfTaknz+4rTbKeClDkW2GuKFLlnOOvae108bo8u6XsH7v9vPx4rZrhCypvY9Um3retDnmyHTdsjWSjSivlSSNn0sCaFm9qyapmCcDaF2hkjp4l1XTfzV8lS3Kly5si1xvkC6laSvAdCmztT+0Ly3LvzOuqDJ40vI8AAAAVnRSTlMAdyBg8BAwwIBA0OCg7pARcLC7UETMmWbdiCIz/VWq/vb9+Qb89vzt8kqWHM8UCvrw/uwv3IIh/ESQ4z/8/OloIzdk9cv4hrh2qDl+lMXS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" alt="Gobierno de Caldas — Secretaría de Educación">
+              <h2>Ingresar</h2>
+              <div class="sub">Acceso con usuario institucional.</div>
+              <div class="campo"><label for="u">Usuario</label><input id="u" type="text" value="jsaavedra" autocomplete="username"></div>
+              <div class="campo"><label for="p">Contraseña</label><input id="p" type="password" value="••••••••••" autocomplete="current-password"></div>
+              <button class="b" type="button">Ingresar</button>
+              <div class="pie2">
+                Acceso restringido a personal autorizado.
+                <div class="roles-mini"><span>Administrador</span><span>Responsable de sede</span><span>Verificador</span><span>Consulta</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ ARMAZÓN ════ -->
+      <div class="view" id="v-shell">
+        <div class="shell">
+          <nav class="riel">
+            <div class="marca"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAcsAAABtCAMAAAD57royAAADAFBMVEVMaXH////////////////////////////////////////////////////////////////////////////////////////////////////////////////////JvDLHvDLVuSjFuzIIbjvMvjLKvDICbDnu9O/Rtie30r7YqiLYtCRann7e6+Lz9/HZsSTYryPLuS21zrdtpYDg6dwdekvq8OjSvi4sglPR4NEKcD5zq4zUvCjq1JvNuSjatSP7/PqSu6DG2cYQckHH28sYdkUeeUd6sZWAr4zZrDzZsEbSoiTNmig0hVhIkGRuqIgVdUQsgE5jo4Vbmm/iyozav27YpCHkwGTu6tbSpzK/uTLVsST///8AazkAY5PZqyTVuSfWuSjALS3PwDLYriLYrSLXryTPwTLaqyPYsCTZsCTYtiTYpyDSvS7Rvi/RvzDPvSnRvSzXuCfbtSTXqiLYqiLSvSjUvCjXuijZsybUuyjVuijYsyXZtCPZpR8AYpIAazjYoB+/LCzZoSDBNi3BPSwDbDjJVzHDRSwLZ4zPbDccbYQEZI/+/v7MiygrdHw5eXUSaonFXitdimTUsCZOgzDLYTTNZTXRpCTJpiYkcYDMuyzOrirGrS0ueTRIgW+vpCjari3IUjHBoCW2nCTLXjMBaFZ8iVHCSizTqyWJkkwXa4aepUPIhy2rqDy2pDZTg2i6rTQ7fTJBfXHUpiR5ky1xkC1UhzC4tTzO49pLlnP8/Pn79unlxWz69OPw367u2p7WoCAVcDYMbjdFfjHIjCs0dXeQjkSToUl5jVR1i1eCkyuDnFFviFlNf2vRdDiwojiDkk/TfjXUhzDMdSqOmisveHs3i2Mwh1+Ku6QGbj19s5sbek3kw2LcsTXEUyriwFx3iSuekyeslyUjdTRIfG5rkl13lFWknz/HhC2prUFtqo7C29Do8u6108bC3NCXsH5rhCzarS/v9vOpvY9jpIbetDmSjSianym9qyZmjl+hkjpdiTCWm0a0Ly3AdCmlaStBJjHzAAAAW3RSTlMAwLvd7hGAd0BEZsyZIhCI8FUwM6pgINCgkOBwsFD9/v7+9/39+Qb2Q+3ylhsK/PD7S5Eg3BP8zi7yhPxl+PwCaDrsNOfheoHRxuz7yrgj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" alt="Gobierno de Caldas — Secretaría de Educación"></div>
+            <div class="grupo">Seguimiento</div>
+            <a href="#" data-mod="tablero" data-sed>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1"/><rect x="9" y="1.5" width="5.5" height="3" rx="1"/><rect x="9" y="6" width="5.5" height="8.5" rx="1"/><rect x="1.5" y="8.5" width="5.5" height="6" rx="1"/></svg>Tablero</a>
+            <a href="#" data-mod="inicio" class="sel">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 14V6.2L8 2l6 4.2V14"/><path d="M2 14h12"/><path d="M6.2 14V9.5h3.6V14"/></svg>Sedes</a>
+            <a href="#" data-mod="verif" data-sed>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 2.6h10v10.8H3z"/><path d="M5.4 8.2 7.1 9.9l3.5-3.6"/></svg>Verificación<span class="cand" style="font-size:.7rem;font-weight:700;background:var(--oro);color:#2C3334;border-radius:9px;padding:0 .35rem">6</span></a>
+            <a href="#" data-mod="cargas" data-sed>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 1.8v7.4"/><path d="M5 6.3 8 9.3l3-3"/><path d="M2 10.6v2.2a1.4 1.4 0 0 0 1.4 1.4h9.2a1.4 1.4 0 0 0 1.4-1.4v-2.2"/></svg>Cargas</a>
+            <a href="#" class="bloq" title="Se habilita cuando existan los datos de contratación">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.4V8l2.4 1.6"/></svg>Obras<span class="cand">🔒</span></a>
+            <div class="grupo" data-sed>Administración</div>
+            <a href="#" data-mod="hallazgos" data-sed>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 1.5 14.5 13.5H1.5Z"/><path d="M8 6.2v3.4"/><circle cx="8" cy="11.6" r=".6" fill="currentColor" stroke="none"/></svg>Hallazgos<span class="cand" style="font-size:.7rem;font-weight:700;background:var(--err);color:#fff;border-radius:9px;padding:0 .35rem">19</span></a>
+            <a href="#" data-mod="usuarios" data-sed>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="5.4" r="2.8"/><path d="M2.6 14c0-2.7 2.4-4.4 5.4-4.4s5.4 1.7 5.4 4.4"/></svg>Usuarios</a>
+            <div class="base">Lote 1 · 37 sedes<br><span class="mono">v0.6.0 · 16 sep 2026</span></div>
+          </nav>
+
+          <div class="col">
+            <div class="top">
+              <div class="migas" id="migas"></div>
+              <span class="flex"></span>
+              <div class="buscar"><span>Buscar sede o DANE</span><span class="flex"></span><span class="kbd">Ctrl K</span></div>
+              <div class="yo"><span class="av" id="av">JS</span><span><b id="nomTx">J. Saavedra</b><span class="rol" id="rolTx">Administrador</span></span></div>
+            </div>
+
+            <div class="lienzo">
+
+              <!-- ─── TABLERO (solo SED) ─── -->
+              <section class="view on" id="s-tablero">
+                <div class="franja">
+                  <div class="c"><b class="n">37</b><span>Sedes en el lote 1</span></div>
+                  <div class="c"><b class="n">$9.718<span class="u"> M</span></b><span>Valor de referencia</span></div>
+                  <div class="c"><b class="n">2.623</b><span>Estudiantes afectados</span></div>
+                  <div class="c er"><b class="n">34</b><span>Sedes no habilitadas</span></div>
+                  <div class="c al"><b class="n">6</b><span>Esperando verificación</span></div>
+                  <div class="c ok"><b class="n">3</b><span>Aprobadas para obra</span></div>
+                </div>
+
+                <div class="lat">
+                  <div>
+                    <div class="p">
+                      <header><h2>Municipios del lote</h2><span class="flex"></span>
+                        <div class="leyenda">
+                          <span><i style="background:var(--borde-f)"></i>Pendiente</span>
+                          <span><i style="background:var(--oro)"></i>En curso</span>
+                          <span><i style="background:var(--ok)"></i>Aprobado</span>
+                        </div>
+                      </header>
+                      <div class="cuerpo">
+                        <div class="mosaico">
+                          <div class="tsl"><b>Anserma</b><span class="sub">6 sedes · $713,0 M</span></div>
+                          <div class="tsl s-curso"><b>Aguadas</b><span class="sub">5 sedes · $3.150,2 M</span></div>
+                          <div class="tsl s-curso"><b>Aranzazu</b><span class="sub">4 sedes · $985,2 M</span></div>
+                          <div class="tsl"><b>Risaralda</b><span class="sub">4 sedes · $600,3 M</span></div>
+                          <div class="tsl s-curso"><b>Samaná</b><span class="sub">4 sedes · $12,0 M</span></div>
+                          <div class="tsl s-curso"><b>Belalcázar</b><span class="sub">3 sedes · $742,8 M</span></div>
+                          <div class="tsl"><b>Chinchiná</b><span class="sub">3 sedes · $300,0 M</span></div>
+                          <div class="tsl"><b>Viterbo</b><span class="sub">2 sedes · $2.100,0 M</span></div>
+                          <div class="tsl"><b>Pensilvania</b><span class="sub">2 sedes · $800,0 M</span></div>
+                          <div class="tsl"><b>Filadelfia</b><span class="sub">2 sedes · $160,0 M</span></div>
+                          <div class="tsl"><b>Manzanares</b><span class="sub">1 sede · $120,0 M</span></div>
+                          <div class="tsl"><b>Salamina</b><span class="sub">1 sede · $35,0 M</span></div>
+                        </div>
+                        <div class="resto">
+                          <b>Los otros 14 municipios no tienen sedes en el lote 1:</b>
+                          Riosucio · Neira · Supía · Villamaría · Pácora · La Merced · Marmato ·
+                          Marulanda · Marquetalia · Norcasia · Palestina · San José · Victoria ·
+                          La Dorada.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="p soporte">
+                      <header><h2>Valor de referencia por municipio</h2><span class="flex"></span><span class="eyebrow">Censo de daños</span></header>
+                      <div class="cuerpo">
+                        <div class="rk"><span class="nb">Aguadas</span><span class="pista"><i class="alto" style="width:100%"></i></span><span class="vl">$ 3.150,2 M</span></div>
+                        <div class="rk"><span class="nb">Viterbo</span><span class="pista"><i class="alto" style="width:66.7%"></i></span><span class="vl">$ 2.100,0 M</span></div>
+                        <div class="rk"><span class="nb">Aranzazu</span><span class="pista"><i class="alto" style="width:31.3%"></i></span><span class="vl">$ 985,2 M</span></div>
+                        <div class="rk"><span class="nb">Pensilvania</span><span class="pista"><i style="width:25.4%"></i></span><span class="vl">$ 800,0 M</span></div>
+                        <div class="rk"><span class="nb">Belalcázar</span><span class="pista"><i style="width:23.6%"></i></span><span class="vl">$ 742,8 M</span></div>
+                        <div class="rk"><span class="nb">Anserma</span><span class="pista"><i style="width:22.6%"></i></span><span class="vl">$ 713,0 M</span></div>
+                        <div class="rk"><span class="nb">Risaralda</span><span class="pista"><i style="width:19.1%"></i></span><span class="vl">$ 600,3 M</span></div>
+                        <div class="rk"><span class="nb">Chinchiná</span><span class="pista"><i style="width:9.5%"></i></span><span class="vl">$ 300,0 M</span></div>
+                        <div class="rk"><span class="nb">Filadelfia</span><span class="pista"><i style="width:5.1%"></i></span><span class="vl">$ 160,0 M</span></div>
+                        <div class="rk"><span class="nb">Manzanares</span><span class="pista"><i style="width:3.8%"></i></span><span class="vl">$ 120,0 M</span></div>
+                        <div class="rk"><span class="nb">Salamina</span><span class="pista"><i style="width:1.1%"></i></span><span class="vl">$ 35,0 M</span></div>
+                        <div class="rk"><span class="nb">Samaná</span><span class="pista"><i style="width:.4%"></i></span><span class="vl">$ 12,0 M</span></div>
+                      </div>
+                      <div class="pie">
+                        <b style="color:var(--alerta)">No comparar sin leer esto:</b> Samaná aparece último
+                        porque su diagnóstico valoró reparaciones puntuales —tejas, perfiles, un muro—, no
+                        reconstrucción. Es una diferencia de alcance, no de gestión. Y las 4 cifras de
+                        Samaná ya son <b>presupuesto real recibido</b>, no estimación: el censo mezcla
+                        ambas cosas, por eso el campo se llama «referencia» y nunca se sobrescribe.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="p">
+                      <header><h2>Del universo al lote</h2></header>
+                      <div class="cuerpo">
+                        <div class="emb">
+                          <div class="fila"><span>Sedes oficiales</span><span class="pista"><i style="width:100%;background:var(--gris)"></i></span><span class="vl n">975</span></div>
+                          <div class="fila"><span>Priorizadas · lote 1</span><span class="pista"><i style="width:3.8%;background:var(--gris-osc)"></i></span><span class="vl n">37</span></div>
+                          <div class="fila"><span>Con archivo recibido</span><span class="pista"><i style="width:1.6%;background:var(--oro)"></i></span><span class="vl n">16</span></div>
+                          <div class="fila"><span>Presupuesto radicado</span><span class="pista"><i style="width:.9%;background:var(--verde)"></i></span><span class="vl n">9</span></div>
+                          <div class="fila"><span>Aprobadas para obra</span><span class="pista"><i style="width:.3%;background:var(--ok)"></i></span><span class="vl n">3</span></div>
+                        </div>
+                      </div>
+                      <div class="pie">Barras a escala real sobre 975. Que el lote casi no se vea <b>es el dato</b>: 37 de 975, un 3,8 %.</div>
+                    </div>
+
+                    <div class="p soporte">
+                      <header><h2>Nivel de afectación</h2></header>
+                      <div class="cuerpo">
+                        <div class="dist">
+                          <div style="width:36.4%;background:var(--err)">12</div>
+                          <div style="width:15.2%;background:#B5562E">5</div>
+                          <div style="width:21.2%;background:var(--alerta)">7</div>
+                          <div style="width:9.1%;background:#9C8A2E">3</div>
+                          <div style="width:18.1%;background:var(--borde-f);color:var(--tx)">6</div>
+                        </div>
+                        <div class="leyenda" style="margin-top:.55rem">
+                          <span><i style="background:var(--err)"></i>Inhabilitada</span>
+                          <span><i style="background:#B5562E"></i>Grave</span>
+                          <span><i style="background:var(--alerta)"></i>Moderado</span>
+                          <span><i style="background:#9C8A2E"></i>Leve</span>
+                          <span><i style="background:var(--borde-f)"></i>Sin dato</span>
+                        </div>
+                      </div>
+                      <div class="pie">6 sedes del lote no traen nivel de afectación en el censo del 27-08-2026.</div>
+                    </div>
+
+                    <div class="p soporte">
+                      <header><h2>Bitácora</h2><span class="flex"></span><span class="vivo"><span class="pt"></span>en vivo</span></header>
+                      <div class="cuerpo">
+                        <div class="fi"><span class="pto" style="background:var(--ok)"></span><span class="tx"><b>Mercedes Abrego</b> aprobada y cerrada<span>Samaná · J. Saavedra</span></span><span class="hace">10:14</span></div>
+                        <div class="fi"><span class="pto" style="background:var(--err)"></span><span class="tx"><b>H-4</b> registrado: DANE de 14 dígitos<span>Samaná · I.E. Pío XII, fila 4</span></span><span class="hace">08:45</span></div>
+                        <div class="fi"><span class="pto" style="background:var(--oro)"></span><span class="tx"><b>Samaná</b> · archivo validado<span>77 leídas · 25 advertencias · 4 errores</span></span><span class="hace">08:42</span></div>
+                        <div class="fi"><span class="pto" style="background:var(--gris)"></span><span class="tx"><b>Belalcázar</b> · archivo recibido<span>Sin código DANE — cruce por nombre pendiente</span></span><span class="hace">ayer</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ─── SEDES ─── -->
+              <section class="view" id="s-inicio">
+                <div class="p">
+                  <header><h2 id="tituloSedes">Municipios del lote</h2><span class="flex"></span>
+                    <div class="leyenda">
+                      <span><i style="background:var(--borde-f)"></i>Pendiente</span>
+                      <span><i style="background:var(--oro)"></i>Radicado / verificación</span>
+                      <span><i style="background:var(--ok)"></i>Aprobado</span>
+                    </div>
+                  </header>
+                  <div class="cuerpo ras">
+                    <div class="scroll">
+                      <table>
+                        <thead><tr><th>Municipio</th><th class="n">Sedes</th><th>Avance</th><th>Origen</th><th class="n" data-sed>Costo leído</th><th>Actualizado</th></tr></thead>
+                        <tbody>
+                          <tr class="click"><td><strong>Samaná</strong></td><td class="n">4</td>
+                            <td><div class="seg"><i style="width:25%;background:var(--borde-f)"></i><i style="width:50%;background:var(--oro)"></i><i style="width:25%;background:var(--ok)"></i></div><div class="seg-tx">1 pend · 2 curso · 1 aprob</div></td>
+                            <td><span class="orig xls">XLS</span></td><td class="n" data-sed>$ 10.309.500</td><td class="hace">hace 2 h</td></tr>
+                          <tr class="click ext-off"><td><strong>Belalcázar</strong></td><td class="n">3</td>
+                            <td><div class="seg"><i style="width:100%;background:var(--borde-f)"></i></div><div class="seg-tx">3 pendientes</div></td>
+                            <td><span class="orig xls">XLS</span></td><td class="n" data-sed>—</td><td class="hace">ayer</td></tr>
+                          <tr class="click ext-off"><td><strong>Aguadas</strong></td><td class="n">5</td>
+                            <td><div class="seg"><i style="width:100%;background:var(--borde-f)"></i></div><div class="seg-tx">5 pendientes</div></td>
+                            <td><span class="orig xls">XLS</span></td><td class="n" data-sed>—</td><td class="hace">ayer</td></tr>
+                          <tr class="click ext-off"><td><strong>Aranzazu</strong></td><td class="n">4</td>
+                            <td><div class="seg"><i style="width:100%;background:var(--borde-f)"></i></div><div class="seg-tx">4 pendientes</div></td>
+                            <td><span class="orig xls">XLS</span></td><td class="n" data-sed>—</td><td class="hace">ayer</td></tr>
+                          <tr class="click tenue ext-off"><td>Anserma</td><td class="n">5</td>
+                            <td><div class="seg"><i style="width:100%;background:var(--borde-f)"></i></div><div class="seg-tx">Sin envío</div></td>
+                            <td>—</td><td class="n" data-sed>—</td><td class="hace">—</td></tr>
+                          <tr class="click tenue ext-off"><td>Chinchiná · Risaralda · Pensilvania · y 5 más</td><td class="n">12</td>
+                            <td><div class="seg"><i style="width:100%;background:var(--borde-f)"></i></div><div class="seg-tx">Sin envío</div></td>
+                            <td>—</td><td class="n" data-sed>—</td><td class="hace">—</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="pie" data-sed>San José y Victoria enviaron presupuesto pero no pertenecen al lote 1 (hallazgo H-2) — quedan fuera hasta que se defina su lote.</div>
+                  <div class="pie ext-solo oculto">Usted ve únicamente el municipio que tiene asignado.</div>
+                </div>
+
+                <div class="p" data-sed>
+                  <header><h2>Hallazgos abiertos</h2><span class="flex"></span><span class="eyebrow">6 sin resolver</span></header>
+                  <div class="cuerpo ras">
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">H-4 · Samaná</span>
+                      <span><b>Bloquea una sede del lote 1.</b> I.E. Pío XII — Bernardo Ocampo Herrera: el archivo trae <code class="dane">21766200280204</code> (14 dígitos); la priorización dice <code class="dane">217662002631</code>. Sin confirmación de la alcaldía no se cruza.</span></div>
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">H-3 · Belalcázar</span>
+                      <span>La hoja «SEDES EDUCATIVAS» no trae código DANE — la columna RUD viene vacía en las 12 filas. El cruce tendrá que hacerse por nombre, revisado uno por uno.</span></div>
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">H-1 · Aguadas</span>
+                      <span>El encabezado del archivo dice «ALCALDÍA MUNICIPAL DE SALAMINA» — plantilla reciclada sin actualizar. No afecta los datos, pero conviene confirmarlo antes de citarlo en un documento oficial.</span></div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ─── MUNICIPIO ─── -->
+              <section class="view" id="s-muni">
+                <div class="p">
+                  <header><h2>Samaná</h2><span class="flex"></span>
+                    <button class="b sec mini" type="button" data-sed>Ver archivo original</button>
+                    <button class="b mini" type="button" data-sed>Cargar Excel</button>
+                    <button class="b mini ext-solo oculto" type="button">Diligenciar sede</button>
+                  </header>
+                  <div class="cuerpo">
+                    <div class="cifras">
+                      <div class="cifra"><b class="n">4</b><span>En el lote</span></div>
+                      <div class="cifra ok"><b class="n">1</b><span>Aprobadas</span></div>
+                      <div class="cifra al"><b class="n">2</b><span>En curso</span></div>
+                      <div class="cifra er"><b class="n">1</b><span>Con hallazgo</span></div>
+                      <div class="cifra" data-sed><b class="n">77</b><span>Leídas del archivo</span></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="p">
+                  <header><h2>Sedes priorizadas</h2><span class="flex"></span><span class="eyebrow">Orden del lote</span></header>
+                  <div class="cuerpo ras">
+                    <div class="scroll">
+                      <table>
+                        <thead><tr><th>#</th><th>Sede</th><th>DANE</th><th>Pri.</th><th class="n">Costo directo</th><th>Origen</th><th>Estado</th></tr></thead>
+                        <tbody>
+                          <tr class="click"><td class="n">23</td><td>I.E. El Bosque — Guayaquil</td><td class="dane">217662002291</td>
+                            <td><span class="pri p2">P2</span></td><td class="n">$ 6.943.056</td><td><span class="orig man">MAN</span></td><td><span class="est e-rad">Radicado</span></td></tr>
+                          <tr class="click"><td class="n">32</td><td>I.E. El Bosque — Quebrada Seca</td><td class="dane">217662002762</td>
+                            <td><span class="pri p2">P2</span></td><td class="n">$ 3.650.100</td><td><span class="orig xls">XLS</span></td><td><span class="est e-ver">En verificación</span></td></tr>
+                          <tr class="click"><td class="n">27</td><td>I.E. El Silencio — Mercedes Abrego <span class="sig cerr" title="Cerrado: aprobado el 15 sep 2026">🔒</span></td><td class="dane">217662000786</td>
+                            <td><span class="pri p2">P2</span></td><td class="n">$ 1.688.600</td><td><span class="orig man">✎ Manual</span></td><td><span class="est e-apr">Aprobado</span></td></tr>
+                          <tr class="click"><td class="n">33</td><td>I.E. Pío XII — Bernardo Ocampo Herrera <span class="sig hall">!</span></td><td class="dane">— por confirmar</td>
+                            <td><span class="pri p2">P2</span></td><td class="n">—</td><td>—</td><td><span class="est e-pend">Pendiente</span></td></tr>
+                          <tr class="tenue"><td class="n">—</td><td>I.E. El Bosque — El Congal</td><td class="dane">217662000859</td>
+                            <td>—</td><td class="n">$ 0</td><td><span class="orig xls">XLS</span></td><td><span class="est e-sin">Sin afectación</span></td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="pie" data-sed>El archivo de Samaná trae 77 sedes leídas; aquí solo las del lote 1. «Cargar Excel» está disponible para Administrador y Verificador — son quienes reciben el correo de la alcaldía.</div>
+                </div>
+              </section>
+
+              <!-- ─── FICHA ─── -->
+              <section class="view" id="s-ficha">
+                <div class="p">
+                  <header><h2>I.E. El Bosque — Guayaquil</h2><span class="est e-rad">Radicado</span><span class="flex"></span>
+                    <button class="b mini" type="button" data-edita
+                            onclick="vista='registrar';pintar()">Editar presupuesto</button>
+                    <button class="b sec mini" type="button" data-verifica
+                            onclick="vista='verif';pintar()">Verificar</button>
+                    <button class="b sec mini" type="button">Descargar PDF</button>
+                  </header>
+                  <div class="cuerpo">
+                    <dl class="kv">
+                      <dt>DANE sede</dt><dd class="dane">217662002291</dd>
+                      <dt>Municipio</dt><dd>Samaná · zona rural</dd>
+                      <dt>Matrícula</dt><dd class="n">5 estudiantes</dd>
+                      <dt>Prioridad</dt><dd><span class="pri p2">P2</span> Riesgo inminente de colapso — 1 de las 37 del lote</dd>
+                      <dt>Afectación</dt><dd>Riesgo inminente de colapso · nivel moderado</dd>
+                      <dt>Origen del dato</dt><dd><span class="orig xls">XLS</span> Diagnóstico municipal, hoja «I.E EL BOSQUE», fila 9</dd>
+                      <dt>Última carga</dt><dd>15 sep 2026, 08:42 · J. Saavedra <span class="hace">(hace 2 h)</span></dd>
+                    </dl>
+                  </div>
+                </div>
+
+                <div class="rejilla">
+                  <div class="p" data-sed>
+                    <header><h2>Seguimiento y control</h2><span class="flex"></span><span class="eyebrow">Dos valores, sin desviación</span></header>
+                    <div class="cuerpo">
+                      <div class="cmp"><div class="et"><span>Valor de referencia — arquitecto</span><b class="n">$ 4.970.800</b></div>
+                        <div class="pista"><i style="width:72%;background:var(--gris)"></i></div></div>
+                      <div class="cmp"><div class="et"><span>Presupuesto recibido — municipio</span><b class="n">$ 6.943.056</b></div>
+                        <div class="pista"><i style="width:100%;background:var(--verde)"></i></div></div>
+                    </div>
+                    <div class="pie">
+                      <b>No se restan.</b> La referencia es una estimación de visita; el recibido es un
+                      levantamiento de cantidades. Su diferencia no es sobrecosto ni ahorro, y como
+                      porcentaje induce una conclusión falsa (D-28).
+                    </div>
+                  </div>
+
+                  <div class="p ext-solo oculto">
+                    <header><h2>Su presupuesto</h2></header>
+                    <div class="cuerpo">
+                      <div class="cmp"><div class="et"><span>Costo directo declarado</span><b class="n">$ 5.987.974</b></div>
+                        <div class="pista"><i style="width:100%;background:var(--gris)"></i></div></div>
+                      <div class="cmp"><div class="et"><span>Total con A, U e IVA</span><b class="n">$ 6.943.056</b></div>
+                        <div class="pista"><i style="width:100%;background:var(--verde)"></i></div></div>
+                    </div>
+                    <div class="pie">El municipio presupuesta de forma independiente: el valor de referencia de la Secretaría no se muestra, para que la medición no quede anclada a esa cifra (D-6).</div>
+                  </div>
+
+                  <div class="p">
+                    <header><h2>Historial</h2><span class="flex"></span><span class="eyebrow">Manda la más reciente</span></header>
+                    <div class="cuerpo ras">
+                      <table>
+                        <thead><tr><th>Ver.</th><th>Estado</th><th>Origen</th><th class="n">Total</th><th>Fecha</th></tr></thead>
+                        <tbody><tr><td><strong>v1</strong></td><td><span class="est e-rad">Radicado</span></td><td><span class="orig xls">XLS</span></td><td class="n">$ 6.943.056</td><td class="hace">16 sep</td></tr></tbody>
+                      </table>
+                    </div>
+                    <div class="pie">Si la alcaldía reenvía o alguien corrige a mano, entra como v2 y queda vigente — la v1 no se borra, queda como evidencia.</div>
+                  </div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Daño registrado y presupuestado</h2><span class="flex"></span>
+                    <span class="eyebrow">Cruce por capítulo</span></header>
+                  <div class="cuerpo">
+                    <div class="caps">
+                      <div class="cap"><span class="cn">1</span>Estructural</div>
+                      <div class="cap dano pres"><span class="cn">2</span>Mampostería y muros<span class="flex"></span><span class="cok">✓ $</span></div>
+                      <div class="cap dano pres"><span class="cn">3</span>Cubierta<span class="flex"></span><span class="cok">✓ $</span></div>
+                      <div class="cap"><span class="cn">4</span>Cimentación y terreno</div>
+                      <div class="cap"><span class="cn">5</span>Elem. no estructurales</div>
+                      <div class="cap dano pres"><span class="cn">6</span>Acabados<span class="flex"></span><span class="cok">✓ $</span></div>
+                      <div class="cap"><span class="cn">7</span>Instalaciones</div>
+                      <div class="cap"><span class="cn">8</span>Unidades sanitarias</div>
+                      <div class="cap"><span class="cn">9</span>Cocina y restaurante</div>
+                      <div class="cap"><span class="cn">10</span>Elementos exteriores</div>
+                      <div class="cap"><span class="cn">11</span>Deficiencia constructiva</div>
+                      <div class="cap trans pres"><span class="cn">13</span>Demoliciones y desmontes<span class="flex"></span><span class="ctr">transversal</span></div>
+                      <div class="cap trans pres"><span class="cn">14</span>Aseo y escombros<span class="flex"></span><span class="ctr">transversal</span></div>
+                    </div>
+                  </div>
+                  <div class="pie">
+                    Esto <b>reemplaza al porcentaje de desviación</b>. El arquitecto no pregunta
+                    «¿se pasó un 12 %?», pregunta <b>«¿presupuestó lo que se dañó?»</b>.
+                    Aquí los tres capítulos con daño (2, 3 y 6) están cubiertos.
+                    <br><br>
+                    Los capítulos <b>12 a 14 son transversales</b> (D-34): no son un lugar donde haya
+                    daño, son trabajo que toda reconstrucción necesita — demoler antes de levantar,
+                    sacar escombros, cerrar la obra. <b>Nunca se marcan como «presupuesto sin daño»</b>.
+                    En el presupuesto real de Belalcázar pesan el <b>13,6 %</b>.
+                  </div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Presupuesto a detalle</h2><span class="flex"></span>
+                    <span class="eyebrow">6 ítems · sección 3</span>
+                    <button class="b sec mini" type="button">Agregar ítem</button></header>
+                  <div class="cuerpo ras">
+                    <div class="scroll"><table>
+                      <thead><tr><th>#</th><th>Capítulo</th><th>Trabajo a ejecutar</th><th>Un.</th>
+                        <th class="n">Cant.</th><th class="n">Vr. unitario</th><th class="n">Valor total</th></tr></thead>
+                      <tbody>
+                        <tr><td class="n">1</td><td><span class="dane">13</span> Demoliciones</td>
+                          <td>Demolición de estructuras en mampostería</td><td class="dane">m³</td>
+                          <td class="n">3,50</td><td class="n">$ 168.895</td><td class="n"><b>$ 591.132</b></td></tr>
+                        <tr><td class="n">2</td><td><span class="dane">2</span> Mampostería</td>
+                          <td>Suministro, transporte e instalación muro en bloque n.º 4 arcilla</td><td class="dane">m²</td>
+                          <td class="n">28,00</td><td class="n">$ 75.550</td><td class="n"><b>$ 2.115.400</b></td></tr>
+                        <tr><td class="n">3</td><td><span class="dane">3</span> Cubierta</td>
+                          <td>Recorrido de cubierta (incl. ganchos, amarras y sikaflex)</td><td class="dane">m²</td>
+                          <td class="n">42,00</td><td class="n">$ 12.095</td><td class="n"><b>$ 507.990</b></td></tr>
+                        <tr><td class="n">4</td><td><span class="dane">3</span> Cubierta</td>
+                          <td>Suministro, transporte e instalación teja termoacústica</td><td class="dane">m²</td>
+                          <td class="n">12,00</td><td class="n">$ 98.296</td><td class="n"><b>$ 1.179.552</b></td></tr>
+                        <tr><td class="n">5</td><td><span class="dane">6</span> Acabados</td>
+                          <td>Suministro, transporte e instalación revoque liso muros 1:3</td><td class="dane">m²</td>
+                          <td class="n">32,00</td><td class="n">$ 36.948</td><td class="n"><b>$ 1.182.336</b></td></tr>
+                        <tr><td class="n">6</td><td><span class="dane">14</span> Aseo y escombros</td>
+                          <td>Manejo y movilización de escombros / sobrantes</td><td class="dane">m³</td>
+                          <td class="n">6,00</td><td class="n">$ 68.594</td><td class="n"><b>$ 411.564</b></td></tr>
+                      </tbody>
+                    </table></div>
+                  </div>
+                  <div class="cuerpo" style="border-top:1px solid var(--borde)">
+                    <dl class="tot">
+                      <dt>Costo directo</dt><dd class="n">$ 5.987.974</dd>
+                      <dt>Administración <span class="pct">10 %</span></dt><dd class="n">$ 598.797</dd>
+                      <dt>Utilidad <span class="pct">5 %</span></dt><dd class="n">$ 299.399</dd>
+                      <dt>IVA 19 % sobre la utilidad</dt><dd class="n">$ 56.886</dd>
+                      <dt class="gt">Total del presupuesto</dt><dd class="n gt">$ 6.943.056</dd>
+                      <dt>Plazo de ejecución</dt><dd class="n">45 días</dd>
+                    </dl>
+                  </div>
+                  <div class="pie">
+                    A y U por separado, sin Imprevistos, con IVA sobre la utilidad (Decreto 1372 de
+                    1992, art. 3 — D-5). No hay tope legal de AIU: el sistema <b>alerta</b> si
+                    A&nbsp;&gt;&nbsp;12&nbsp;% o U&nbsp;&gt;&nbsp;8&nbsp;%, no bloquea. Los cálculos
+                    nunca se digitan: salen de cantidad × valor unitario.
+                  </div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Formato oficial</h2><span class="flex"></span><span class="eyebrow">3 de 5 secciones</span></header>
+                  <div class="cuerpo ras">
+                    <div class="paso-sec done"><span class="no">1</span><span class="flex">Identificación de la sede</span><span class="est e-apr">Completa</span></div>
+                    <div class="paso-sec done"><span class="no">2</span><span class="flex">Descripción de la afectación</span><span class="est e-apr">Completa</span></div>
+                    <div class="paso-sec done"><span class="no">3</span><span class="flex">Presupuesto y cálculo A/U/IVA</span><span class="est e-apr">Completa</span></div>
+                    <div class="paso-sec"><span class="no">4</span><span class="flex">Registro fotográfico</span><span class="est e-pend">Sin adjuntar</span></div>
+                    <div class="paso-sec"><span class="no">5</span><span class="flex">Verificación de la Secretaría</span><span class="est e-pend">Pendiente</span></div>
+                  </div>
+                  <div class="pie">La sección 5 se emite desde <b>Verificación</b>, no aquí: los arquitectos trabajan por bandeja (D-30). Aquí solo se lee el concepto ya emitido.</div>
+                </div>
+              </section>
+
+              <!-- ─── REGISTRAR PRESUPUESTO (diligenciamiento manual) ─── -->
+              <section class="view" id="s-registrar">
+                <div class="p">
+                  <header><h2>Presupuesto — I.E. El Bosque, Guayaquil</h2>
+                    <span class="est e-pend">En diligenciamiento</span><span class="flex"></span>
+                    <span class="eyebrow">Borrador guardado 14:02</span></header>
+                  <div class="cuerpo">
+                    <div class="pasos-f">
+                      <div class="pf hecho"><span class="no">1</span>Identificación</div>
+                      <div class="pf hecho"><span class="no">2</span>Afectación</div>
+                      <div class="pf act"><span class="no">3</span>Presupuesto</div>
+                      <div class="pf"><span class="no">4</span>Fotografías</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. AFECTACIÓN -->
+                <div class="p">
+                  <header><h2>2 · Descripción de la afectación</h2></header>
+                  <div class="cuerpo">
+                    <div class="campo-v">
+                      <label>¿La sede resultó afectada por el sismo?</label>
+                      <div class="ayuda">El censo la clasificó como <b>tipo 2 — riesgo inminente de
+                        colapso</b>. Si usted declara algo distinto, el sistema le pedirá justificarlo
+                        y lo marcará como discrepancia para que un arquitecto lo revise.</div>
+                      <label class="op"><input type="radio" name="af" checked>
+                        <span><b>Sí, presento presupuesto</b><small>Coincide con el censo</small></span></label>
+                      <label class="op"><input type="radio" name="af">
+                        <span><b>No presenta afectación</b><small>Discrepa del censo — exige
+                        justificación de mínimo 40 caracteres</small></span></label>
+                    </div>
+                    <div class="campo-v" style="margin-bottom:0">
+                      <label>Descripción de los daños</label>
+                      <div class="ayuda">Mínimo 60 caracteres. Describa <b>qué se dañó</b>; el trabajo
+                        a ejecutar va en la tabla de abajo.</div>
+                      <textarea>Cubierta con tejas fisuradas y perfilería deformada en el aula principal. Una columna presenta grieta diagonal visible. Se restringió el acceso al salón oriental.</textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. PRESUPUESTO EDITABLE -->
+                <div class="p">
+                  <header><h2>3 · Presupuesto a detalle</h2><span class="flex"></span>
+                    <span class="eyebrow">6 ítems</span>
+                    <button class="b mini" type="button">+ Agregar ítem</button></header>
+                  <div class="cuerpo ras">
+                    <div class="scroll"><table class="edit">
+                      <thead><tr><th style="width:2rem">#</th><th style="min-width:150px">Capítulo de daño</th>
+                        <th style="min-width:230px">Trabajo a ejecutar</th><th style="width:88px">Unidad</th>
+                        <th class="n" style="width:86px">Cantidad</th><th class="n" style="width:112px">Vr. unitario</th>
+                        <th class="n" style="width:112px">Valor total</th><th style="width:2rem"></th></tr></thead>
+                      <tbody>
+                        <tr><td class="n">1</td>
+                          <td><select><option>1. Estructural</option><option>2. Mampostería y muros</option><option>3. Cubierta</option><option>4. Cimentación y terreno</option><option>5. Elementos no estructurales</option><option>6. Acabados</option><option>7. Instalaciones</option><option>8. Unidades sanitarias</option><option>9. Cocina y restaurante escolar</option><option>10. Elementos exteriores</option><option>11. Deficiencia constructiva</option><option>12. Preliminares y obras provisionales</option><option selected>13. Demoliciones y desmontes</option><option>14. Aseo, escombros y disposición final</option></select></td>
+                          <td><input value="Demolición de estructuras en mampostería"></td>
+                          <td><select><option>m²</option><option selected>m³</option><option>ml</option><option>un</option><option>gl</option><option>kg</option><option>ton</option><option>vje</option><option>día</option><option>mes</option><option>hora</option></select></td>
+                          <td><input class="n" value="3,50" inputmode="decimal"></td>
+                          <td><input class="n" value="168.895" inputmode="decimal"></td>
+                          <td class="n calc">$ 591.132</td><td><button class="quitar" type="button" title="Quitar">×</button></td></tr>
+                        <tr><td class="n">2</td>
+                          <td><select><option>1. Estructural</option><option selected>2. Mampostería y muros</option><option>3. Cubierta</option><option>4. Cimentación y terreno</option><option>5. Elementos no estructurales</option><option>6. Acabados</option><option>7. Instalaciones</option><option>8. Unidades sanitarias</option><option>9. Cocina y restaurante escolar</option><option>10. Elementos exteriores</option><option>11. Deficiencia constructiva</option><option>12. Preliminares y obras provisionales</option><option>13. Demoliciones y desmontes</option><option>14. Aseo, escombros y disposición final</option></select></td>
+                          <td><input value="Suministro, transporte e instalación muro en bloque n.º 4 arcilla"></td>
+                          <td><select><option selected>m²</option><option>m³</option><option>ml</option><option>un</option><option>gl</option><option>kg</option><option>ton</option><option>vje</option><option>día</option><option>mes</option><option>hora</option></select></td>
+                          <td><input class="n" value="28,00" inputmode="decimal"></td>
+                          <td><input class="n" value="75.550" inputmode="decimal"></td>
+                          <td class="n calc">$ 2.115.400</td><td><button class="quitar" type="button" title="Quitar">×</button></td></tr>
+                        <tr><td class="n">3</td>
+                          <td><select><option>1. Estructural</option><option>2. Mampostería y muros</option><option selected>3. Cubierta</option><option>4. Cimentación y terreno</option><option>5. Elementos no estructurales</option><option>6. Acabados</option><option>7. Instalaciones</option><option>8. Unidades sanitarias</option><option>9. Cocina y restaurante escolar</option><option>10. Elementos exteriores</option><option>11. Deficiencia constructiva</option><option>12. Preliminares y obras provisionales</option><option>13. Demoliciones y desmontes</option><option>14. Aseo, escombros y disposición final</option></select></td>
+                          <td><input value="Recorrido de cubierta (incl. ganchos, amarras y sikaflex)"></td>
+                          <td><select><option selected>m²</option><option>m³</option><option>ml</option><option>un</option><option>gl</option><option>kg</option><option>ton</option><option>vje</option><option>día</option><option>mes</option><option>hora</option></select></td>
+                          <td><input class="n" value="42,00" inputmode="decimal"></td>
+                          <td><input class="n" value="12.095" inputmode="decimal"></td>
+                          <td class="n calc">$ 507.990</td><td><button class="quitar" type="button" title="Quitar">×</button></td></tr>
+                        <tr><td class="n">4</td>
+                          <td><select><option>1. Estructural</option><option>2. Mampostería y muros</option><option selected>3. Cubierta</option><option>4. Cimentación y terreno</option><option>5. Elementos no estructurales</option><option>6. Acabados</option><option>7. Instalaciones</option><option>8. Unidades sanitarias</option><option>9. Cocina y restaurante escolar</option><option>10. Elementos exteriores</option><option>11. Deficiencia constructiva</option><option>12. Preliminares y obras provisionales</option><option>13. Demoliciones y desmontes</option><option>14. Aseo, escombros y disposición final</option></select></td>
+                          <td><input value="Suministro, transporte e instalación teja termoacústica"></td>
+                          <td><select><option selected>m²</option><option>m³</option><option>ml</option><option>un</option><option>gl</option><option>kg</option><option>ton</option><option>vje</option><option>día</option><option>mes</option><option>hora</option></select></td>
+                          <td><input class="n" value="12,00" inputmode="decimal"></td>
+                          <td><input class="n" value="98.296" inputmode="decimal"></td>
+                          <td class="n calc">$ 1.179.552</td><td><button class="quitar" type="button" title="Quitar">×</button></td></tr>
+                        <tr><td class="n">5</td>
+                          <td><select><option>1. Estructural</option><option>2. Mampostería y muros</option><option>3. Cubierta</option><option>4. Cimentación y terreno</option><option>5. Elementos no estructurales</option><option selected>6. Acabados</option><option>7. Instalaciones</option><option>8. Unidades sanitarias</option><option>9. Cocina y restaurante escolar</option><option>10. Elementos exteriores</option><option>11. Deficiencia constructiva</option><option>12. Preliminares y obras provisionales</option><option>13. Demoliciones y desmontes</option><option>14. Aseo, escombros y disposición final</option></select></td>
+                          <td><input value="Suministro, transporte e instalación revoque liso muros 1:3"></td>
+                          <td><select><option selected>m²</option><option>m³</option><option>ml</option><option>un</option><option>gl</option><option>kg</option><option>ton</option><option>vje</option><option>día</option><option>mes</option><option>hora</option></select></td>
+                          <td><input class="n" value="32,00" inputmode="decimal"></td>
+                          <td><input class="n" value="36.948" inputmode="decimal"></td>
+                          <td class="n calc">$ 1.182.336</td><td><button class="quitar" type="button" title="Quitar">×</button></td></tr>
+                        <tr><td class="n">6</td>
+                          <td><select><option>1. Estructural</option><option>2. Mampostería y muros</option><option>3. Cubierta</option><option>4. Cimentación y terreno</option><option>5. Elementos no estructurales</option><option>6. Acabados</option><option>7. Instalaciones</option><option>8. Unidades sanitarias</option><option>9. Cocina y restaurante escolar</option><option>10. Elementos exteriores</option><option>11. Deficiencia constructiva</option><option>12. Preliminares y obras provisionales</option><option>13. Demoliciones y desmontes</option><option selected>14. Aseo, escombros y disposición final</option></select></td>
+                          <td><input value="Manejo y movilización de escombros / sobrantes"></td>
+                          <td><select><option>m²</option><option selected>m³</option><option>ml</option><option>un</option><option>gl</option><option>kg</option><option>ton</option><option>vje</option><option>día</option><option>mes</option><option>hora</option></select></td>
+                          <td><input class="n" value="6,00" inputmode="decimal"></td>
+                          <td><input class="n" value="68.594" inputmode="decimal"></td>
+                          <td class="n calc">$ 411.564</td><td><button class="quitar" type="button" title="Quitar">×</button></td></tr>
+                      </tbody>
+                    </table></div>
+                  </div>
+                  <div class="pie">
+                    <b>Los 14 capítulos.</b> Del 1 al 11 son los del censo — <b>dónde</b> está el
+                    daño. Del 12 al 14 son transversales (D-34): preliminares, demoliciones y
+                    escombros. No son un lugar con daño, son trabajo que toda reconstrucción
+                    necesita, y sin ellos <b>el 13,6 % de un presupuesto real no tiene dónde ir</b>
+                    — medido sobre el presupuesto de Belalcázar.
+                    <br><br>
+                    <b>Dos formas de presupuestar:</b> lo <b>medible</b> va con su unidad y cantidad
+                    (28 m² × $75.550); lo que no se puede desglosar va como <b>global</b> — unidad
+                    <b>gl</b>, cantidad 1, y el valor completo en «Vr. unitario».
+                    Se escribe <b>1.500.000</b> o <b>$ 1.200.000</b> indistintamente: el sistema lo
+                    entiende y lo reformatea al salir del campo, para que usted confirme que se
+                    entendió lo mismo. <b>La columna «Valor total» no se digita</b>, se calcula.
+                  </div>
+                </div>
+
+                <!-- 3.1 A / U / IVA -->
+                <div class="p">
+                  <header><h2>3.1 · Administración, utilidad e IVA</h2></header>
+                  <div class="cuerpo">
+                    <div class="au">
+                      <div class="campo-v" style="margin:0">
+                        <label>Administración (%)</label>
+                        <div class="ayuda">Dirección de obra, pólizas, ensayos, servicios públicos
+                          de la obra, personal administrativo.</div>
+                        <input value="10" inputmode="decimal">
+                      </div>
+                      <div class="campo-v" style="margin:0">
+                        <label>Utilidad (%)</label>
+                        <div class="ayuda">La ganancia del constructor. Sobre ella se liquida el IVA.</div>
+                        <input value="5" inputmode="decimal">
+                      </div>
+                      <div class="campo-v" style="margin:0">
+                        <label>Plazo de ejecución (días)</label>
+                        <div class="ayuda">Días de obra <b>una vez contratada</b>. No incluye el
+                          tiempo del proceso de contratación.</div>
+                        <input value="45" inputmode="decimal">
+                      </div>
+                    </div>
+
+                    <div class="alerta-au">
+                      <b>Referencia de mercado, no tope legal</b>
+                      En Colombia <b>no existe tope de AIU por ley</b> — cada entidad es autónoma
+                      (Colombia Compra Eficiente). La práctica usual sin Imprevistos es
+                      <b>A 10 % + U 5 %</b>. El sistema <b>avisa</b> si A&nbsp;&gt;&nbsp;12&nbsp;% o
+                      U&nbsp;&gt;&nbsp;8&nbsp;%, pero <b>no bloquea</b>: si su caso lo justifica,
+                      radíquelo y susténtelo.
+                    </div>
+
+                    <dl class="tot">
+                      <dt>Costo directo</dt><dd class="n">$ 5.987.974</dd>
+                      <dt>Administración <span class="pct">10 %</span></dt><dd class="n">$ 598.797</dd>
+                      <dt>Utilidad <span class="pct">5 %</span></dt><dd class="n">$ 299.399</dd>
+                      <dt>IVA 19 % sobre la utilidad</dt><dd class="n">$ 56.886</dd>
+                      <dt class="gt">Total del presupuesto</dt><dd class="n gt">$ 6.943.056</dd>
+                    </dl>
+                  </div>
+                  <div class="pie">
+                    A y U por separado, <b>sin Imprevistos</b> (en lo público no se maneja la I), con
+                    IVA sobre la utilidad — Decreto 1372 de 1992, art. 3 (D-5).
+                  </div>
+                </div>
+
+                <!-- 4. FOTOS -->
+                <div class="p">
+                  <header><h2>4 · Registro fotográfico</h2><span class="flex"></span>
+                    <span class="eyebrow">2 de 6 · mínimo 1</span></header>
+                  <div class="cuerpo">
+                    <div class="fotos">
+                      <div class="foto"><span class="ph">IMG</span><b>cubierta-01.jpg</b><small>1,2 MB</small></div>
+                      <div class="foto"><span class="ph">IMG</span><b>columna-grieta.jpg</b><small>0,9 MB</small></div>
+                      <div class="foto add"><span class="mas">+</span><b>Agregar</b><small>jpg, png · máx 5 MB</small></div>
+                    </div>
+                    <div class="aviso-foto">
+                      <b>Si vuelve a abrir esta sede, tendrá que adjuntar las fotos de nuevo</b>
+                      El sistema guarda el nombre del archivo, no la imagen. Medido en Riosucio: 58
+                      sedes con 3 fotos llegan a 49 MB y el navegador empieza a rechazar guardados
+                      <b>en silencio</b> — se perdieron 10 borradores sin que nadie viera un error.
+                      Es deliberado, y por eso se le avisa aquí en vez de dejarlo fallar callado.
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p">
+                  <div class="cuerpo">
+                    <div class="acciones-v">
+                      <button class="b sec" type="button">Guardar borrador</button>
+                      <span class="flex"></span>
+                      <span style="font-size:.79rem;color:var(--tx-sec)">Al radicar ya no podrá
+                        editarlo; si necesita corregir, se genera una <b>v2</b> y la v1 queda como
+                        evidencia.</span>
+                      <button class="b" type="button">Radicar presupuesto</button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ─── VERIFICACIÓN (solo SED) ─── -->
+              <section class="view" id="s-verif">
+                <div class="franja">
+                  <div class="c al"><b class="n">6</b><span>Esperando concepto</span></div>
+                  <div class="c"><b class="n">9</b><span>Presupuestos radicados</span></div>
+                  <div class="c ok"><b class="n">3</b><span>Aprobadas para obra</span></div>
+                  <div class="c er"><b class="n">2</b><span>Devueltas al municipio</span></div>
+                  <div class="c"><b class="n">$1.512<span class="u"> M</span></b><span>Radicado sin verificar</span></div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Bandeja de verificación</h2><span class="flex"></span>
+                    <span class="eyebrow">Todo el departamento</span></header>
+                  <div class="cuerpo ras">
+                    <div class="scroll"><table>
+                      <thead><tr><th>Sede</th><th>Municipio</th><th>Pri.</th><th class="n">Daños</th>
+                        <th class="n">Referencia</th><th class="n">Radicado</th><th>Origen</th>
+                        <th>Espera</th><th></th></tr></thead>
+                      <tbody>
+                        <tr class="click"><td>I.E. San Antonio de Arma — Sede Principal</td><td>Aguadas</td>
+                          <td><span class="pri p2">P2</span></td><td class="n">4</td>
+                          <td class="n">$ 1.350.000.000</td><td class="n"><b>$ 1.512.000.000</b></td>
+                          <td><span class="orig xls">XLS</span></td><td class="hace">3 días</td>
+                          <td><button class="b mini" type="button">Verificar</button></td></tr>
+                        <tr class="click"><td>Escuela La Esperanza</td><td>Risaralda</td>
+                          <td><span class="pri p2">P2</span></td><td class="n">2</td>
+                          <td class="n">$ 250.000.000</td><td class="n"><b>$ 235.000.000</b></td>
+                          <td><span class="orig man">MAN</span></td><td class="hace">2 días</td>
+                          <td><button class="b sec mini" type="button">Abrir</button></td></tr>
+                        <tr class="click"><td>Escuela Antonio José de Sucre</td><td>Risaralda</td>
+                          <td><span class="pri p2">P2</span></td><td class="n">2</td>
+                          <td class="n">$ 85.259.000</td><td class="n"><b>$ 95.490.080</b></td>
+                          <td><span class="orig xls">XLS</span></td><td class="hace">2 días</td>
+                          <td><button class="b sec mini" type="button">Abrir</button></td></tr>
+                        <tr class="click"><td>I.E. El Águila — Sede Principal <span class="sig hall">!</span></td>
+                          <td>Belalcázar</td>
+                          <td><span class="pri p1">P1</span></td><td class="n">3</td>
+                          <td class="n">$ 600.782.132</td><td class="n"><b>$ 600.782.132</b></td>
+                          <td><span class="orig xls">XLS</span></td><td class="hace">1 día</td>
+                          <td><button class="b sec mini" type="button">Abrir</button></td></tr>
+                        <tr class="click"><td>Escuela Monterredondo</td><td>Belalcázar</td>
+                          <td><span class="pri p1">P1</span></td><td class="n">3</td>
+                          <td class="n">$ 125.000.000</td><td class="n"><b>$ 140.000.000</b></td>
+                          <td><span class="orig xls">XLS</span></td><td class="hace">1 día</td>
+                          <td><button class="b sec mini" type="button">Abrir</button></td></tr>
+                        <tr class="click"><td>Escuela Rural Camelia Baja</td><td>Aranzazu</td>
+                          <td><span class="pri p2">P2</span></td><td class="n">1</td>
+                          <td class="n">$ 19.766.127</td><td class="n"><b>$ 22.138.062</b></td>
+                          <td><span class="orig xls">XLS</span></td><td class="hace">6 h</td>
+                          <td><button class="b sec mini" type="button">Abrir</button></td></tr>
+                      </tbody>
+                    </table></div>
+                  </div>
+                  <div class="pie">
+                    El <b>Verificador alcanza todas las sedes del departamento</b>, sin restricción por
+                    municipio (D-25) — a diferencia del Responsable de sede. Válido mientras el equipo
+                    sea de 1 a 3 arquitectos; si crece, se revisa.
+                  </div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Emitir concepto</h2>
+                    <span class="est e-rad">Radicado</span><span class="flex"></span>
+                    <span class="eyebrow">I.E. San Antonio de Arma · Aguadas</span></header>
+                  <div class="cuerpo">
+                    <div class="rejilla" style="margin-bottom:1.1rem">
+                      <div class="cmp"><div class="et"><span>Valor de referencia — su visita</span><b class="n">$ 1.350.000.000</b></div>
+                        <div class="pista"><i style="width:89.3%;background:var(--gris)"></i></div></div>
+                      <div class="cmp"><div class="et"><span>Presupuesto radicado por el municipio</span><b class="n">$ 1.512.000.000</b></div>
+                        <div class="pista"><i style="width:100%;background:var(--verde)"></i></div></div>
+                    </div>
+
+                    <div class="caps" style="margin-bottom:1.1rem">
+                      <div class="cap dano pres"><span class="cn">1</span>Estructural<span class="flex"></span><span class="cok">✓ $</span></div>
+                      <div class="cap dano pres"><span class="cn">3</span>Cubierta<span class="flex"></span><span class="cok">✓ $</span></div>
+                      <div class="cap dano pres"><span class="cn">4</span>Cimentación<span class="flex"></span><span class="cok">✓ $</span></div>
+                      <div class="cap dano"><span class="cn">2</span>Mampostería<span class="flex"></span><span class="cer">sin $</span></div>
+                    </div>
+
+                    <div class="campo-v">
+                      <label>Resultado de la verificación</label>
+                      <div class="ayuda">Lo que marque se guarda tal cual. A qué estado pasa la sede lo
+                        decide la regla D-22, conservadora mientras Planeación responde Q-7.</div>
+                      <label class="op"><input type="radio" name="rv" checked>
+                        <span><b>Corresponde</b><small>Cantidades y valores corresponden a los daños
+                        registrados. → pasa a <b>APROBADO</b></small></span></label>
+                      <label class="op"><input type="radio" name="rv">
+                        <span><b>Corresponde parcialmente</b><small>Parte está sustentada, parte no.
+                        → pasa a <b>REQUIERE AJUSTE</b></small></span></label>
+                      <label class="op"><input type="radio" name="rv">
+                        <span><b>No corresponde</b><small>No se sustenta en los daños registrados.
+                        → pasa a <b>REQUIERE AJUSTE</b></small></span></label>
+                    </div>
+
+                    <div class="campo-v">
+                      <label>Observaciones técnicas</label>
+                      <div class="ayuda">Obligatorias si el resultado no es «corresponde»: son las que
+                        le llegan al municipio para saber qué corregir.</div>
+                      <textarea placeholder="Ej.: el capítulo 2 (mampostería) figura con daño en el censo y no tiene ítems presupuestados…"></textarea>
+                    </div>
+
+                    <div class="firma">
+                      <b>Firma electrónica — registro de auditoría</b>
+                      Queda quién verificó, con qué cuenta institucional y cuándo. No hay que subir
+                      imagen de firma ni digitar cédula: el ingreso con cuenta real ya identifica a la
+                      persona de forma verificable (D-21).
+                    </div>
+
+                    <div class="acciones-v">
+                      <button class="b sec" type="button">Guardar sin emitir</button>
+                      <span class="flex"></span>
+                      <button class="b sec" type="button" style="color:var(--err);border-color:var(--err)">Devolver al municipio</button>
+                      <button class="b" type="button">Emitir concepto</button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ─── CARGAS (solo SED) ─── -->
+              <section class="view" id="s-cargas">
+                <div class="p soltar" style="margin-bottom:1rem">
+                  <div class="vacio">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1.8v7.4"/><path d="M5 6.3 8 9.3l3-3"/><path d="M2 10.6v2.2a1.4 1.4 0 0 0 1.4 1.4h9.2a1.4 1.4 0 0 0 1.4-1.4v-2.2"/></svg>
+                    <h3>Arrastre aquí el Excel de una alcaldía</h3>
+                    <p>O <a href="#">selecciónelo del equipo</a>. Se acepta .xlsx y .xlsm. El archivo se archiva tal como llegó y nunca se modifica.</p>
+                  </div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Informe de validación</h2><span class="flex"></span><span class="eyebrow">Nada se vuelca sin pasar por aquí</span></header>
+                  <div class="archivo">
+                    <div class="ico">XLSX</div>
+                    <div class="meta"><b>PRESUPUESTO ESTIMADO I.E.xlsx F.xlsx</b>
+                      <span>Samaná · 8 hojas · 15 sep 2026, 08:42</span></div>
+                    <span class="flex"></span><span class="orig xls">XLS</span>
+                  </div>
+                  <div class="cuerpo">
+                    <div class="barra-val" role="img" aria-label="77 leídas, 25 advertencias, 4 errores">
+                      <div style="width:72.6%;background:var(--ok)">77 leídas</div>
+                      <div style="width:23.6%;background:var(--alerta)">25 advertencias</div>
+                      <div style="width:3.8%;background:var(--err)">4</div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:.45rem;font-size:.79rem;color:var(--tx-sec)">
+                      <span>96 filas revisadas</span><span class="n">4 con error — no se vuelcan</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p">
+                  <div class="gh" style="--g:var(--err);--gbg:var(--err-bg);--gtx:var(--err)">
+                    <div class="cab"><span class="sig hall">!</span>Error · no se vuelcan<span class="cnt">4</span></div>
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">FELIX NARANJO · f5</span><span>Donde va el DANE hay texto: «fuera de servisio por falta de estudiantes»</span></div>
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">FELIX NARANJO · f13</span><span>Donde va el DANE hay texto: «fuera de servisio por falta de estudiantes»</span></div>
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">RANCHO LARGO · f11</span><span>Donde va el DANE hay texto: «NO ES»</span></div>
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">RANCHO LARGO · f19</span><span>Donde va el DANE hay texto: «NO EST»</span></div>
+                  </div>
+                </div>
+
+                <div class="p">
+                  <div class="gh" style="--g:var(--alerta);--gbg:var(--alerta-bg);--gtx:var(--alerta)">
+                    <div class="cab"><span>▲</span>Advertencia · se vuelcan con marca<span class="cnt">25</span></div>
+                    <div class="hf"><span>▲</span><span class="ref">PIO XII · f4</span><span><b>Afecta una sede del lote 1.</b> DANE de 14 dígitos: <code class="dane">21766200280204</code>. La priorización dice <code class="dane">217662002631</code>.</span></div>
+                    <div class="hf"><span>▲</span><span class="ref">PIO XII · f3, f6, f8, f9, f11</span><span>Otros 5 DANE con longitud distinta de 12 dígitos. Ninguno pertenece al lote 1.</span></div>
+                    <div class="hf"><span>▲</span><span class="ref">EL BOSQUE · f5, f6, f8 · y 16 más</span><span>Sin valor de materiales ni mano de obra — probablemente sin afectación, confirmar antes de reportarlas en cero.</span></div>
+                  </div>
+                  <div class="pie" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">
+                    <span>El archivo original queda archivado tal como llegó.</span><span class="flex"></span>
+                    <button class="b sec mini" type="button">Descartar</button>
+                    <button class="b mini" type="button">Volcar 77 + 25 con marca</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ─── HALLAZGOS (solo SED) ─── -->
+              <section class="view" id="s-hallazgos">
+                <div class="franja">
+                  <div class="c er"><b class="n">19</b><span>Abiertos</span></div>
+                  <div class="c"><b class="n">7</b><span>Bloquean un cruce</span></div>
+                  <div class="c"><b class="n">12</b><span>Informativos</span></div>
+                  <div class="c ok"><b class="n">0</b><span>Resueltos</span></div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Discrepancias entre fuentes</h2><span class="flex"></span>
+                    <span class="eyebrow">docs/CONFLICTOS_Y_HALLAZGOS.md</span></header>
+                  <div class="cuerpo ras">
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">H-2 · San José · Victoria</span>
+                      <span>Enviaron presupuesto pero <b>ninguno de los dos aparece en las 37 priorizadas</b>. No se sabe si entran en un lote posterior. <button class="b mini" type="button" style="margin-left:.6rem">Marcar resuelto</button></span></div>
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">H-4 · Samaná</span>
+                      <span>I.E. Pío XII — Bernardo Ocampo Herrera: el archivo trae DANE de 14 dígitos; la priorización dice <code class="dane">217662002631</code>. Es una de las 37 priorizadas — bloquea su cruce automático. <button class="b mini" type="button" style="margin-left:.6rem">Marcar resuelto</button></span></div>
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">H-16 · Belalcázar</span>
+                      <span>«ESCUELA SAN ISIDRO» es ambiguo: dos sedes de la I.E. San Isidro califican como principal (<code class="dane">217088000080</code> y <code class="dane">217088000535</code>). Requiere decisión humana. <button class="b mini" type="button" style="margin-left:.6rem">Marcar resuelto</button></span></div>
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">H-18 · Belalcázar</span>
+                      <span>Los presupuestos de afectación grave son por <b>institución</b>, no por sede (El Águila $600,8 M, El Madroño $74,0 M, San Isidro $45,9 M, Manuela Beltrán $207,2 M). El lector propone la sede principal — es una inferencia, no un dato del archivo. Requiere confirmación de Infraestructura. <button class="b mini" type="button" style="margin-left:.6rem">Marcar resuelto</button></span></div>
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">H-10 · Aguadas · Aranzazu</span>
+                      <span>Los presupuestos casi no cubren el lote priorizado: Aranzazu solo tiene 1 de 4 priorizadas, Aguadas 1 de 5. <button class="b mini" type="button" style="margin-left:.6rem">Marcar resuelto</button></span></div>
+                    <div class="hf"><span class="sig hall">!</span><span class="ref">H-14 · Aguadas · Aranzazu</span>
+                      <span>Ningún presupuesto incluye IVA sobre la utilidad, y D-5 lo exige (Decreto 1372/1992 art. 3). <button class="b mini" type="button" style="margin-left:.6rem">Marcar resuelto</button></span></div>
+                    <div class="hf tenue"><span class="sig cerr">i</span><span class="ref">H-1 · Aguadas</span>
+                      <span>El encabezado del archivo dice «ALCALDÍA MUNICIPAL DE SALAMINA» — plantilla reciclada sin actualizar. No afecta la lectura. <button class="b sec mini" type="button" style="margin-left:.6rem">Marcar resuelto</button></span></div>
+                    <div class="hf tenue"><span class="sig cerr">i</span><span class="ref">H-19 · Belalcázar</span>
+                      <span>El archivo llama «institución» a lo que el catálogo trata como sede de la I.E. Cristo Rey. Informativo, no bloquea el cruce. <button class="b sec mini" type="button" style="margin-left:.6rem">Marcar resuelto</button></span></div>
+                  </div>
+                  <div class="pie">Mostrando 8 de 19 — el listado completo vive en
+                    <span class="mono">docs/CONFLICTOS_Y_HALLAZGOS.md</span> mientras se termina de
+                    volcar a la pestaña <span class="mono">Hallazgos</span> del backend (D-36).
+                    Nada se resuelve solo: cada fila espera que alguien —la alcaldía, Infraestructura,
+                    el arquitecto— confirme el dato real.</div>
+                </div>
+              </section>
+
+              <!-- ─── USUARIOS (solo SED) ─── -->
+              <section class="view" id="s-usuarios">
+                <div class="p">
+                  <header><h2>Usuarios</h2><span class="flex"></span><button class="b mini" type="button">+ Agregar usuario</button></header>
+                  <div class="cuerpo ras">
+                    <div class="scroll">
+                      <table>
+                        <thead><tr><th>Persona</th><th>Rol</th><th>Ámbito</th><th>Estado</th><th>Último ingreso</th></tr></thead>
+                        <tbody>
+                          <tr><td><strong>José Saavedra</strong><br><span class="hace">jsaavedra</span></td><td>Administrador</td><td>Todo Caldas</td><td><span class="est e-apr">Activo</span></td><td class="hace">hace 2 h</td></tr>
+                          <tr class="tenue"><td><strong>Gustavo</strong><br><span class="hace">por definir</span></td><td>Administrador</td><td>Todo Caldas</td><td><span class="est e-pend">Sin activar</span></td><td class="hace">—</td></tr>
+                          <tr class="tenue"><td>Arquitecto — infraestructura</td><td>Verificador</td><td>Todo Caldas · puede cargar Excel</td><td><span class="est e-pend">Sin activar</span></td><td class="hace">—</td></tr>
+                          <tr class="tenue"><td>Encargado municipal</td><td>Responsable de sede</td><td>Su municipio o sus sedes</td><td><span class="est e-pend">Sin activar</span></td><td class="hace">—</td></tr>
+                          <tr class="tenue"><td>Dirección</td><td>Consulta</td><td>Todo Caldas · solo lectura</td><td><span class="est e-pend">Sin activar</span></td><td class="hace">—</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="pie">Arranca con un solo usuario activo. Los demás existen como definición: se activan cuando la persona real entre.</div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Qué puede hacer cada rol</h2></header>
+                  <div class="cuerpo ras">
+                    <div class="scroll">
+                      <table>
+                        <thead><tr><th>Acción</th><th style="text-align:center">Admin</th><th style="text-align:center">Responsable</th><th style="text-align:center">Verificador</th><th style="text-align:center">Consulta</th></tr></thead>
+                        <tbody>
+                          <tr><td>Ver el tablero</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm si">●</td><td class="perm si">●</td></tr>
+                          <tr><td>Ver el valor de referencia del arquitecto</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm si">●</td><td class="perm si">●</td></tr>
+                    <tr><td>Emitir concepto de verificación</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm si">●</td><td class="perm no">○</td></tr>
+                          <tr><td>Diligenciar a mano</td><td class="perm si">●</td><td class="perm lim">su ámbito</td><td class="perm si">●</td><td class="perm no">○</td></tr>
+                          <tr><td>Cargar Excel de alcaldía</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm si">●</td><td class="perm no">○</td></tr>
+                          <tr><td>Verificar y aprobar</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm si">●</td><td class="perm no">○</td></tr>
+                          <tr><td>Reabrir algo ya cerrado</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm no">○</td><td class="perm no">○</td></tr>
+                          <tr><td>Gestionar usuarios</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm no">○</td><td class="perm no">○</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="pie">
+                    <b>Consulta</b> son directivos de la Secretaría: ven todo, no tocan nada.
+                    <b>Responsable de sede</b> es externo al edificio de la SED, y por eso no ve ni el
+                    tablero ni el valor estimado por la Secretaría (decisión D-6).
+                  </div>
+                </div>
+              </section>
+
+            </div>
+
+            <footer class="pie-inst">
+              <span class="sello">Gobernación de Caldas · Secretaría de Educación</span>
+              <span>Cl. 14 #2-58, Parque Tecnológico, Villamaría</span>
+              <span>Conmutador +57 68 98 24 44</span>
+              <a href="mailto:atencionalciudadano@caldas.gov.co">atencionalciudadano@caldas.gov.co</a>
+              <span class="flex"></span>
+              <span class="hace">Uso interno — no distribuir fuera de la Secretaría</span>
+            </footer>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <p class="caption">
+    Cifras del tablero calculadas sobre <b>dimDañosInfraestructura.xlsx</b>, hoja
+    <b>EstadoInfraestructura</b> (D-26): 37 sedes priorizadas —9 de tipo 1, 28 de tipo 2—
+    · $9.718.464.165 de referencia · 2.623 estudiantes · 34 no habilitadas · 12 municipios.
+    Cruce verificado: 975 DANE contra el catálogo, <b>0 discrepancias</b>. El archivo real de
+    Samaná se leyó con <b>tools/ingesta_samana.py</b>. Contacto verificado contra
+    <b>caldas.gov.co</b> y <b>educacion.caldas.gov.co</b>.
+    <br><br>
+    <b>Lo que es simulado:</b> los estados de avance, los presupuestos recibidos, las filas del
+    presupuesto a detalle y la bandeja de verificación — todavía no hay presupuestos cargados en
+    el sistema. Sedes, municipios, matrícula, capítulos de daño y valores de referencia son reales.
+  </p>
+</div>
+
+<script>
+  const RUTA = {
+    login:   ['reconstruccion.sedcaldas.gov.co/entrar', null, null, ''],
+    tablero: ['reconstruccion.sedcaldas.gov.co/tablero', 'tablero', 's-tablero', '<span class="hoy">Tablero</span>'],
+    inicio:  ['reconstruccion.sedcaldas.gov.co/sedes', 'inicio', 's-inicio', '<span class="hoy">Caldas</span>'],
+    muni:    ['reconstruccion.sedcaldas.gov.co/sedes/samana', 'inicio', 's-muni', '<a href="#">Caldas</a><span class="sep">›</span><span class="hoy">Samaná</span>'],
+    ficha:   ['reconstruccion.sedcaldas.gov.co/sedes/samana/217662002291', 'inicio', 's-ficha', '<a href="#">Caldas</a><span class="sep">›</span><a href="#">Samaná</a><span class="sep">›</span><span class="hoy">I.E. El Bosque — Guayaquil</span>'],
+    verif:   ['reconstruccion.sedcaldas.gov.co/verificacion', 'verif', 's-verif', '<span class="hoy">Verificación técnica</span>'],
+    registrar:['reconstruccion.sedcaldas.gov.co/sedes/samana/217662002291/presupuesto', 'inicio', 's-registrar', '<a href="#">Caldas</a><span class="sep">›</span><a href="#">Samaná</a><span class="sep">›</span><a href="#">I.E. El Bosque — Guayaquil</a><span class="sep">›</span><span class="hoy">Presupuesto</span>'],
+    cargas:  ['reconstruccion.sedcaldas.gov.co/cargas', 'cargas', 's-cargas', '<a href="#">Cargas</a><span class="sep">›</span><span class="hoy">Samaná · validación</span>'],
+    hallazgos:['reconstruccion.sedcaldas.gov.co/hallazgos', 'hallazgos', 's-hallazgos', '<span class="hoy">Hallazgos</span>'],
+    usuarios:['reconstruccion.sedcaldas.gov.co/usuarios', 'usuarios', 's-usuarios', '<span class="hoy">Usuarios y roles</span>'],
+  };
+
+  /* Los 4 roles del sistema (D-20). `ve` es la lista blanca de pantallas;
+     `ref` es si alcanza a ver el valor de referencia del arquitecto (D-6);
+     `edita` si puede diligenciar; `verifica` si puede emitir concepto.
+     En producción esto NO vive en el navegador: el backend filtra y responde
+     solo lo que el rol alcanza. Aquí se simula para poder revisarlo. */
+  const ROLES = {
+    admin:    { nom:'J. Saavedra',      ini:'JS', ext:false,
+                rot:'Administrador',
+                ve:['tablero','inicio','muni','ficha','registrar','verif','cargas','hallazgos','usuarios'],
+                ref:true,  edita:true,  verifica:true },
+    verif:    { nom:'Arq. M. Ospina',   ini:'MO', ext:false,
+                rot:'Verificador · todo el departamento',
+                ve:['tablero','inicio','muni','ficha','verif','cargas','hallazgos'],
+                ref:true,  edita:false, verifica:true },
+    resp:     { nom:'L. Ramírez',       ini:'LR', ext:true,
+                rot:'Responsable de sede · Samaná',
+                ve:['inicio','muni','ficha','registrar'],
+                ref:false, edita:true,  verifica:false },
+    consulta: { nom:'Dir. Planeación',  ini:'DP', ext:false,
+                rot:'Consulta · solo lectura',
+                ve:['tablero','inicio','muni','ficha'],
+                ref:true,  edita:false, verifica:false },
+  };
+
+  let vista = 'login', rol = 'admin';
+
+  function pintar(){
+    const R = ROLES[rol];
+    if (vista !== 'login' && !R.ve.includes(vista)) vista = R.ve[0];
+    const [url, mod, inner, migas] = RUTA[vista];
+
+    document.querySelectorAll('.ctl [data-v]').forEach(b => b.classList.toggle('active', b.dataset.v === vista));
+    document.querySelectorAll('.ctl [data-r]').forEach(b => b.classList.toggle('active', b.dataset.r === rol));
+    document.getElementById('urlbar').textContent = url;
+
+    const esLogin = vista === 'login';
+    document.getElementById('v-login').classList.toggle('on', esLogin);
+    document.getElementById('v-shell').classList.toggle('on', !esLogin);
+
+    // D-6: el valor de referencia de la SED no existe para quien no lo alcanza
+    document.querySelectorAll('[data-sed]').forEach(e => e.classList.toggle('oculto', !R.ref));
+    document.querySelectorAll('.ext-solo').forEach(e => e.classList.toggle('oculto', R.ref));
+    document.querySelectorAll('.ext-off').forEach(e => e.classList.toggle('oculto', !R.ref));
+    // Capacidades
+    document.querySelectorAll('[data-edita]').forEach(e => e.classList.toggle('oculto', !R.edita));
+    document.querySelectorAll('[data-verifica]').forEach(e => e.classList.toggle('oculto', !R.verifica));
+    // Pantallas fuera del alcance: tachadas en el selector del mockup
+    document.querySelectorAll('.ctl [data-v]').forEach(b => {
+      const fuera = b.dataset.v !== 'login' && !R.ve.includes(b.dataset.v);
+      b.style.opacity = fuera ? '.35' : '';
+      b.style.textDecoration = fuera ? 'line-through' : '';
+    });
+    // Riel: solo los módulos que alcanza
+    document.querySelectorAll('.riel a[data-mod]').forEach(a =>
+      a.classList.toggle('oculto', !R.ve.includes(a.dataset.mod)
+                                && !(a.dataset.mod === 'inicio' && R.ve.includes('inicio'))));
+
+    if (esLogin) return;
+    document.querySelectorAll('.lienzo > .view').forEach(s => s.classList.toggle('on', s.id === inner));
+    document.querySelectorAll('.riel a[data-mod]').forEach(a => a.classList.toggle('sel', a.dataset.mod === mod));
+    document.getElementById('migas').innerHTML = migas;
+    document.getElementById('nomTx').textContent = R.nom;
+    document.getElementById('av').textContent = R.ini;
+    document.getElementById('av').classList.toggle('ext', R.ext);
+    document.getElementById('rolTx').textContent = R.rot;
+    document.getElementById('tituloSedes').textContent = R.ext ? 'Mi municipio' : 'Municipios del lote';
+  }
+
+  document.querySelectorAll('.ctl [data-v]').forEach(b => b.addEventListener('click', () => { vista = b.dataset.v; pintar(); }));
+  document.querySelectorAll('.ctl [data-r]').forEach(b => b.addEventListener('click', () => { rol = b.dataset.r; pintar(); }));
+  pintar();
+</script>
+
+</body></html>

@@ -55,9 +55,19 @@ _DEFECTO = RAIZ.parent
 FUENTES = Path(os.environ.get("SED_FUENTES", _DEFECTO))
 
 F_MAESTRA = FUENTES / "trabajo 27.08" / "fctMaestra.xlsx"
-F_ESTIMACION = FUENTES / "trabajoInstrumentoControlReconstruccion" / "ESTIMACION COSTOS RECONSTRUCCION SEDES OFICIALES 08_09_2026.xlsx"
 F_DIRECTORIO = FUENTES / "trabajo 3.09" / "Directorio Instituciones Educativas 2026.xlsx"
 F_FUNCIONARIOS = FUENTES / "trabajoInstrumentoControlReconstruccion" / "Base de datos Funcionarios 2026.xlsx"
+
+# Censo de daños vivo, mantenido por los arquitectos (D-26). Reemplaza como
+# fuente a «ESTIMACION COSTOS RECONSTRUCCION SEDES OFICIALES 08_09_2026.xlsx»,
+# el modelo paramétrico, que queda RETIRADO del sistema: ya no se lee, no se
+# contrasta contra él y su valor no se guarda en ningún lado.
+#
+# Vive dentro del proyecto (data/insumos/) y no en FUENTES porque no es un
+# entregable cerrado de otra dirección: es un archivo que se actualiza a medida
+# que los arquitectos visitan sedes y que se vuelve a leer en cada build.
+F_DIM_DANOS = DATA / "insumos" / "dimDañosInfraestructura.xlsx"
+H_DIM_DANOS = "EstadoInfraestructura"
 
 # --- Salida del consolidado --------------------------------------------------
 # Dónde quedan CONSOLIDADO.xlsx, los fechados y las fotografías extraídas. Por
@@ -83,7 +93,7 @@ VERSION = "0.9.2"
 def verificar_fuentes() -> list[Path]:
     """Devuelve las fuentes que no se encuentran, para fallar con un mensaje
     claro en vez de con un traceback de openpyxl."""
-    return [p for p in (F_MAESTRA, F_ESTIMACION, F_DIRECTORIO, F_FUNCIONARIOS)
+    return [p for p in (F_MAESTRA, F_DIM_DANOS, F_DIRECTORIO, F_FUNCIONARIOS)
             if not p.exists()]
 
 
