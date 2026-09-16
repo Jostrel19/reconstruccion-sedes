@@ -1,5 +1,12 @@
 # Análisis y plan del instrumento de recolección presupuestal
 
+> **Foto congelada del 08-09-2026, día 1 del proyecto.** La tabla «0. Decisiones tomadas» de más
+> abajo NO se actualiza — varias de esas decisiones están anuladas o evolucionaron:
+> **D-1** (Power Automate) anulada, **D-2** (diligencia el alcalde) anulada por D-17,
+> **D-6** evolucionó con D-27/D-28. **La fuente de verdad vigente es `CLAUDE.md` §2**, con las
+> decisiones D-1 a D-36. Este archivo se conserva como evidencia de cómo arrancó el análisis, no
+> como referencia operativa.
+
 **Objeto:** convertir el «INFORME TÉCNICO PRESUPUESTAL para municipios.docx» en un aplicativo web
 que los municipios diligencien sede por sede, con los registros consolidados en SharePoint de la SED.
 

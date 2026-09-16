@@ -1,5 +1,11 @@
 # Automatización: del archivo que sube el alcalde al tablero que se actualiza solo
 
+> **SUPERADO por D-19 (2026-09-15).** Este flujo de Power Automate + SharePoint + Power BI
+> pertenece al backend viejo (§8.1 de `CLAUDE.md`), reemplazado por Google Apps Script + Sheets +
+> Drive. Se conserva como registro de por qué se descartó ese camino (falta de licencia Premium),
+> no como especificación a construir. El backend vigente está en `CLAUDE.md` §6 y
+> `docs/PLAN_DESARROLLO.md`.
+
 Secretaría de Educación de Caldas — Dirección de Planeación
 
 Este documento monta la pieza que faltaba: **el alcalde sube su archivo y, sin que nadie toque
