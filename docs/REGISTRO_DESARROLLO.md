@@ -201,6 +201,240 @@ hacer?") — y solo cambió la primera. El reparto de roles (Administrador / Ver
 de sede / Consulta) y sus alcances sigue exactamente como se diseñó en el mockup v5 y en la pestaña
 `Usuarios`.
 
+## 2026-09-16 — Giro a «solo valores reales»: dimDaños reemplaza al modelo (D-26 a D-31)
+
+Cambio de fondo pedido por la Secretaría: **el modelo paramétrico sale del sistema**. Ya no se
+contrasta contra él, no se calcula desviación y su archivo no se lee. La verdad pasa a ser el censo
+vivo que mantienen los arquitectos.
+
+### Qué se inspeccionó antes de tocar nada
+
+`data/insumos/dimDañosInfraestructura.xlsx`, hoja `EstadoInfraestructura` (975 filas × 37 columnas):
+
+- **975 DANE, cruce exacto contra el catálogo, 0 discrepancias** en ambos sentidos. No hubo que
+  proponer ni descartar ninguna sede.
+- Las columnas 18-28 son daño marcado con «X» por capítulo, y son **exactamente** los 11
+  `CAPITULOS` de `config.js`. Eso permitió reemplazar la desviación borrada por un cruce con
+  sentido: qué capítulos tienen daño contra qué capítulos tienen presupuesto.
+- `PRESUPUESTO APROX INVERSION`: 162 sedes con valor, $14.260.058.745 en total.
+
+### Las 37 del lote 1
+
+Priorizada = tipo de afectación 1 o 2, los dos que el censo marca `PRIORITARIO`. Da 37 exactas, en
+12 municipios, **las 37 con valor de referencia**, suma $9.718.464.165.
+
+Contra las 33 de `PrimerasPriorizadas.xlsx`: 32 se mantienen, entran 5, **sale 1** (La Dorada,
+`117380000134`, reclasificada a tipo 4) → hallazgo abierto, hay que confirmarlo.
+
+### Por qué desaparece la desviación, con evidencia
+
+Comparando el valor viejo del modelo contra el de `dimDaños` en las 32 sedes que se mantienen, los
+valores divergen por factores de 3× a 13×:
+
+| Sede | Modelo | dimDaños |
+|---|---:|---:|
+| Ángel de la Guarda (Aguadas) | $438.750.000 | $1.055.000.000 |
+| San Antonio de Arma (Aguadas) | $101.250.000 | $1.350.000.000 |
+| Encimadas (Aguadas) | $180.000.000 | $5.183.267 |
+| Camelia Baja (Aranzazu) | $225.000.000 | $19.766.127 |
+
+No son desviaciones que medir: es que la cifra se reemplazó. Y **las 4 sedes de Samaná traen cifra
+idéntica en ambos archivos** ($1.688.600 / $4.970.800 / $3.651.100) porque ahí ya se registró el
+presupuesto real recibido. Esa mezcla es la razón de fondo para llamar al campo «referencia» y
+nunca sobrescribirlo (D-27).
+
+### Cambios en el código
+
+- `tools/rutas.py`: se elimina `F_ESTIMACION`; entra `F_DIM_DANOS` + `H_DIM_DANOS`.
+- `tools/build_catalogo.py`, sección 3 reescrita. Campos nuevos: `priorizada`, `capitulos_dano`,
+  `valor_referencia`, `estado_prestacion`, `concepto_tecnico`, `certificacion`,
+  `observaciones_censo`, `donante`, `observaciones_presupuesto`. Se van `valor_modelo`,
+  `orden_priorizacion`, `en_alcance`, `nivel_censo`.
+- `RESERVADOS` pasa a `("valor_referencia", "donante", "observaciones_presupuesto")`: D-6 sobrevive
+  en su intención (el municipio no ve la cifra de la SED) aunque el modelo que la originaba ya no
+  exista. Verificado que `data.js` no contiene `valor_referencia`.
+- `_entero()` usa `round()`, no `int()`: truncar perdía pesos en silencio (un peso en el total del
+  lote, detectado al cuadrar contra la inspección previa).
+- **Nuevos:** `tools/gen_mockup_datos.py` y `docs/diseno/mockup_v6.html`.
+
+### Mockup v6 — partiendo del v5, no reescrito
+
+**Corrección de rumbo durante la sesión.** Primero rehíce el mockup de cero aplicando los tokens de
+`DISENO_01`; el resultado no gustó y con razón: el v5 aprobado era un Artifact de la conversación
+anterior, no un archivo del repo, así que lo había reinterpretado en vez de partir de él. Se
+recuperó el fuente real del Artifact (122 KB), se limpió el envoltorio del visor y quedó como
+`docs/diseno/mockup_v6.html` — **ahora sí versionado en el repo**, que era el punto flaco de tener
+el diseño aprobado viviendo fuera.
+
+Sobre esa base, sin tocar el diseño, entró lo nuevo:
+
+- **Riel:** entra «Verificación» con contador de bandeja; lote 1 pasa a 37.
+- **Tablero:** franja y mosaico con las cifras reales de `dimDaños`; «Valor estimado por municipio /
+  modelo paramétrico» pasa a «Valor de referencia / censo de daños»; el embudo va a 37 de 975 (3,8 %).
+- **Ficha:** «Contraste contra el modelo» → **«Seguimiento y control»**, dos valores lado a lado sin
+  restarlos. Entra el **cruce de capítulos** (daño vs. presupuesto), que es lo que reemplaza al
+  porcentaje borrado: el arquitecto no pregunta «¿se pasó un 12 %?» sino «¿presupuestó lo que se
+  dañó?». Entra el **presupuesto a detalle** con 6 ítems, A/U/IVA y plazo.
+- **Verificación (nueva):** bandeja de 6 radicados con alcance departamental, y el panel de emitir
+  concepto con los 3 resultados de D-22 y el aviso de firma por auditoría (D-21).
+- **Usuarios:** fila nueva de permiso «Emitir concepto de verificación».
+
+Dos defectos propios detectados y corregidos al probar, no asumidos:
+
+| Defecto | Corrección |
+|---|---|
+| **Los radios del formulario de verificación salían apilados sobre el texto.** `.campo-v > label` (0,1,1) le ganaba a `.op` (0,1,0) y aplastaba su `display:flex` — las opciones también son `<label>` hijos directos | `.campo-v > label:not(.op)`, con el porqué escrito en el CSS |
+| **El total del presupuesto a detalle ($5.122.318) no coincidía con el que mostraba el panel de Seguimiento ($5.567.296)** — la regla de la práctica es que las cifras del cuerpo y de los anexos cuadren | Se corrigió a $5.122.318 en los dos paneles. Aritmética verificada: costo directo $4.417.695 + A 10 % + U 5 % + IVA 19 % sobre la utilidad |
+
+Probado en navegador: **8 pantallas × 2 roles = 16 combinaciones**, sin errores de consola. El rol
+externo queda fuera de Tablero, Verificación, Cargas y Usuarios, y **no ve el valor de referencia**
+(D-6 sigue vigente en su intención aunque el modelo que la originaba ya no exista).
+
+**No se publicó como Artifact ni se subió a ningún servicio externo**: lleva nombres de sede y
+cifras institucionales. Se abre en local.
+
+### Cierre para desarrollo — 4 roles, diligenciamiento manual y D-32/D-33
+
+Faltaba la pieza que hacía que el sistema no cumpliera el objetivo 1: **no había pantalla donde el
+alcalde o el rector digitara el presupuesto a mano.** Se agregó «Registrar presupuesto» (D-33) con
+la lógica del sistema anterior, que ya estaba probada y no había por qué reinventar: catálogos
+cerrados de unidad y capítulo, cálculo automático, parseo del formato colombiano, alerta de A/U sin
+bloqueo, y el aviso de readjuntar fotos con el dato de Riosucio que lo justifica.
+
+El mockup pasó de 2 roles simulados a **los 4 reales**. El enrutado dejó de ser
+`if (rol === 'ext')` y pasa por una tabla `ROLES` con lista blanca de pantallas y tres capacidades
+(`ref`, `edita`, `verifica`). Verificado: **9 pantallas × 4 roles**, sin errores de consola.
+
+| Rol | Alcanza | Ve referencia | Diligencia | Verifica |
+|---|---|:--:|:--:|:--:|
+| Administrador | todo | sí | sí | sí |
+| Verificador | tablero, sedes, ficha, verificación, cargas | sí | no | sí |
+| Responsable de sede | sedes, ficha, registrar | **no** | sí | no |
+| Consulta | tablero, sedes, ficha | sí | no | no |
+
+**D-32 resuelve La Dorada.** Se preguntó si la sede reclasificada a tipo 4 debía salir del lote; la
+respuesta es que sí, y la razón es que ya estaba implícita en D-31: si la priorización se **deriva**
+del censo, manda el censo. La sede no desaparece —sigue entre las 975— solo sale del lote 1, y si
+los arquitectos corrigen `dimDaños`, vuelve sola en el siguiente build. Eso es preferible a
+mantener una lista a mano que se desincroniza.
+
+Se escribió **`docs/PLAN_DESARROLLO.md`**: los 4 objetivos contra la pieza que los cumple, el
+alcance por rol confirmado, los 6 pasos de construcción en orden, y lo que falta separado entre lo
+que **bloquea el paso 0** (repo, lista de Administrador/Consulta, prueba de despliegue de Apps
+Script) y lo que no bloquea pero hay que resolver antes de dar acceso real.
+
+---
+
+### De dónde salen los valores: inspección de los 3 formatos reales (D-34, D-35)
+
+Se preguntó por qué el presupuesto tiene «tantos valores» y si los 11 capítulos del censo alcanzan.
+Se fue a los archivos reales en vez de opinar.
+
+**Tres niveles de madurez, muy distintos entre sí:**
+
+- **Belalcázar** — presupuesto profesional de 10 hojas con base de **APU**: `Capitulos`,
+  `Actividades`, `Presupuesto`, `A.P.U`, `Insumos`, `Analisis AU`, `Analisis Mano de Obra`,
+  `Analisis Herramienta Menor`, `Analisis Factor Prestacional`, `Polizas`. Cada precio unitario se
+  arma de insumos + mano de obra + herramienta + factor prestacional. **35 capítulos disponibles, 18
+  usados, 74 actividades** con cantidad. Ahí salen los valores.
+- **Aguadas y Aranzazu** — la misma plantilla, y el encabezado todavía dice **«ALCALDÍA MUNICIPAL DE
+  SALAMINA»**: la copiaron sin cambiar el membrete. Lista plana ITEM/DESCRIPCIÓN/UND/CANT/VR.
+  UNITARIO agrupada por I.E. → sede. Declaran **A 25 % · I 0 % · U 5 %**.
+- **Samaná** — **no es un presupuesto**: es una lista de materiales de ferretería (bulto de cemento
+  $37.000, teja Eternit #6 $78.000, bloque recocido #5 $1.950). Sin mano de obra, sin actividades.
+
+**D-34 — los capítulos pasan de 11 a 14.** Se mapearon los 18 capítulos usados por Belalcázar contra
+los 11 del censo y **el 13,6 % del costo directo no tiene dónde ir**:
+
+| Capítulo sin destino | Valor | % |
+|---|---:|---:|
+| DEMOLICIONES | $71.624.369 | 10,6 % |
+| PRELIMINARES | $14.517.964 | 2,2 % |
+| DESMONTES | $5.653.115 | 0,8 % |
+| **Total huérfano** | **$91.795.449** | **13,6 %** |
+
+No son lugares donde haya daño: son trabajo que toda reconstrucción necesita —demoler antes de
+levantar, sacar escombros, cerrar la obra—. Sin ellos, quien presupuesta los mete a la fuerza en un
+capítulo equivocado y ensucia el cruce daño↔presupuesto, que es justo lo que reemplazó a la
+desviación. Entran **12. Preliminares · 13. Demoliciones y desmontes · 14. Aseo y escombros**, y el
+cruce **solo evalúa del 1 al 11**: los transversales nunca se marcan como anomalía. **Los 11 del
+censo no se tocaron** — son de los arquitectos.
+
+**D-35 — el sistema no exige APU.** Pide el mínimo común: actividad + unidad + cantidad + valor
+unitario. Exigir APU dejaría a Samaná sin poder radicar. Consecuencia aceptada y escrita: el sistema
+**no valida que un precio unitario sea razonable**; eso lo hace el arquitecto al verificar.
+
+**Hallazgo que convierte Q-3 en concreta.** El umbral de alerta es A > 12 %; Aguadas y Aranzazu
+radican con **A 25 %**, el doble. La alerta saltará en casi todo lo que llegue de esos dos. Está
+bien que **alerte y no bloquee** (no hay tope legal de AIU), pero ahora hay evidencia real que
+llevarle a Planeación en vez de una pregunta teórica. Además ambos declaran «Imprevistos», aunque en
+cero: si alguno lo usa distinto de cero, el lector debe **reportarlo como hallazgo**, no sumarlo en
+silencio.
+
+**El mockup dejó de tener cifras inventadas.** El ejemplo de presupuesto usa actividades y precios
+unitarios reales del APU de Belalcázar, sobre Guayaquil (Samaná) —sede real cuyo censo marca daño en
+los capítulos **2, 3 y 6**, coherente con su observación: «la pared del fondo presenta movimiento» y
+«la cubierta se encuentra encorvada»—. Costo directo $5.987.974 → total $6.943.056, aritmética
+verificada y cuadrada entre las tres pantallas donde aparece.
+
+**Corregido también:** §1 de `CLAUDE.md` seguía definiendo el proyecto como «contraste contra el
+modelo paramétrico» —lo primero que lee cualquiera, y ya contradecía a D-26/D-28—. Ahora describe
+los dos valores que conviven sin restarse, y deja el modelo como historia.
+
+Se agregó **§4.b «Lo que sobra»** a `PLAN_DESARROLLO.md`: 9 piezas que no entran al desarrollo, con
+el porqué de cada una.
+
+---
+
+### Auditoría de módulos antes de arrancar: 3 huecos reales, no cosméticos
+
+Se pidió "agregar los módulos faltantes" antes de empezar a programar. En vez de listar algo al
+aire, se auditó el diseño (mockup v6) y la documentación contra la arquitectura de 6 pestañas de
+Apps Script (D-19) y se encontraron tres huecos concretos:
+
+1. **`CLAUDE.md` §6 «Modelo de datos» seguía describiendo el backend viejo** (`PresupuestosSedes` /
+   `ItemsPresupuesto`, pensado para listas de SharePoint). Es lo que Paso 0 del plan necesita para
+   crear el Google Sheet — sin columnas definidas, ese paso no se puede ejecutar. **Reescrita
+   completa**: 6 pestañas (`Sedes`, `Presupuestos`, `Items`, `Verificaciones`, `Usuarios`,
+   `Hallazgos`) con columnas derivadas de lo que el sistema ya produce (catálogo, `RegistroIngesta`,
+   formulario de verificación, borrador de usuarios) — nada inventado.
+
+2. **D-36 — decisión nueva sobre granularidad de Cargas.** Al revisar si los lectores de ingesta
+   podían alimentar el cruce daño↔presupuesto (D-34) igual que el diligenciamiento manual, se
+   encontró que **solo Belalcázar trae capítulo por fila** en su Excel; Aguadas, Aranzazu y Samaná
+   traen descripciones en texto libre sin ninguna columna de capítulo. Inferir el capítulo por
+   palabras clave sería exactamente la adivinación que el proyecto prohíbe para la ingesta —
+   funcionaría en los ejemplos vistos y fallaría en silencio en el municipio 27 que describe
+   distinto. **Se decide:** cuando el archivo trae capítulo estructurado, el lector llena `Items`
+   completo; cuando no, vuelca solo el total y la Ficha lo marca como «sin desglose por capítulo» —
+   el arquitecto revisa el Excel adjunto al verificar, que es para eso que existe ese paso.
+
+3. **Hallazgos era un panel decorativo, no una pantalla administrable.** Hay una pestaña
+   `Hallazgos` en el modelo de datos y 19 discrepancias reales ya documentadas en
+   `CONFLICTOS_Y_HALLAZGOS.md`, pero ningún lugar donde el Administrador pudiera marcarlas
+   resueltas — un hueco directo contra el objetivo 4 ("que los administradores tengan el control de
+   todo el sistema"). **Se agregó como pantalla propia** (`data-mod="hallazgos"`, visible para
+   Administrador y Verificador), con las 8 discrepancias reales que más importan hoy —las que
+   bloquean un cruce, no las informativas— y el resto referenciado al `.md` mientras se termina de
+   volcar a la pestaña real.
+
+**No se agregó** (evaluado y descartado por ahora): tamizaje/confirmación masiva para las 975 sedes
+completas. D-3/D-4 siguen vigentes pero aplican cuando el sistema cubra más que el lote 1 de 37 —
+documentado en `CLAUDE.md` §6 como Fase 2, no bloquea el arranque actual.
+
+Probado: **10 pantallas × 4 roles, 0 errores.** El rol Responsable de sede queda correctamente
+bloqueado de Hallazgos (no es de su incumbencia); Verificador y Administrador sí lo ven.
+
+---
+
+### Pendiente
+
+Lo de siempre (repo remoto, lista de Administrador/Consulta, despliegue de prueba de Apps Script,
+crear el Sheet) más lo que abrió este cambio: confirmar la reclasificación de La Dorada, las 5
+priorizadas sin capítulo de daño, y sincronizar `docs/diseno/DISENO_01..05` con D-26 a D-31.
+
+---
+
 ## 2026-09-15 — Repositorio git, alcance de roles (D-24/D-25) y borrador de Usuarios
 
 Se decidió publicar bajo la cuenta personal del practicante (`Jostrel19`), no bajo la organización

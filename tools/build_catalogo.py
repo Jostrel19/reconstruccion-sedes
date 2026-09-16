@@ -9,6 +9,7 @@ Fuentes:
 
 Llave de cruce del universo: DANE SEDE (12 dígitos).
 """
+import collections
 import json
 import re
 import unicodedata
@@ -131,29 +132,89 @@ for d, s in sedes.items():
     s["estado_sede"] = estado.get(d, "")
 print(f"[2] Estado DUE cruzado. Sin registro en hoja Sedes: {len(sin_estado)}")
 
-# ------------------------------------------------- 3. Censo / modelo de costos
+# --------------------------------------- 3. Censo de daños vivo (dimDaños, D-26)
+#
+# Fuente única de afectación y de valor de referencia. El modelo paramétrico
+# (ESTIMACION COSTOS ...xlsx) quedó RETIRADO: no se lee, no se contrasta y su
+# cifra no viaja a ningún lado.
+#
+# Dos cosas que este archivo hace y el modelo no hacía:
+#   - marca daño por capítulo (11 columnas con «X»), que son exactamente los 11
+#     CAPITULOS de config.js con los que se clasifica cada fila de presupuesto;
+#   - se actualiza a medida que los arquitectos visitan, así que su columna
+#     PRESUPUESTO APROX INVERSION mezcla estimaciones con presupuestos ya
+#     recibidos. Por eso se guarda como «referencia», nunca como valor real:
+#     el valor real vive en el registro de presupuesto, no en el catálogo.
+
+# Las 11 columnas de daño, en el orden de APP_CONFIG.CAPITULOS (config.js).
+COLS_DANO = [
+    (1, "1. ESTRUCTURAL"),
+    (2, "2. MAMPOSTERÍA Y MUROS"),
+    (3, "3. CUBIERTA"),
+    (4, "4. CIMENTACIÓN Y TERRENO"),
+    (5, "5. ELEMENTOS NO ESTRUCTURALES"),
+    (6, "6. ACABADOS"),
+    (7, "7. INSTALACIONES"),
+    (8, "8A. UNIDADES SANITARIAS"),
+    (9, "9. COCINA Y RESTAURANTE ESCOLAR"),
+    (10, "10. ELEMENTOS EXTERIORES"),
+    (11, "11. DEFICIENCIA CONSTRUCTIVA / VULNERABILIDAD"),
+]
+
+# Tipos 1 y 2 son los marcados PRIORITARIO en el propio censo. La priorización
+# deja de ser un archivo aparte (PrimerasPriorizadas.xlsx) y se DERIVA del tipo
+# de afectación: así no hay dos listas que se puedan desincronizar.
+TIPOS_PRIORIZADOS = ("1.", "2.")
+
+
+def _marcado(v):
+    return str(v or "").strip().upper() == "X"
+
+
+def _entero(v):
+    # round(), no int(): algunas celdas traen decimales y truncar pierde pesos
+    # en silencio. El sistema trabaja en pesos enteros.
+    return round(v) if isinstance(v, (int, float)) else 0
+
+
 censo = 0
-for r in rows(rutas.F_ESTIMACION, "BASE COMPLETA"):
-    ds = dane(r.get("DANE SEDE"))
-    if ds in sedes:
-        censo += 1
-        sedes[ds].update(
-            {
-                "tipo_censo": str(r.get("A2. TIPO DE AFECTACION") or "").strip(),
-                "nivel_censo": str(r.get("NIVEL DE AFECTACION") or "").strip(),
-                "n_danos": int(r.get("N DANOS MARCADOS") or 0),
-                "en_alcance": norm(r.get("EN ALCANCE (tipo 1-4)")) == "SI",
-                "valor_modelo": int(r.get("VALOR ESTIMADO (COP)") or 0),
-                "orden_priorizacion": int(r.get("ORDEN PRIORIZACION") or 0),
-            }
-        )
+for r in rows(rutas.F_DIM_DANOS, rutas.H_DIM_DANOS):
+    ds = dane(r.get("CODIGO_DANE_SEDE"))
+    if ds not in sedes:
+        continue
+    censo += 1
+    tipo = str(r.get("A2. TIPO DE AFECTACIÓN") or "").strip()
+    capitulos = [cid for cid, col in COLS_DANO if _marcado(r.get(col))]
+    sedes[ds].update(
+        {
+            "tipo_censo": tipo,
+            "priorizada": tipo.startswith(TIPOS_PRIORIZADOS),
+            "capitulos_dano": capitulos,
+            "n_danos": len(capitulos),
+            # Valor puesto por el arquitecto. Es el punto de partida del
+            # seguimiento, NO el presupuesto: ver D-27.
+            "valor_referencia": _entero(r.get("PRESUPUESTO APROX INVERSION")),
+            "estado_prestacion": str(r.get("ESTADO DE LA PRESTACIÓN DEL SERVICIO EDUCATIVO") or "").strip(),
+            "concepto_tecnico": str(r.get("CONCEPTO TECNICO") or "").strip(),
+            "certificacion": str(r.get("CERTIFICACIÓN") or "").strip(),
+            "observaciones_censo": str(r.get("OBSERVACIONES") or "").strip(),
+            "donante": str(r.get("NOMBRE POSIBLE DONANTE") or "").strip(),
+            "observaciones_presupuesto": str(r.get("OBSERVACIONES PRESUPUESTO") or "").strip(),
+        }
+    )
+
 faltan_censo = [d for d, s in sedes.items() if "tipo_censo" not in s]
 for d in faltan_censo:
     sedes[d].update(
-        {"tipo_censo": "", "nivel_censo": "", "n_danos": 0,
-         "en_alcance": False, "valor_modelo": 0, "orden_priorizacion": 0}
+        {"tipo_censo": "", "priorizada": False, "capitulos_dano": [], "n_danos": 0,
+         "valor_referencia": 0, "estado_prestacion": "", "concepto_tecnico": "",
+         "certificacion": "", "observaciones_censo": "", "donante": "",
+         "observaciones_presupuesto": ""}
     )
-print(f"[3] Censo cruzado por DANE SEDE: {censo}. Sin dato de censo: {len(faltan_censo)}")
+
+n_pri = sum(1 for s in sedes.values() if s["priorizada"])
+print(f"[3] dimDaños cruzado por DANE SEDE: {censo}. Sin dato de censo: {len(faltan_censo)}")
+print(f"    Priorizadas (tipo 1 y 2): {n_pri}")
 
 # --------------------------------------------------- 4. Rector y contacto I.E.
 direc = defaultdict(list)
@@ -243,7 +304,7 @@ catalogo = {
     "fuentes": {
         "universo": "fctMaestra.xlsx / MATRICULA (SECTOR=OFICIAL, sin Manizales)",
         "estado_due": "fctMaestra.xlsx / Sedes",
-        "censo": "ESTIMACION COSTOS RECONSTRUCCION SEDES OFICIALES 08_09_2026.xlsx / BASE COMPLETA",
+        "censo": "dimDañosInfraestructura.xlsx / EstadoInfraestructura (D-26)",
         "rectores": "Directorio Instituciones Educativas 2026.xlsx (cruce por municipio+nombre)",
         "alcaldes": "Base de datos Funcionarios 2026.xlsx / Alcaldes",
     },
@@ -275,13 +336,17 @@ with open(out, "w", encoding="utf-8") as f:
 # --- Salida para el sitio estático ------------------------------------------
 # Se parte en dos archivos a propósito:
 #
-#   data.js      lo carga el aplicativo del alcalde. NO lleva el valor estimado
-#                por el modelo ni el orden de priorización. D-6 exige que el
-#                municipio presupueste sin ver la cifra de la SED, y si el dato
-#                viaja al navegador basta abrir el inspector para verlo.
-#   data-sed.js  lo carga solo la consola de la Secretaría. Ahí sí va el valor
-#                del modelo, que es lo que permite calcular la desviación.
-RESERVADOS = ("valor_modelo", "orden_priorizacion", "n_danos", "en_alcance")
+#   data.js      lo carga el aplicativo del alcalde. NO lleva el valor de
+#                referencia del arquitecto: D-6 sigue vigente en su intención
+#                —que el municipio mida por su cuenta, sin anclarse a la cifra
+#                de la SED— aunque el modelo paramétrico que la originaba ya no
+#                exista (D-26). Si el dato viaja al navegador basta abrir el
+#                inspector para verlo.
+#   data-sed.js  lo carga solo la consola de la Secretaría.
+#
+# Tampoco viaja el posible donante: es información de gestión en curso, no un
+# atributo de la sede.
+RESERVADOS = ("valor_referencia", "donante", "observaciones_presupuesto")
 
 
 publicas = [{k: v for k, v in s.items() if k not in RESERVADOS} for s in catalogo["sedes"]]
@@ -311,10 +376,16 @@ print(f"\n[6] Escrito: {out}")
 print(f"    {len(catalogo['sedes'])} sedes | {len(catalogo['municipios'])} municipios | "
       f"{len(ies)} I.E.")
 pre = sum(1 for s in catalogo["sedes"] if s["premarcada_sin_afectacion"])
+pri = [s for s in catalogo["sedes"] if s["priorizada"]]
 print(f"    Pre-marcadas 'sin afectación' (tipo 5): {pre}")
-print(f"    Abiertas para presupuesto (tipo 1-4):   "
-      f"{sum(1 for s in catalogo['sedes'] if s['en_alcance'])}")
-print(f"    Requieren declaración expresa (6 y 7):  "
-      f"{len(catalogo['sedes']) - pre - sum(1 for s in catalogo['sedes'] if s['en_alcance'])}")
+print(f"    PRIORIZADAS (tipo 1 y 2) — lote 1:      {len(pri)}")
+print(f"      con valor de referencia:              "
+      f"{sum(1 for s in pri if s['valor_referencia'])}")
+print(f"      suma de referencia:                   "
+      f"${sum(s['valor_referencia'] for s in pri):,}")
+print(f"    Desglose por tipo de afectación:")
+for t, n in sorted(collections.Counter(
+        s["tipo_censo"][:2] or "--" for s in catalogo["sedes"]).items()):
+    print(f"      tipo {t:3} {n:5}")
 print(f"    Sedes sin rector precargado:            "
       f"{sum(1 for s in catalogo['sedes'] if not s['rector'])}")
