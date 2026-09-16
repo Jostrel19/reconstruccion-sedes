@@ -140,26 +140,38 @@ Cada paso deja algo que se puede probar. No se avanza con el anterior sin verifi
 
 ## 4. Lo que falta para arrancar — y quién lo tiene que dar
 
+**Actualizado 2026-09-16.** Esta es la única lista de pendientes vigente — la tabla «Pendientes» de
+`CLAUDE.md` §8 es histórica (sistema viejo) y no se vuelve a actualizar.
+
 **Bloquean el paso 0:**
 
-| # | Qué falta | Quién |
-|---|---|---|
-| 1 | **Nombre del repositorio y si es público o privado** (bajo la cuenta propia, no la organización `sedcaldas`) | Practicante |
-| 2 | **Lista de Administrador y Consulta**: nombre + correo. No sale de ningún catálogo | Jefatura |
-| 3 | **Cuenta de Google** con la que se despliega el Apps Script, y probar que despliega | Practicante |
+| # | Qué falta | Quién | Estado |
+|---|---|---|---|
+| 1 | Nombre del repositorio y visibilidad | Practicante | ✅ **Hecho** — `github.com/Jostrel19/reconstruccion-sedes`, público |
+| 2 | Lista de Administrador, Verificador y Consulta: nombre + correo | Jefatura | ✅ **Hecho** — 6 personas confirmadas (2 Administrador, 2 Verificador, 2 Consulta), en `data/insumos/usuarios_manual.csv` |
+| 3 | Cuenta de Google para desplegar el Apps Script, y probar que despliega | Practicante | **Pendiente** — guía en `docs/PRUEBA_DESPLIEGUE_APPS_SCRIPT.md` |
+
+Con 1 y 2 resueltos, **el 3 es el único que falta para empezar el paso 1** (backend real).
 
 **No bloquean, pero hay que resolverlos antes de dar acceso real:**
 
 | # | Qué falta | Quién |
 |---|---|---|
-| 4 | Confirmar que los **187 correos** del borrador de `Usuarios` siguen vigentes | Alcaldías / rectorías |
+| 4 | Confirmar que los **187 correos** de alcaldes/rectores siguen vigentes (los 6 internos ya están confirmados) | Alcaldías / rectorías |
 | 5 | **Q-3:** aval de Planeación a los umbrales A > 12 %, U > 8 %. **Ya no es teórico:** Aguadas y Aranzazu radican con **A 25 %** — la alerta va a saltar en casi todo lo que llegue de esos dos. Hay evidencia concreta que llevarle | Planeación |
 | 6 | **Q-7:** mapa definitivo resultado → estado. Mientras tanto rige **D-22** | Planeación |
 | 7 | Las **5 sedes priorizadas sin capítulo de daño marcado** en `dimDaños`: están en el lote pero no hay contra qué verificar su presupuesto | Arquitectos |
 | 8 | **Q-13:** logo oficial en alta y manual de identidad. Hoy se usa el PNG del repo | Comunicaciones |
+| 9 | **Q-4:** ¿se agregan campos que el formato oficial no pide (profesional que elabora, obra en curso, cofinanciación)? | Planeación |
+| 10 | **Q-12:** «el catálogo que próximamente se subirá» — ¿es el catálogo de sedes (ya resuelto, es `dimDaños`) o un catálogo de **precios unitarios** para validar presupuestos? Son diseños distintos; D-35 asume que no existe todavía | Planeación |
 
-**Ya no bloquea nada:** Q-10 (los Excel reales) se resolvió — llegaron 6 municipios y hay 4 lectores
-probados. Q-1, Q-2, Q-9, Q-11 están cerradas.
+**No urgente, pertenece a Fase 4 (módulo Obras/Monitoreo), aplazada por decisión propia:**
+
+| # | Qué falta |
+|---|---|
+| 11 | **Q-14:** datos del contrato o mecanismo de ejecución (número, contratista, valor, plazo, actas). Sin esto no se diseña el módulo 4 — no se está intentando ahora |
+
+**Ya cerradas, no se repreguntan:** Q-1, Q-2, Q-5, Q-6, Q-8, Q-9, Q-10, Q-11.
 
 ---
 

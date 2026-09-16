@@ -461,6 +461,42 @@ errores de consola.
 
 ---
 
+### Segunda ronda de auditoría: la pantalla Usuarios y el §8 de CLAUDE.md
+
+**Usuarios del mockup, corregido.** Al preguntar el usuario si algo más había quedado
+desactualizado, se revisó la pantalla Usuarios: mostraba `jsaavedra` como identificador de sesión
+(residuo del modelo usuario/contraseña ya retirado) y placeholders genéricos («Arquitecto —
+infraestructura», «Dirección») que ya no representan la realidad ahora que hay 2 Verificadores y 2
+Consulta confirmados, no 1 de cada uno. Se corrigió a 7 filas con roles y cantidades reales, sin
+poner los nombres/correos de los 6 funcionarios en el código público — mismo criterio que con
+alcaldes y rectores.
+
+**Pregunta del usuario: los correos institucionales son de Microsoft, no de Gmail — ¿eso rompe
+algo?** No: `MailApp.sendEmail()` (Apps Script) entrega por SMTP normal a cualquier proveedor,
+igual que cualquier remitente le llega a cualquier bandeja. El usuario final nunca inicia sesión en
+Google ni en Microsoft — solo recibe un código en su Outlook y lo escribe en la página. Ya estaba
+resuelto por D-20, pero como generó duda se agregó una prueba concreta a
+`docs/PRUEBA_DESPLIEGUE_APPS_SCRIPT.md`: una función `probarCorreoInstitucional()` que manda un
+correo real a una cuenta `@sedcaldas.edu.co` para confirmarlo con hechos, no solo con el argumento.
+
+**El hueco más grande: `CLAUDE.md` §8 "Estado actual" no tenía ningún aviso de que es histórico.**
+Describe el aplicativo viejo congelado el 2026-09-09 —un día antes de que D-17 girara todo el
+proyecto— y aparece justo después de §7, que sí está actualizado al 16-09. Alguien leyendo de
+corrido se pega el mismo salto que el usuario tuvo con `ANALISIS_INSTRUMENTO_PRESUPUESTAL.md`.
+Se agregó el mismo tipo de aviso que a los demás documentos. Dentro de su tabla "Pendientes"
+(Q-1 a Q-14): **Q-6 venció** (era para una prueba de septiembre que ya pasó), **Q-8 quedó superada**
+(el flujo de Power Automate que iba a montar ya no existe), **Q-5 se resolvió** (repo bajo cuenta
+propia, no la organización `sedcaldas`).
+
+**`docs/PLAN_DESARROLLO.md` §4 reescrita como única lista de pendientes vigente.** Los 3
+bloqueantes del paso 0 ahora muestran su estado real: **1 y 2 hechos**, solo falta 3 (prueba de
+despliegue). Se sumaron Q-4 (campos extra del formato) y Q-12 (ambigüedad del "catálogo de
+precios unitarios") a la lista de "no bloquea pero hay que resolver", que antes no las tenía —
+existían solo en el §8 histórico y se habrían perdido de vista. Q-14 (datos del contrato) se anota
+aparte como "no urgente, Fase 4 aplazada" para que no se confunda con algo por resolver ya.
+
+---
+
 ### Pendiente
 
 Lo de siempre (repo remoto, lista de Administrador/Consulta, despliegue de prueba de Apps Script,

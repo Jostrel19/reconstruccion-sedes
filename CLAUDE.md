@@ -397,7 +397,14 @@ Los más livianos: Marulanda 11, San José 13, Palestina/Marmato/Viterbo 16.
 
 ---
 
-## 8. Estado actual
+## 8. Estado actual — sistema viejo, histórico
+
+> **Toda esta sección describe el aplicativo para alcaldes, congelado el 2026-09-09, un día antes
+> de que D-17 girara el proyecto a sistema interno.** No se actualiza. Para el estado real de hoy
+> y lo que falta por construir, ver `docs/PLAN_DESARROLLO.md` y `docs/REGISTRO_DESARROLLO.md`. La
+> tabla «Pendientes» de más abajo mezcla preguntas ya resueltas (marcadas), vencidas por el
+> calendario (Q-6, sobre una prueba de septiembre que ya pasó) y algunas que siguen abiertas de
+> verdad — esas últimas están además en `docs/PLAN_DESARROLLO.md` §4 para no tener dos listas.
 
 **Fecha de corte: 2026-09-09.** Versión del aplicativo: 0.9.0.
 
@@ -546,10 +553,10 @@ Functions, no porque siga siendo el camino vigente.
 | ~~Q-2~~ | ~~Sitio de SharePoint destino, carpetas por alcaldía~~ → **superada por D-19**: el sistema nuevo no usa SharePoint |
 | Q-3 | Aval de Planeación a los umbrales de alerta A > 12 % y U > 8 %. **Con evidencia desde 2026-09-16:** Aguadas y Aranzazu radican con **A 25 % · I 0 % · U 5 %**, el doble del umbral. La alerta saltará en casi todo lo que llegue de esos dos municipios. Ya no es una pregunta teórica |
 | Q-4 | ¿Se agregan campos que el formato no pide? (profesional que elabora, obra en curso, cofinanciación) |
-| Q-5 | ¿Se publica bajo la organización `sedcaldas` en GitHub, junto a circular122? |
-| Q-6 | Municipios destinatarios de la prueba del viernes 11 |
+| ~~Q-5~~ | ~~¿Se publica bajo la organización `sedcaldas` en GitHub?~~ → **resuelto 2026-09-16**: repo propio del practicante, `github.com/Jostrel19/reconstruccion-sedes`, público. Esa organización resultó ser la cuenta personal de otro funcionario, no una cuenta institucional |
+| ~~Q-6~~ | ~~Municipios destinatarios de la prueba del viernes 11~~ → **vencida**, esa fecha (sep. 2026) ya pasó y el plan de pruebas cambió con D-17 |
 | Q-7 | Confirmar con Planeación el mapa resultado de verificación → estado. Mientras tanto rige la regla conservadora **D-22** |
-| Q-8 | Al montar el flujo, verificar que el disparador quede **sin carpeta fija**, o no verá las 26 subcarpetas |
+| ~~Q-8~~ | ~~Al montar el flujo, verificar que el disparador quede sin carpeta fija~~ → **superada por D-19**: no hay flujo de Power Automate que montar |
 | **Q-10** | **Un Excel real de los que están mandando las alcaldías** (dos o tres si difieren entre sí). **Bloqueante duro del rediseño:** sin ver la estructura real, cualquier lector que se escriba es adivinación, y adivinar aquí es meter cifras mal leídas en un consolidado oficial |
 | ~~Q-11~~ | ~~¿El aplicativo de los alcaldes se retira?~~ → **RESUELTO 2026-09-09: se retira (D-18)** |
 | Q-12 | «El catálogo que próximamente se subirá»: ¿catálogo de sedes actualizado, o catálogo de precios unitarios para validar los presupuestos? Son diseños distintos |
