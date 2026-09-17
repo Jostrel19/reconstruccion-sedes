@@ -81,9 +81,16 @@ reconstruccion-sedes/
 │   │   └── DISENO_00..05_*.md       diseño previo a D-26, parcialmente desactualizado
 │   └── (ANALISIS_*, AUTOMATIZACION_*, GUIA_SHAREPOINT_*, GUION_*, HANDOFF_*)
 │       — documentan el aplicativo anterior, cada uno con aviso de vigencia al inicio
+├── backend/                      código fuente del backend Apps Script (D-19) — se pega a mano
+│   │                             en script.google.com, ver backend/README.md
+│   ├── Setup.gs                   crea las 6 pestañas (Paso 0)
+│   ├── Codigo.gs                  doGet/doPost, registro de acciones
+│   ├── Auth.gs                    login por código de un solo uso (D-20)
+│   └── Sedes.gs                   listado de sedes filtrado por rol/alcance (D-6, D-24, D-25)
 ├── tools/
 │   ├── rutas.py                    punto único de rutas — nada más trae rutas absolutas
 │   ├── build_catalogo.py           fuentes oficiales -> catalogo_sedes.json (975 sedes)
+│   ├── exportar_backend.py         catalogo_sedes.json / usuarios_borrador.csv -> CSV del Sheet
 │   ├── ingesta.py                  registro de lectores de Excel por municipio
 │   ├── ingesta_samana.py · ingesta_apu.py · ingesta_belalcazar.py
 │   ├── ingesta_esquema.py          esquema común de salida (RegistroIngesta, Hallazgo)

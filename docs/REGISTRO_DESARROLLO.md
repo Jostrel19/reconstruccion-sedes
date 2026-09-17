@@ -596,3 +596,36 @@ conservan porque `build_catalogo.py` (activo, no retirado) todavía los escribe 
 consumidor (`web/index.html`/`consola.html`) esté retirado como puerta de entrada, tocar esa lógica
 no era parte de lo pedido y el script sigue verificado tal como está. Verificado con
 `python -c "import rutas"` que el módulo sigue cargando bien tras el recorte.
+
+## 2026-09-17 — Empieza el backend real: Paso 0 y arranque de Paso 1
+
+Primer código de producción del proyecto, en `backend/`:
+
+- **`Setup.gs`** — `crearHojas()`, crea las 6 pestañas con las columnas exactas de `CLAUDE.md` §6.
+- **`Codigo.gs`** — `doGet` (mismo ping ya probado) y `doPost` con un registro de acciones
+  (`manejadores`), para sumar módulos sin tocar lo que ya funciona.
+- **`Auth.gs`** — D-20 completo: `solicitarCodigo`/`validarCodigo`, código de 6 dígitos en
+  `CacheService` (vence solo, sin pestaña de sesiones que limpiar), token de sesión firmado con
+  HMAC-SHA256 (secreto autogenerado en las Propiedades del script, nunca en un archivo), y la regla
+  dura de no revelar si un correo tiene cuenta.
+- **`Sedes.gs`** — listado de sedes filtrado del lado del servidor por rol y alcance (D-24/D-25),
+  con `valor_referencia` excluido de la respuesta para Responsable de sede (D-6) — el filtro real,
+  no el `classList.toggle` de la maqueta.
+
+**`tools/exportar_backend.py` (nuevo)** convierte `catalogo_sedes.json` y `usuarios_borrador.csv` al
+formato exacto de las pestañas `Sedes` y `Usuarios`, listo para `Archivo > Importar`. Al escribirlo
+se encontró y corrigió un error propio antes de que llegara a ningún archivo: la primera versión le
+daba a los alcaldes `alcance = TODO_EL_DEPARTAMENTO` en vez de su municipio — habría roto D-24 dándole
+a cada alcalde acceso a las sedes de los otros 25 municipios. Corregido a usar el campo `municipio`
+que el borrador ya trae por separado. Verificado contra los datos reales: 975 sedes exportadas, 193
+usuarios (26 alcaldes con `alcance` = su municipio, 161 rectores con `alcance` = lista de sus
+`dane_sede`, 6 internos con `TODO_EL_DEPARTAMENTO`).
+
+Los 4 archivos `.gs` se validaron con `node --check` (renombrados a `.js` temporalmente, Apps Script
+no tiene linter propio fuera del editor de Google) — sin errores de sintaxis.
+
+**Sigue pendiente, del lado del usuario:** crear el Google Sheet real, pegar estos 4 archivos en su
+editor de Apps Script, correr `crearHojas()`, importar los dos CSV, volver a desplegar como Web App
+y probar `solicitarCodigo`/`validarCodigo` de punta a punta con un correo real — guía completa en
+`backend/README.md`. Después de eso, conectar el frontend del mockup con `fetch` real es lo que
+falta para cerrar el Paso 1.

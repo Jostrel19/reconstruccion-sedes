@@ -94,23 +94,28 @@ arquitecto en la verificación — es para lo que existe ese paso.
 
 Cada paso deja algo que se puede probar. No se avanza con el anterior sin verificar.
 
-### Paso 0 — Backend mínimo en pie
+### Paso 0 — Backend mínimo en pie — ✅ código listo en `backend/`, falta desplegarlo
 1. Crear el Google Sheet con 6 pestañas: `Sedes`, `Presupuestos`, `Items`, `Verificaciones`,
-   `Usuarios`, `Hallazgos` — columnas exactas en `CLAUDE.md` §6 (reescrita 2026-09-16 para el
-   backend Apps Script; antes describía el modelo viejo de SharePoint).
-2. Desplegar un Web App de Apps Script que responda a un `ping`. **Confirma que ninguna política
-   de dominio lo bloquea** — es el único riesgo técnico que no se ha probado.
-3. Cargar `Sedes` desde `data/generado/catalogo_sedes.json` (975 filas).
+   `Usuarios`, `Hallazgos` — columnas exactas en `CLAUDE.md` §6. **`backend/Setup.gs::crearHojas()`
+   lo hace solo**, falta correrlo una vez en el Sheet real.
+2. Desplegar un Web App de Apps Script que responda a un `ping`. **Confirmado 2026-09-17**
+   (`docs/PRUEBA_DESPLIEGUE_APPS_SCRIPT.md`) — `backend/Codigo.gs::doGet` ya lo implementa.
+3. Cargar `Sedes` desde `data/generado/catalogo_sedes.json` (975 filas). **`tools/exportar_backend.py`
+   ya genera el CSV exacto** (`backend_sedes.csv`) para importar con `Archivo > Importar`.
 
-### Paso 1 — Entrar (D-20)
+### Paso 1 — Entrar (D-20) — ✅ código listo en `backend/Auth.gs`, falta desplegar y probar en vivo
 4. `POST solicitarCodigo` → busca el correo en `Usuarios`; si no está, **no envía nada y responde
    lo mismo** que si estuviera (no se puede averiguar quién tiene cuenta probando correos).
 5. Genera código de 6 dígitos, lo guarda con vencimiento de 10 min, lo manda con `MailApp`.
-6. `POST validarCodigo` → token de sesión firmado + rol y alcance leídos de `Usuarios`.
-7. Frontend: pantalla de entrada del mockup, en dos pasos.
+6. `POST validarCodigo` → token de sesión firmado (HMAC, secreto en las Propiedades del script) +
+   rol y alcance leídos de `Usuarios`.
+7. Frontend: pantalla de entrada del mockup, en dos pasos — **falta conectarla con `fetch` real** al
+   endpoint; hoy el botón solo cambia de vista sin llamar al backend.
 
-### Paso 2 — Armazón y lectura
-8. Riel, barra superior, migas, y el filtrado por rol **del lado del servidor**.
+### Paso 2 — Armazón y lectura — arrancado
+8. Riel, barra superior, migas, y el filtrado por rol **del lado del servidor**. **`backend/Sedes.gs`
+   ya filtra por alcance (D-24/D-25) y oculta `valor_referencia` a Responsable de sede (D-6)** —
+   falta el resto de pantallas y conectar el frontend.
 9. Sedes → Municipio → Ficha, en modo lectura.
 10. Tablero.
 
