@@ -862,3 +862,43 @@ al escribir esa sección de `CLAUDE.md`.
 **Con esto, el Paso 2 completo queda cerrado** (`docs/PLAN_DESARROLLO.md` §3, ítems 8-10). Sigue el
 Paso 3: pantalla Registrar presupuesto, el primer módulo que escribe en el backend en vez de solo
 leerlo.
+
+## 2026-09-17 — Tres correcciones de diseño detectadas al revisar el Tablero en vivo
+
+El usuario revisó el Tablero recién conectado y señaló, con captura de pantalla, que la conexión a
+datos reales no bastaba: había que revisar el resultado con el mismo rigor que el dato. Tres
+problemas reales, no solo estéticos:
+
+1. **Los badges "6" (Verificación) y "19" (Hallazgos) del riel seguían siendo del ejemplo de
+   diseño.** Con una sesión real activa, mostrar un conteo pendiente inventado es exactamente el
+   tipo de dato falso que se había evitado en todos los demás paneles. Se ocultan (`.riel .cand`)
+   apenas hay sesión real, mismo criterio que ya se aplicaba al panel de Hallazgos de Sedes.
+2. **La franja de 6 cifras se partía mal.** `grid-template-columns:repeat(auto-fit,minmax(142px,1fr))`
+   dejaba, a ciertos anchos de ventana, 5 tarjetas en una fila y la sexta sola y estirada en la
+   siguiente — con un número de tarjetas fijo y conocido (6), `auto-fit` no es la herramienta
+   correcta. Se cambió a `repeat(6,1fr)` con dos breakpoints (`repeat(3,1fr)` bajo 920px,
+   `repeat(2,1fr)` bajo 520px). Además, "Esperando verificación" y "Aprobadas para obra" — que
+   todavía no aplican, no que valgan cero — pasaron de mostrar un "0" con el mismo peso visual que
+   las cifras reales a un "—" atenuado (clase `.c.na`), para no competir con el 37 y el 34 que sí
+   importan.
+3. **"Nivel de afectación" no medía lo que decía medir.** Se había repoblado (en el commit anterior)
+   con `estado_prestacion`, un campo real pero que responde otra pregunta ("¿puede funcionar la
+   sede hoy?", no "¿qué tan grave es el daño?"). El dato correcto ya existe y ya se usa en otras
+   pantallas: `tipo_censo`, que dentro del lote 1 solo toma dos valores por definición del propio
+   lote (D-31) — tipo 1 "colapso total o parcial" y tipo 2 "riesgo inminente". Se reemplazó el
+   gráfico de barra apilada (`.dist`) por el mismo patrón de lista horizontal que ya usa "Del
+   universo al lote" (`.emb`), reutilizando los colores y badges P1/P2 que ya existen en
+   Sedes/Municipio/Ficha en vez de inventar una paleta nueva. Una barra apilada tampoco era el tipo
+   de gráfica correcto para un reparto tan desigual (9 contra 28): aprietaba el número menor hasta
+   volverlo casi ilegible.
+
+**Verificado en el navegador:** a 1110px de ancho la franja usa sus 6 columnas; a 590px usa 3; el
+desglose real dio 9 sedes tipo 1 y 28 tipo 2 — coincide exactamente con la cifra que ya documentaba
+`docs/diseno/mockup_v6.html` en su propio pie de página ("9 de tipo 1, 28 de tipo 2") y con
+`CLAUDE.md` §7.
+
+El usuario también reportó un número superpuesto/duplicado en pantalla ("$9.718.46~~2663~~4.165").
+No se encontró ninguna ruta de código que pudiera producir dos nodos de texto superpuestos —
+`innerHTML` reemplaza el contenido completo en cada pintada — así que se documenta como sospecha de
+artefacto de repintado del navegador (ghosting al redimensionar), no como bug confirmado. Pendiente
+de que el usuario confirme si persiste después de un refresco duro.
