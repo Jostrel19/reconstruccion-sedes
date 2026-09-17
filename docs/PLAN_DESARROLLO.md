@@ -149,9 +149,10 @@ Cada paso deja algo que se puede probar. No se avanza con el anterior sin verifi
 |---|---|---|---|
 | 1 | Nombre del repositorio y visibilidad | Practicante | ✅ **Hecho** — `github.com/Jostrel19/reconstruccion-sedes`, público |
 | 2 | Lista de Administrador, Verificador y Consulta: nombre + correo | Jefatura | ✅ **Hecho** — 6 personas confirmadas (2 Administrador, 2 Verificador, 2 Consulta), en `data/insumos/usuarios_manual.csv` |
-| 3 | Cuenta de Google para desplegar el Apps Script, y probar que despliega | Practicante | **Pendiente** — guía en `docs/PRUEBA_DESPLIEGUE_APPS_SCRIPT.md` |
+| 3 | Cuenta de Google para desplegar el Apps Script, y probar que despliega | Practicante | ✅ **Hecho 2026-09-17** — desplegado con Gmail personal (`jose.saavedra2@gmail.com`, ver D-19 precisada), acceso público confirmado en incógnito, y `MailApp` entrega sin fricción a `@sedcaldas.edu.co` (Office 365) |
 
-Con 1 y 2 resueltos, **el 3 es el único que falta para empezar el paso 1** (backend real).
+**Los tres bloqueantes del paso 0 están resueltos.** No queda nada pendiente para empezar el
+paso 1 (backend real) — ver `docs/REGISTRO_DESARROLLO.md` para el detalle de la prueba.
 
 **No bloquean, pero hay que resolverlos antes de dar acceso real:**
 

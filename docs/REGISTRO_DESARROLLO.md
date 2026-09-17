@@ -537,3 +537,37 @@ salen de ningún catálogo.
 lista de Administrador/Consulta, prueba de despliegue de Apps Script, y crear el Google Sheet real
 con las 6 pestañas. Nada de esto bloquea empezar a escribir el backend de Apps Script ni el frontend
 de Fase 0.
+
+---
+
+## 2026-09-17 — Prueba de despliegue de Apps Script: hecha, con una precisión a D-19
+
+Al ir a ejecutar `docs/PRUEBA_DESPLIEGUE_APPS_SCRIPT.md`, el primer intento de iniciar sesión en
+script.google.com con `data@sedcaldas.edu.co` falló con «No se pudo encontrar esta cuenta» — **el
+dominio `@sedcaldas.edu.co` es Microsoft 365, no Google Workspace**, así que no existe ninguna cuenta
+de Google con ese correo. D-19 asumía «mismo dominio institucional, mismo patrón que `circular122`»
+sin haber verificado cómo estaba desplegado realmente ese sistema de referencia.
+
+Se confirmó con el usuario: `circular122` está desplegado desde el **Gmail personal** del funcionario
+que lo hizo, no desde una cuenta institucional — no existe tal cosa. Este proyecto sigue el mismo
+patrón, con el Gmail personal del practicante. **D-19 se precisó** en `CLAUDE.md` con esta aclaración
+y la consecuencia aceptada: el script y las hojas quedan de propiedad de esa cuenta personal, mismo
+riesgo de continuidad que ya asume `circular122`, no uno nuevo.
+
+**Prueba ejecutada con Gmail personal, tres partes:**
+
+1. **Despliegue** — `Ejecutar como: Yo (jose.saavedra2@gmail.com)`, `Usuarios con acceso: Cualquiera`.
+   Un primer intento de abrir la URL `/exec` en incógnito dio un error de Google Drive («No se puede
+   abrir el archivo»); se aisló probando primero en una pestaña normal (con sesión), donde sí
+   funcionó, lo que descartó problema de permisos o de código. Repetido en incógnito un par de
+   minutos después, funcionó — fue demora de propagación del despliegue nuevo, no un error real.
+2. **Acceso público confirmado**: el JSON de `doGet` se ve sin pedir login, en incógnito.
+3. **Correo a Office 365**: `probarCorreoInstitucional()` ejecutada desde el editor, entregó a
+   `data@sedcaldas.edu.co` sin pedir autorización adicional (ya estaba concedida) y llegó a la
+   bandeja principal de Outlook, no a spam. Confirma que `MailApp` entrega por SMTP normal
+   independiente del proveedor del destinatario — sin integración especial Google↔Microsoft.
+
+**Resultado: sin bloqueante técnico.** Los tres pendientes que bloqueaban el Paso 0 del plan
+(`docs/PLAN_DESARROLLO.md` §4) quedan resueltos. Falta borrar el proyecto de prueba en
+script.google.com (no se necesita conservarlo) y empezar el Paso 0 real: crear el Google Sheet con
+las 6 pestañas y desplegar el backend definitivo.
