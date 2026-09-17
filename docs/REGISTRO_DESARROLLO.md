@@ -680,3 +680,35 @@ la API, que sí versiona. Aplicado en vivo sobre las 5 pestañas.
 código ya lo implementa (`_enAlcance` en `Sedes.gs`) pero no hay forma de probarlo hoy sin acceso a
 un correo real de alcalde, rector o arquitecto. Queda para cuando se invite a alguien real o se
 decida crear una cuenta de prueba con cada rol.
+
+## 2026-09-17 — Cierra Paso 1: el mockup deja de simular el login
+
+Se conectó `docs/diseno/mockup_v6.html` al backend real: `loginEnviarCodigo`/`loginEntrar` pasaron de
+cambiar de vista sin más a llamar `solicitarCodigo`/`validarCodigo` por `fetch`, con manejo de error
+visible en pantalla y botones deshabilitados mientras esperan respuesta. Detalle técnico que evita un
+problema conocido de Apps Script: el `fetch` no fija `Content-Type` — al mandar el body como string
+plano, el navegador lo clasifica como petición CORS "simple" y no dispara `OPTIONS` (preflight), que
+Apps Script no responde. `Codigo.gs` igual lo parsea como JSON sin mirar la cabecera.
+
+**Probado en el navegador de punta a punta, con la cuenta real:** correo → código recibido por
+correo → validado → `sesion` queda con el token, rol (`ADMINISTRADOR`), nombre
+(`JOSE ANDRES SAAVEDRA HIGUERA`) y alcance (`TODO_EL_DEPARTAMENTO`) reales, la vista salta sola al
+Tablero y la barra superior muestra el nombre e iniciales correctos — nada de esto viene ya de un
+dato simulado.
+
+**Incidente durante la prueba, sin relación con el código:** el panel de navegador compartido tuvo
+dos problemas de sesión — un timeout de la herramienta al encadenar una llamada async por consola
+(se resolvió recargando la página y volviendo al patrón de clic normal) y una confusión del usuario,
+que escribió un código directamente en el campo del panel compartido sin avisar, pisando el intento
+en curso. Se acordó un protocolo: el usuario dicta el código por chat, nunca lo escribe en el panel
+mientras hay una prueba en curso.
+
+**Hallazgo abierto, no bloqueante:** `solicitarCodigo` no limita frecuencia. Alguien que conozca la
+URL del backend (viaja en el HTML público) podría pedir códigos repetidos para cualquier correo que
+sí esté en `Usuarios`, inundándole la bandeja sin comprometer la cuenta (cada código sigue siendo de
+un solo uso, vence en 10 min). Conviene un límite tipo "1 código por correo cada 60 s" con
+`CacheService` antes de repartir el sistema a alcaldes y rectores reales — no antes de eso.
+
+Con esto, **Paso 1 del plan queda cerrado**: falta el filtro de alcance para roles externos (sin
+forma de probarlo todavía) y seguir con el Paso 2 (armazón, riel, migas, Sedes → Municipio → Ficha en
+modo lectura conectados de verdad).
