@@ -727,3 +727,16 @@ de Apps Script desplegado. Apps Script congela el código en cada implementació
 en el editor **no alcanza a la URL `/exec` ya publicada** hasta que se actualice esa implementación
 (`Implementar > Administrar implementaciones > editar > Versión: Nueva versión > Implementar`), lo
 que sí mantiene la misma URL, sin necesidad de tocar `BACKEND_URL` en el mockup.
+
+## 2026-09-17 — Documento único de alcance y requisitos
+
+El usuario pidió algo que hasta hoy no existía: un documento centralizado de "qué es este proyecto y
+cuál es su alcance", pensado como soporte estable, no como bitácora. Se creó
+`docs/ALCANCE_Y_REQUISITOS.md` con esa intención explícita: resume los 4 objetivos, los 4 roles y su
+alcance, el universo de datos (975 sedes, lote 1 de 37, los 14 capítulos), qué SÍ y qué NO hace el
+sistema, la arquitectura en una vista, y un snapshot de estado — sin repetir el detalle fino que ya
+vive en `CLAUDE.md` (decisiones) y `PLAN_DESARROLLO.md` (plan operativo), a los que remite en vez de
+duplicar. Incluye una sección explícita de que es un documento vivo y el protocolo para actualizarlo,
+para que no quede desactualizado como pasó con el README antes de la auditoría del mismo día.
+
+Enlazado desde `README.md` como primer punto de entrada.
