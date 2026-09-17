@@ -115,12 +115,16 @@ Cada paso deja algo que se puede probar. No se avanza con el anterior sin verifi
    no de un dato simulado. El selector "Ver como" del mockup sigue existiendo aparte, para revisar
    diseño sin necesidad de loguearse cada vez.
 
-### Paso 2 — Armazón y lectura — arrancado
-8. Riel, barra superior, migas, y el filtrado por rol **del lado del servidor**. **`backend/Sedes.gs`
-   ya filtra por alcance (D-24/D-25) y oculta `valor_referencia` a Responsable de sede (D-6)** —
-   falta el resto de pantallas y conectar el frontend.
-9. Sedes → Municipio → Ficha, en modo lectura.
-10. Tablero.
+### Paso 2 — Armazón y lectura — en curso
+8. ✅ Riel y migas ya navegan de verdad (antes eran decorativos); filtrado por rol **del lado del
+   servidor** en `backend/Sedes.gs` (D-24/D-25), `valor_referencia` oculto a Responsable de sede
+   (D-6) — verificado también sobre datos reales, no solo en el diseño simulado.
+9. ✅ **Hecho 2026-09-17.** Sedes → Municipio → Ficha, en modo lectura, conectadas a `listarSedes`.
+   Probado de punta a punta con la cuenta Administrador real: 12 municipios del lote 1, drill-down
+   a sedes de un municipio, ficha con identidad y censo de daños reales (capítulos 1-14). Lo que
+   todavía no existe (presupuesto, historial, ítems) se muestra vacío, no simulado — detalle en
+   `docs/REGISTRO_DESARROLLO.md`.
+10. Tablero — sigue con las cifras de ejemplo del diseño; falta conectarlo igual que Sedes.
 
 ### Paso 3 — Escritura manual (objetivo 1)
 11. Pantalla Registrar presupuesto: ítems, cálculo, validaciones, borrador.
@@ -190,6 +194,12 @@ Sheet completo a Drive todos los días; `docs/RUNBOOK_CONTINUIDAD.md` documenta 
 cuenta personal que sostiene todo esto. **Pendiente del lado del usuario:** pegar `Auth.gs`
 actualizado y `Backup.gs` nuevo en el proyecto real, correr `configurarRespaldoAutomatico` una vez, y
 actualizar la implementación (`Nueva versión`) para que el bloqueo de intentos quede activo.
+
+**Actualizado 2026-09-17, noche — Paso 2, ítem 9 cerrado.** `docs/diseno/mockup_v6.html` ya no
+muestra Samaná de ejemplo en Sedes/Municipio/Ficha: las tres pantallas llaman `listarSedes` y pintan
+el catálogo real, con drill-down real (clic en municipio → sus sedes; clic en sede → su ficha) y
+migas/riel funcionales. Probado de punta a punta con la cuenta Administrador. Detalle completo en
+`docs/REGISTRO_DESARROLLO.md`.
 
 **No bloquean, pero hay que resolverlos antes de dar acceso real:**
 

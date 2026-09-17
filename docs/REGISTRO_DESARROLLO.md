@@ -774,3 +774,52 @@ Verificado con `node --check` que `Auth.gs` y `Backup.gs` siguen siendo JS váli
 `Backup.gs` nuevo en el proyecto real, correr `configurarRespaldoAutomatico` una vez, y actualizar la
 implementación (`Nueva versión`) para que el bloqueo de intentos quede activo — nada de esto llega
 solo al backend desplegado, igual que pasó con el límite de frecuencia.
+
+## 2026-09-17 — Paso 2: Sedes → Municipio → Ficha con datos reales
+
+Hasta ahora `docs/diseno/mockup_v6.html` solo mostraba, en las pantallas ③ Sedes, ④ Municipio y
+⑤ Ficha, contenido de ejemplo escrito a mano (municipios y sedes de Samaná inventados para el
+diseño). Se conectaron las tres a `listarSedes`, el mismo endpoint que ya existía en
+`backend/Sedes.gs` desde el Paso 0, sin tocar el backend.
+
+**Qué se agregó al mockup:**
+- `cargarSedes()` pide `listarSedes` justo después de un login real y guarda el resultado en
+  `SEDES` — el backend ya filtró por rol y alcance (D-6/D-24/D-25) y ya quitó `valor_referencia`
+  para Responsable de sede, así que el navegador no vuelve a decidir nada de eso, solo pinta.
+- `pintarInicioReal()` agrupa las 37 sedes del lote 1 por municipio y reemplaza la tabla de
+  ejemplo; cada fila abre `pintarMuniReal()` con las sedes reales de ese municipio; cada sede abre
+  `pintarFichaReal()` con su identidad y censo de daños reales (DANE, matrícula, tipo de
+  afectación, estado de prestación, concepto técnico, observaciones, capítulos con daño 1-14).
+- Migas (`Caldas › Municipio › Sede`) y el riel lateral (`Sedes`, `Verificación`, etc.) pasaron de
+  ser decorativos a navegar de verdad — antes no tenían ningún listener de clic.
+- **Lo que todavía no existe se muestra como vacío, no simulado**: presupuesto recibido, historial
+  de versiones, ítems de detalle y las 4 últimas secciones del formato oficial aparecen como "sin
+  radicar" / "sin diligenciar" en vez de repetir los números de ejemplo del diseño original —
+  Presupuestos e Items son Paso 3, no existen todavía en el Sheet.
+- Se ocultó el panel "Hallazgos abiertos" de la pantalla Sedes cuando hay sesión real: esos
+  hallazgos (H-1, H-3, H-4) son ejemplos inventados para el diseño, y mostrarlos junto a datos
+  reales de una sesión autenticada los haría pasar por reales. El módulo real de Hallazgos es
+  Paso 6, todavía sin construir.
+
+**Riesgo verificado y descartado:** `capitulos_dano` viaja como texto con comas (`"1,3"`,
+`"2,3,6"`). Antes de construir el cruce por capítulo se revisó si Google Sheets pudo haber
+interpretado esas comas como separador decimal al importar el CSV (locale es-CO) — eso habría
+convertido, por ejemplo, `"1,3"` en el número `1.3`, perdiendo cuál par de capítulos era. Se agregó
+una detección defensiva (`capitulosDeSede()`, reporta en vez de adivinar si el valor llega como
+número) y se probó en vivo contra el backend real: `217013000602` (Aguadas, capítulos `"1,3"`) y
+`217662002291` (Samaná, capítulos `"1,2,3,4,6,7,10"` en otro caso) llegaron como texto correcto en
+ambos casos. La detección se deja igual, por si un reimport futuro con otra configuración de hoja
+sí produce el problema.
+
+**Probado en el navegador de punta a punta con la cuenta Administrador real** (correo → código →
+sesión): Sedes mostró los 12 municipios del lote 1 con las cifras exactas de `CLAUDE.md` §7
+(Anserma 6 sedes/$713,0 M, Aguadas 5/$3.150,2 M, etc.); Municipio → Samaná mostró sus 4 sedes
+reales con DANE correcto; Ficha → `217662002291` mostró identidad, censo (capítulos 2, 3 y 6
+marcados con daño, exactamente los que ya describía el ejemplo de diseño original — confirma que
+el ejemplo se había escrito a partir del dato real) y un estado honesto de "sin presupuesto". Se
+verificó también que D-6 sigue aplicando sobre datos reales: con "Ver como: Responsable de sede"
+el valor de referencia se oculta; con la sesión real de Administrador, se ve.
+
+**Con esto, el ítem 9 del Paso 2 queda cerrado** (`docs/PLAN_DESARROLLO.md` §3). Sigue pendiente el
+ítem 10 (Tablero con datos reales) y, en paralelo, el filtro de alcance para Responsable de
+sede/Verificador reales sigue sin poder probarse por falta de un correo real de esos roles.

@@ -1481,6 +1481,50 @@
   let sesion = null; // {token, rol, nombre, alcance} una vez logueado de verdad
   let correoActual = '';
 
+  /* Paso 2: catálogo real de sedes (null hasta que llegue del backend), y
+     dónde está parado el usuario al navegar Sedes -> Municipio -> Ficha. */
+  let SEDES = null;
+  let muniActual = null;
+  let daneActual = null;
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function cop(n){
+    return new Intl.NumberFormat('es-CO', { style:'currency', currency:'COP', maximumFractionDigits:0 }).format(Number(n) || 0);
+  }
+  // priorizada viaja como texto "TRUE"/"FALSE" (exportar_backend.py), pero
+  // Google Sheets puede haberlo guardado como booleano nativo — se aceptan
+  // los dos en vez de asumir uno solo.
+  const esPriorizada = v => v === 'TRUE' || v === true;
+
+  /* capitulos_dano viaja como texto "2,6". Si la hoja interpretó la coma como
+     separador decimal (locale es-CO) al importar el CSV, llega como número
+     (2.6) en vez de lista — se detecta y se reporta, no se adivina a qué
+     capítulos correspondía. */
+  function capitulosDeSede(s){
+    const raw = s.capitulos_dano;
+    if (raw === '' || raw == null) return { lista: [], corrupto: false };
+    if (typeof raw === 'number') return { lista: [], corrupto: true, crudo: raw };
+    return { lista: String(raw).split(',').map(x => x.trim()).filter(Boolean), corrupto: false };
+  }
+
+  /* Trae las sedes ya filtradas y recortadas por el backend según el rol y
+     alcance de la sesión (backend/Sedes.gs::_enAlcance, D-6/D-24/D-25). El
+     navegador no vuelve a filtrar nada, solo pinta lo que llega. */
+  async function cargarSedes(){
+    try {
+      const r = await backend('listarSedes', { token: sesion.token });
+      SEDES = r.ok ? r.sedes : [];
+    } catch (err) {
+      SEDES = [];
+    }
+  }
+
+  function irInicio(){ vista = 'inicio'; muniActual = null; daneActual = null; pintar(); }
+  function irMuni(m){ vista = 'muni'; muniActual = m; pintar(); }
+  function irFicha(dane){ vista = 'ficha'; daneActual = dane; pintar(); }
+
   /* Sin cabeceras a propósito: un fetch con body de texto plano es una
      petición CORS "simple" y no dispara preflight OPTIONS, que Apps Script
      no responde. El backend igual lo parsea como JSON (Codigo.gs). */
@@ -1551,11 +1595,208 @@
       ROLES[clave].ini = iniciales(r.nombre);
       vista = ROLES[clave].ve[0];
       pintar();
+      // Sedes reales (Paso 2): no bloquea la entrada, se repinta cuando llegue.
+      cargarSedes().then(() => pintar());
     } catch (err) {
       errorLogin('No se pudo contactar el servidor. Intente de nuevo.');
     } finally {
       btn.disabled = false; btn.textContent = 'Entrar';
     }
+  }
+
+  // D-6: el valor de referencia de la SED no existe para quien no lo alcanza.
+  // Se llama dos veces por pintada: antes y después de pintar datos reales,
+  // porque las tablas reales se regeneran con elementos [data-sed] nuevos que
+  // la primera pasada todavía no vio.
+  function aplicarVisibilidadRol(R){
+    document.querySelectorAll('[data-sed]').forEach(e => e.classList.toggle('oculto', !R.ref));
+    document.querySelectorAll('.ext-solo').forEach(e => e.classList.toggle('oculto', R.ref));
+    document.querySelectorAll('.ext-off').forEach(e => e.classList.toggle('oculto', !R.ref));
+    document.querySelectorAll('[data-edita]').forEach(e => e.classList.toggle('oculto', !R.edita));
+    document.querySelectorAll('[data-verifica]').forEach(e => e.classList.toggle('oculto', !R.verifica));
+  }
+
+  /* ─── Paso 2: Sedes / Municipio / Ficha con datos reales del backend ───
+     Solo se ejecutan cuando hay sesión real (login por código de correo).
+     Sin sesión, estas tres pantallas quedan con el contenido de ejemplo de
+     la maqueta, para revisar diseño sin necesidad de loguearse (docs/PLAN_
+     DESARROLLO.md §6). Se pinta solo lo que ya está construido: identidad y
+     censo de daños son reales; presupuesto, verificación e historial todavía
+     no existen (Pasos 3-5) y se muestran como estado vacío, no simulados. */
+
+  function pintarInicioReal(){
+    const panel = document.querySelector('#s-inicio .p');
+    const panelHallazgos = document.querySelectorAll('#s-inicio .p')[1];
+    if (panelHallazgos) panelHallazgos.classList.add('oculto'); // ejemplo, no hay Hallazgos real todavía (Paso 6)
+
+    if (!SEDES){
+      panel.querySelector('.cuerpo').innerHTML = '<div class="vacio"><h3>Cargando sedes…</h3><p>Consultando el catálogo real en el backend.</p></div>';
+      return;
+    }
+
+    const lote = SEDES.filter(s => esPriorizada(s.priorizada));
+    const porMuni = new Map();
+    lote.forEach(s => {
+      if (!porMuni.has(s.municipio)) porMuni.set(s.municipio, []);
+      porMuni.get(s.municipio).push(s);
+    });
+
+    panel.querySelector('thead tr').innerHTML =
+      '<th>Municipio</th><th class="n">Sedes</th><th>Estado</th><th class="n" data-sed>Valor de referencia</th>';
+
+    const tbody = panel.querySelector('tbody');
+    tbody.innerHTML = '';
+    [...porMuni.entries()].sort((a, b) => b[1].length - a[1].length).forEach(([muni, sedes]) => {
+      const total = sedes.reduce((acc, s) => acc + (Number(s.valor_referencia) || 0), 0);
+      const tr = document.createElement('tr');
+      tr.className = 'click';
+      tr.innerHTML =
+        `<td><strong>${esc(muni)}</strong></td><td class="n">${sedes.length}</td>` +
+        `<td><span class="est e-pend">Sin presupuesto radicado</span></td>` +
+        `<td class="n" data-sed>${cop(total)}</td>`;
+      tr.addEventListener('click', () => irMuni(muni));
+      tbody.appendChild(tr);
+    });
+
+    const pie = panel.querySelector('.pie[data-sed]');
+    if (pie) pie.textContent =
+      `${lote.length} sedes del lote 1 en ${porMuni.size} municipio${porMuni.size === 1 ? '' : 's'}. Ningún presupuesto se ha radicado todavía en el sistema — el registro manual (Paso 3) sigue en construcción.`;
+  }
+
+  function pintarMuniReal(){
+    const paneles = document.querySelectorAll('#s-muni .p');
+    const panelCab = paneles[0];
+    const panelTabla = paneles[1];
+
+    panelCab.querySelector('h2').textContent = muniActual || '(sin municipio)';
+
+    if (!SEDES){
+      panelTabla.querySelector('.cuerpo').innerHTML = '<div class="vacio"><h3>Cargando…</h3></div>';
+      return;
+    }
+
+    const sedes = SEDES.filter(s => s.municipio === muniActual && esPriorizada(s.priorizada));
+    const matriculaTotal = sedes.reduce((a, s) => a + (Number(s.matricula) || 0), 0);
+    const valorTotal = sedes.reduce((a, s) => a + (Number(s.valor_referencia) || 0), 0);
+
+    panelCab.querySelector('.cifras').innerHTML =
+      `<div class="cifra"><b class="n">${sedes.length}</b><span>En el lote</span></div>` +
+      `<div class="cifra"><b class="n">${matriculaTotal}</b><span>Matrícula total</span></div>` +
+      `<div class="cifra" data-sed><b class="n">${cop(valorTotal)}</b><span>Valor de referencia</span></div>`;
+
+    panelTabla.querySelector('thead tr').innerHTML =
+      '<th>Sede</th><th>DANE</th><th>Pri.</th><th class="n" data-sed>Valor de referencia</th><th>Estado</th>';
+
+    const tbody = panelTabla.querySelector('tbody');
+    tbody.innerHTML = '';
+    sedes.forEach(s => {
+      const p1 = String(s.tipo_censo || '').startsWith('1.');
+      const tr = document.createElement('tr');
+      tr.className = 'click';
+      tr.innerHTML =
+        `<td>${esc(s.sede)}</td><td class="dane">${esc(s.dane_sede)}</td>` +
+        `<td><span class="pri ${p1 ? 'p1' : 'p2'}">${p1 ? 'P1' : 'P2'}</span></td>` +
+        `<td class="n" data-sed>${cop(s.valor_referencia)}</td>` +
+        `<td><span class="est e-pend">Sin presupuesto</span></td>`;
+      tr.addEventListener('click', () => irFicha(s.dane_sede));
+      tbody.appendChild(tr);
+    });
+
+    const pie = panelTabla.querySelector('.pie[data-sed]');
+    if (pie) pie.textContent =
+      `${sedes.length} sedes priorizadas de ${muniActual}, según dimDañosInfraestructura.xlsx. Ninguna tiene presupuesto radicado todavía en el sistema.`;
+  }
+
+  function pintarFichaReal(){
+    const paneles = document.querySelectorAll('#s-ficha .p');
+    // [0] identificación · [1] seguimiento (data-sed) · [2] su presupuesto (ext-solo)
+    // [3] historial · [4] daño↔presupuesto · [5] presupuesto a detalle · [6] formato oficial
+    if (!SEDES){
+      paneles[0].querySelector('.cuerpo').innerHTML = '<div class="vacio"><h3>Cargando…</h3></div>';
+      return;
+    }
+    const s = SEDES.find(x => String(x.dane_sede) === String(daneActual));
+    if (!s){
+      paneles[0].querySelector('.cuerpo').innerHTML =
+        '<div class="vacio"><h3>Sede no encontrada</h3><p>No está en su alcance, o el DANE no existe en el catálogo real.</p></div>';
+      for (let i = 1; i < paneles.length; i++) paneles[i].classList.add('oculto');
+      return;
+    }
+    for (let i = 1; i < paneles.length; i++) paneles[i].classList.remove('oculto');
+
+    const p1 = String(s.tipo_censo || '').startsWith('1.');
+    const nombreFicha = (s.sede && s.institucion && s.sede.toUpperCase().indexOf(s.institucion.toUpperCase()) !== -1)
+      ? s.sede : `${s.institucion} — ${s.sede}`;
+
+    paneles[0].querySelector('h2').textContent = nombreFicha;
+    const badge = paneles[0].querySelector('.est');
+    if (badge){ badge.className = 'est e-pend'; badge.textContent = 'Sin presupuesto'; }
+
+    paneles[0].querySelector('.kv').innerHTML =
+      `<dt>DANE sede</dt><dd class="dane">${esc(s.dane_sede)}</dd>` +
+      `<dt>Municipio</dt><dd>${esc(s.municipio)} · ${esc(String(s.zona || '').toLowerCase())}</dd>` +
+      `<dt>Matrícula</dt><dd class="n">${esc(s.matricula)} estudiantes</dd>` +
+      `<dt>Tipo de afectación</dt><dd>${esPriorizada(s.priorizada) ? `<span class="pri ${p1 ? 'p1' : 'p2'}">${p1 ? 'P1' : 'P2'}</span> ` : ''}${esc(s.tipo_censo)}</dd>` +
+      `<dt>Estado de prestación</dt><dd>${esc(s.estado_prestacion || '—')}</dd>` +
+      `<dt>Concepto técnico</dt><dd>${esc(s.concepto_tecnico || '—')}</dd>` +
+      `<dt>Observaciones del censo</dt><dd>${esc(s.observaciones_censo || 'Sin observaciones')}</dd>`;
+
+    paneles[1].querySelector('.cuerpo').innerHTML =
+      `<div class="cmp"><div class="et"><span>Valor de referencia — arquitecto</span><b class="n">${cop(s.valor_referencia)}</b></div>` +
+      `<div class="pista"><i style="width:100%;background:var(--gris)"></i></div></div>` +
+      `<div class="cmp"><div class="et"><span>Presupuesto recibido — municipio</span><b class="n">Sin radicar</b></div>` +
+      `<div class="pista"><i style="width:0%;background:var(--verde)"></i></div></div>`;
+    paneles[1].querySelector('.pie').textContent =
+      'Esta sede no tiene presupuesto radicado todavía — el registro manual (Paso 3) sigue en construcción.';
+
+    paneles[2].querySelector('.cuerpo').innerHTML =
+      '<p style="color:var(--tx-sec);font-size:.85rem;margin:0">Todavía no ha diligenciado presupuesto para esta sede.</p>';
+
+    paneles[3].querySelector('tbody').innerHTML =
+      '<tr><td colspan="5" style="color:var(--tx-sec);text-align:center;padding:1rem">Sin versiones radicadas todavía</td></tr>';
+    paneles[3].querySelector('.pie').textContent =
+      'En cuanto se radique un presupuesto para esta sede, aparecerá aquí como v1.';
+
+    const NOMBRES_CAP = {1:'Estructural',2:'Mampostería y muros',3:'Cubierta',4:'Cimentación y terreno',
+      5:'Elem. no estructurales',6:'Acabados',7:'Instalaciones',8:'Unidades sanitarias',
+      9:'Cocina y restaurante',10:'Elementos exteriores',11:'Deficiencia constructiva',
+      12:'Preliminares',13:'Demoliciones y desmontes',14:'Aseo y escombros'};
+    const cd = capitulosDeSede(s);
+    const cuerpoCaps = paneles[4].querySelector('.cuerpo');
+    const pieCaps = paneles[4].querySelector('.pie');
+    if (cd.corrupto){
+      cuerpoCaps.innerHTML =
+        `<div class="aviso-foto"><b>Dato de capítulo no legible</b>El campo capitulos_dano llegó como el número ${esc(cd.crudo)} en vez de una lista de texto — probable conversión de coma a separador decimal al importar el CSV a Google Sheets. Repórtelo como hallazgo y revise esta celda en la pestaña «Sedes».</div>`;
+      pieCaps.classList.add('oculto');
+    } else {
+      let html = '';
+      for (let n = 1; n <= 11; n++){
+        const tiene = cd.lista.includes(String(n));
+        html += `<div class="cap${tiene ? ' dano' : ''}"><span class="cn">${n}</span>${NOMBRES_CAP[n]}</div>`;
+      }
+      for (let n = 12; n <= 14; n++){
+        html += `<div class="cap trans"><span class="cn">${n}</span>${NOMBRES_CAP[n]}<span class="flex"></span><span class="ctr">transversal</span></div>`;
+      }
+      cuerpoCaps.innerHTML = `<div class="caps">${html}</div>`;
+      pieCaps.classList.remove('oculto');
+      pieCaps.innerHTML = cd.lista.length
+        ? `El censo marca daño en ${cd.lista.length} capítulo${cd.lista.length > 1 ? 's' : ''} (${cd.lista.join(', ')}). Todavía no hay presupuesto radicado para cruzar contra ellos.`
+        : 'El censo no marca ningún capítulo con daño para esta sede.';
+    }
+
+    paneles[5].querySelector('.eyebrow').textContent = 'Sin ítems · sección 3';
+    paneles[5].querySelector('.cuerpo.ras').innerHTML =
+      '<div class="vacio"><h3>Sin ítems</h3><p>Esta sede no tiene presupuesto cargado. El registro manual y la carga masiva (Pasos 3 y 5) siguen en construcción.</p></div>';
+    const cuerpos5 = paneles[5].querySelectorAll('.cuerpo');
+    if (cuerpos5[1]) cuerpos5[1].remove();
+
+    paneles[6].querySelector('.eyebrow').textContent = '1 de 5 secciones';
+    paneles[6].querySelectorAll('.paso-sec').forEach((p, i) => {
+      p.classList.toggle('done', i === 0);
+      const est = p.querySelector('.est');
+      est.className = i === 0 ? 'est e-apr' : 'est e-pend';
+      est.textContent = i === 0 ? 'Completa' : 'Sin diligenciar';
+    });
   }
 
   function pintar(){
@@ -1571,13 +1812,7 @@
     document.getElementById('v-login').classList.toggle('on', esLogin);
     document.getElementById('v-shell').classList.toggle('on', !esLogin);
 
-    // D-6: el valor de referencia de la SED no existe para quien no lo alcanza
-    document.querySelectorAll('[data-sed]').forEach(e => e.classList.toggle('oculto', !R.ref));
-    document.querySelectorAll('.ext-solo').forEach(e => e.classList.toggle('oculto', R.ref));
-    document.querySelectorAll('.ext-off').forEach(e => e.classList.toggle('oculto', !R.ref));
-    // Capacidades
-    document.querySelectorAll('[data-edita]').forEach(e => e.classList.toggle('oculto', !R.edita));
-    document.querySelectorAll('[data-verifica]').forEach(e => e.classList.toggle('oculto', !R.verifica));
+    aplicarVisibilidadRol(R);
     // Pantallas fuera del alcance: tachadas en el selector del mockup
     document.querySelectorAll('.ctl [data-v]').forEach(b => {
       const fuera = b.dataset.v !== 'login' && !R.ve.includes(b.dataset.v);
@@ -1598,10 +1833,54 @@
     document.getElementById('av').classList.toggle('ext', R.ext);
     document.getElementById('rolTx').textContent = R.rot;
     document.getElementById('tituloSedes').textContent = R.ext ? 'Mi municipio' : 'Municipios del lote';
+
+    // Datos reales del backend (Paso 2): solo si hubo login real. Sin sesión,
+    // estas tres pantallas se quedan con el contenido de ejemplo de la maqueta.
+    if (sesion){
+      if (vista === 'inicio') pintarInicioReal();
+      if (vista === 'muni') pintarMuniReal();
+      if (vista === 'ficha') pintarFichaReal();
+
+      if (vista === 'muni' && muniActual){
+        document.getElementById('migas').innerHTML =
+          `<a href="#" data-nav="inicio">Caldas</a><span class="sep">›</span><span class="hoy">${esc(muniActual)}</span>`;
+      }
+      if (vista === 'ficha' && daneActual){
+        const sf = SEDES && SEDES.find(x => String(x.dane_sede) === String(daneActual));
+        const muniSede = muniActual || (sf ? sf.municipio : '');
+        const nombreSede = sf ? sf.sede : daneActual;
+        document.getElementById('migas').innerHTML =
+          `<a href="#" data-nav="inicio">Caldas</a><span class="sep">›</span>` +
+          `<a href="#" data-nav="muni" data-muni="${esc(muniSede)}">${esc(muniSede)}</a>` +
+          `<span class="sep">›</span><span class="hoy">${esc(nombreSede)}</span>`;
+      }
+      // Las tablas reales que se acaban de pintar crearon elementos [data-sed]
+      // nuevos que la pasada de arriba no vio — se reaplica el filtro de rol.
+      aplicarVisibilidadRol(R);
+    }
   }
 
   document.querySelectorAll('.ctl [data-v]').forEach(b => b.addEventListener('click', () => { vista = b.dataset.v; pintar(); }));
   document.querySelectorAll('.ctl [data-r]').forEach(b => b.addEventListener('click', () => { rol = b.dataset.r; pintar(); }));
+
+  // Riel de navegación real: "Sedes" siempre vuelve al listado (RUTA usa el
+  // mismo módulo 'inicio' para inicio/muni/ficha), el resto entra directo.
+  document.querySelectorAll('.riel a[data-mod]').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault();
+    if (a.classList.contains('oculto')) return;
+    vista = a.dataset.mod;
+    if (vista === 'inicio') { muniActual = null; daneActual = null; }
+    pintar();
+  }));
+  // Migas dinámicas (Caldas › Municipio › Sede), generadas en pintar().
+  document.getElementById('migas').addEventListener('click', e => {
+    const a = e.target.closest('a[data-nav]');
+    if (!a) return;
+    e.preventDefault();
+    if (a.dataset.nav === 'inicio') irInicio();
+    else if (a.dataset.nav === 'muni') irMuni(a.dataset.muni);
+  });
+
   pintar();
 </script>
 
