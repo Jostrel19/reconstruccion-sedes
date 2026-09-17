@@ -1,71 +1,110 @@
-# Informe técnico-presupuestal por sede
+# Reconstrucción de sedes — SED Caldas
 
-Aplicativo web para que las 26 alcaldías de los municipios no certificados de Caldas radiquen, sede
-por sede, el presupuesto de reparación de la infraestructura educativa afectada por el sismo del
-10 de agosto de 2026.
+Sistema interno de trazabilidad del presupuesto de reconstrucción de infraestructura educativa
+afectada por el sismo del 10 de agosto de 2026: presupuesto real por sede (radicado por alcaldes y
+rectores, o cargado por los arquitectos desde Excel), verificación técnica, y control administrativo
+completo.
 
-Secretaría de Educación de Caldas — Dirección de Planeación.
+Secretaría de Educación de Caldas — practicante TIC.
 
-- **Qué hace y por qué está diseñado así:** [`docs/GUIA_SHAREPOINT_Y_FUNCIONAMIENTO.md`](docs/GUIA_SHAREPOINT_Y_FUNCIONAMIENTO.md)
-- **Análisis del instrumento:** [`docs/ANALISIS_INSTRUMENTO_PRESUPUESTAL.md`](docs/ANALISIS_INSTRUMENTO_PRESUPUESTAL.md)
-- **Decisiones, reglas de datos y estado:** [`CLAUDE.md`](CLAUDE.md)
+- **Decisiones, reglas de datos y estado — la fuente de verdad:** [`CLAUDE.md`](CLAUDE.md)
+- **Plan de construcción, orden de pasos, qué falta:** [`docs/PLAN_DESARROLLO.md`](docs/PLAN_DESARROLLO.md)
+- **Bitácora cronológica de cómo se llegó hasta acá:** [`docs/REGISTRO_DESARROLLO.md`](docs/REGISTRO_DESARROLLO.md)
+- **Discrepancias de datos sin resolver:** [`docs/CONFLICTOS_Y_HALLAZGOS.md`](docs/CONFLICTOS_Y_HALLAZGOS.md)
 
----
-
-## Estructura
-
-```
-presupuesto-sedes/
-├── web/                        raíz publicable — esto y solo esto va al hosting
-│   ├── index.html                aplicativo de la alcaldía
-│   ├── consola.html              consola de verificación (uso interno, no publicar)
-│   └── assets/
-│       ├── css/styles.css
-│       └── js/                   ver «Capas» más abajo
-├── tools/                      generación de artefactos (no se publica)
-│   ├── rutas.py                  punto único de configuración de rutas
-│   ├── build_catalogo.py         fuentes oficiales -> catálogo
-│   ├── generar_enlaces.py        tokens, hashes y enlaces por alcaldía
-│   ├── gen_instructivo.py        instructivo en Word
-│   ├── versionar.py              sube la versión y refresca la caché
-│   ├── servir.py                 servidor local de pruebas
-│   └── requirements.txt
-├── data/
-│   ├── generado/                 catalogo_sedes.json  (artefacto, regenerable)
-│   └── privado/                  tokens en claro y enlaces — NUNCA se publican
-└── docs/                       análisis, guía de montaje e instructivo
-```
-
-**El límite importante es `web/`.** Todo lo que está ahí es público; todo lo demás no. Dos
-excepciones que viven en `web/` pero **no deben publicarse** y están en `.gitignore`:
-`consola.html` y `assets/js/data-sed.js`, porque llevan el valor estimado por el modelo.
+> Varios documentos en `docs/` describen el **aplicativo anterior** (2026-09-09 y antes: formulario
+> público para alcaldes con token, backend SharePoint/Power Automate). Ese diseño se retiró como
+> puerta de entrada — ver D-17/D-18 en `CLAUDE.md` — y cada uno de esos archivos lleva un aviso al
+> inicio. La arquitectura vigente es la de este README y la de `CLAUDE.md`.
 
 ---
 
-## Capas del cliente
+## Qué es hoy
 
-El aplicativo es HTML, CSS y JavaScript sin framework ni dependencias externas: no carga nada de
-terceros. Los archivos están separados por responsabilidad y se cargan en orden de dependencia.
+Cuatro roles, un mismo backend:
 
-| Capa | Archivo | Responsabilidad |
-|---|---|---|
-| Configuración | `config.js` | Parámetros de negocio: backend, IVA, umbrales, catálogos cerrados |
-| Datos | `data.js` · `data-sed.js` · `tokens.js` | Catálogos y hashes. **Generados: no editar a mano** |
-| Utilidades | `util.js` | Formato, escape, etiquetas. Compartido por las dos pantallas |
-| Persistencia | `storage.js` | Borradores, registros, versionado, importación |
-| Transporte | `api.js` | Único punto que conoce el backend |
-| Presentación | `pdf.js` | Formato oficial diligenciado |
-| Interfaz | `tablero.js` · `formulario.js` · `consola.js` | Pantallas |
-| Arranque | `app.js` | Enrutado, token, sesión |
+| Rol | Qué hace |
+|---|---|
+| **Administrador** | Control total: usuarios, hallazgos, todas las pantallas |
+| **Verificador** (arquitecto) | Revisa y emite concepto sobre lo radicado, todo el departamento |
+| **Responsable de sede** (alcalde o rector) | Digita el presupuesto de sus sedes, sección por sección |
+| **Consulta** (directivo) | Ve el panorama completo, solo lectura |
 
-Reglas que sostienen la separación:
+Dos caminos de captura que terminan en el mismo registro versionado: **diligenciamiento manual**
+(alcaldes/rectores, ítem por ítem) y **carga masiva** (arquitectos, desde el Excel que ya mandó el
+municipio). El detalle completo de objetivos, alcance por rol y capítulos de presupuesto está en
+`docs/PLAN_DESARROLLO.md` §1-2.
 
-- **`api.js` es el único que sabe cómo se envía.** Cambiar de backend es cambiar `BACKEND` y
-  `ENDPOINT_URL` en `config.js`; ninguna pantalla se entera.
-- **`storage.js` es el único que toca `localStorage`.**
-- **Los archivos generados no se editan:** se regeneran con `tools/`.
-- **Los parámetros de negocio viven en `config.js`,** no dispersos en la lógica. Los umbrales de
-  alerta de A y U se ajustan ahí sin tocar código.
+---
+
+## Arquitectura
+
+```
+Frontend (GitHub Pages, sin build, sin dependencias)
+   docs/diseno/mockup_v6.html   ← diseño aprobado, HTML/CSS/JS autocontenido
+   (el frontend real se construye a partir de este archivo, ver Paso 2 del plan)
+        │  fetch — login por código de correo (D-20)
+        ▼
+Backend — Google Apps Script (D-19), desplegado desde Gmail personal (D-19 precisada)
+   Web App (doGet/doPost) ── MailApp (código de un solo uso, entrega SMTP normal a Office 365)
+        │
+        ▼
+Google Sheet, 6 pestañas — columnas exactas en CLAUDE.md §6
+   Sedes · Presupuestos · Items · Verificaciones · Usuarios · Hallazgos
+```
+
+**Por qué Apps Script y no SharePoint/Power Automate:** la Gobernación no tiene licencia Premium de
+Power Automate (D-1, anulada) y las cuentas institucionales son de Microsoft 365, no de Google — no
+hay forma de desplegar con una cuenta "de la Secretaría". Se sigue el mismo patrón que `circular122`
+(otro sistema de la SED): Apps Script desplegado desde el Gmail personal de quien lo mantiene, gratis
+y sin registro en Entra ID. El correo de un solo uso llega igual a Outlook por SMTP normal — ningún
+usuario final inicia sesión en Google.
+
+**`tools/` no es parte del sistema en producción.** Genera el catálogo que alimenta la pestaña
+`Sedes` y lee los Excel que mandan los municipios antes de que existiera la carga masiva dentro del
+sistema — son utilidades de preparación de datos, no el backend.
+
+---
+
+## Estructura del proyecto
+
+```
+reconstruccion-sedes/
+├── CLAUDE.md                    decisiones, reglas de datos, estado — fuente de verdad
+├── docs/
+│   ├── PLAN_DESARROLLO.md         plan vigente: objetivos, roles, pasos, pendientes
+│   ├── REGISTRO_DESARROLLO.md     bitácora cronológica
+│   ├── CONFLICTOS_Y_HALLAZGOS.md  19 discrepancias de datos abiertas
+│   ├── PRUEBA_DESPLIEGUE_APPS_SCRIPT.md
+│   ├── diseno/
+│   │   ├── mockup_v6.html           diseño vigente, ejecutable (ver «Probar el diseño»)
+│   │   └── DISENO_00..05_*.md       diseño previo a D-26, parcialmente desactualizado
+│   └── (ANALISIS_*, AUTOMATIZACION_*, GUIA_SHAREPOINT_*, GUION_*, HANDOFF_*)
+│       — documentan el aplicativo anterior, cada uno con aviso de vigencia al inicio
+├── tools/
+│   ├── rutas.py                    punto único de rutas — nada más trae rutas absolutas
+│   ├── build_catalogo.py           fuentes oficiales -> catalogo_sedes.json (975 sedes)
+│   ├── ingesta.py                  registro de lectores de Excel por municipio
+│   ├── ingesta_samana.py · ingesta_apu.py · ingesta_belalcazar.py
+│   ├── ingesta_esquema.py          esquema común de salida (RegistroIngesta, Hallazgo)
+│   ├── generar_usuarios_borrador.py  borrador de la pestaña Usuarios
+│   ├── servir.py · versionar.py    utilidades del aplicativo anterior, aún válidas
+│   └── _retirado/                  8 scripts del circuito SharePoint/Power Automate, con LEEME.md
+├── web/                          aplicativo anterior (D-18): retirado como puerta de entrada,
+│   │                             pdf.js/formulario.js/config.js se reutilizan al construir
+│   │                             «Registrar presupuesto» (D-33)
+│   └── assets/js/...
+└── data/
+    ├── generado/                   catalogo_sedes.json y artefactos — NO se versiona
+    ├── insumos/                    fctMaestra, dimDaños, usuarios_manual.csv — NO se versiona
+    ├── entregas_excel/             Excel reales de municipios — NO se versiona
+    └── privado/                    NO se versiona
+```
+
+`data/` no está en git salvo su estructura implícita — son documentos oficiales, presupuestos reales
+de municipios y contactos personales (ver `.gitignore`). Las fuentes institucionales (`fctMaestra`,
+etc.) viven fuera del proyecto; su ubicación se resuelve en `tools/rutas.py` y se puede sobrescribir
+con `SED_FUENTES`.
 
 ---
 
@@ -75,103 +114,51 @@ Reglas que sostienen la separación:
 pip install -r tools/requirements.txt
 ```
 
-Los `.xlsx` de la Secretaría viven fuera del proyecto porque son documentos oficiales con su propio
-ciclo de vida. Si no están donde `tools/rutas.py` espera:
-
-```bash
-SED_FUENTES="D:/ruta/a/las/fuentes" python tools/build_catalogo.py
-```
-
-### Regenerar el catálogo
+### Regenerar el catálogo de sedes
 
 ```bash
 python tools/build_catalogo.py
 ```
 
-Cruza `fctMaestra.xlsx`, el anexo de estimación, el Directorio de I.E. y la base de funcionarios, y
-escribe `data/generado/catalogo_sedes.json`, `web/assets/js/data.js` y `web/assets/js/data-sed.js`.
-Imprime cada cruce difuso para que se verifique uno por uno.
+Cruza `fctMaestra.xlsx`, `dimDañosInfraestructura.xlsx` (censo de daños, D-26), el Directorio de I.E.
+y la base de funcionarios; escribe `data/generado/catalogo_sedes.json` — es lo que alimenta la
+pestaña `Sedes` del backend. Imprime cada cruce difuso para verificarlo uno por uno.
 
-### Generar los enlaces
+### Leer un presupuesto real de un municipio
 
 ```bash
-python tools/generar_enlaces.py
-python tools/generar_enlaces.py https://mi-dominio.gov.co/presupuesto/   # otra URL base
+python tools/ingesta.py SAMANA
+python tools/ingesta.py BELALCAZAR "data/entregas_excel/BELALCAZAR"
 ```
 
-Los tokens se conservan entre ejecuciones: regenerar el catálogo **no invalida enlaces ya
-repartidos**. Escribe `data/privado/tokens.json` (en claro, no se publica),
-`web/assets/js/tokens.js` (solo hashes) y `data/privado/enlaces_alcaldias.csv`.
+Un lector por municipio, registrado en `tools/ingesta.py::LECTORES`. Nunca se adivina el lector de un
+municipio cuyo Excel no se ha visto (ver `docs/diseno/DISENO_04_MODULO_INGESTA.md`). Hoy hay lector
+para Samaná, Aguadas, Aranzazu y Belalcázar; el resultado imprime un informe con lo que se pudo leer
+y lo que quedó como hallazgo, nunca vuelca algo dudoso en silencio.
 
-### Probar en local
+### Probar el diseño vigente
 
 ```bash
 python tools/servir.py
 ```
 
-Sirve `web/` sin caché en `http://127.0.0.1:8777`. El token de cada municipio está en
-`data/privado/tokens.json`.
-
-### Consolidar lo que entregaron los municipios
-
-```bash
-python tools/consolidar.py "C:/Users/<usuario>/OneDrive - .../Entregas"
-```
-
-Lee todos los `.json` de la carpeta —OneDrive la sincroniza al disco— y escribe
-`data/generado/CONSOLIDADO_<fecha>.xlsx` con cuatro hojas: avance por municipio, un registro por
-sede, el detalle de actividades y las sedes que faltan por radicar. Extrae también las fotografías
-a `data/generado/fotos/<dane_sede>/`.
-
-Escribe además `data/generado/CONSOLIDADO.xlsx`, de nombre fijo. **Power BI se conecta a ese**: si
-apuntara al fechado, la conexión se rompería cada día. Los fechados quedan como histórico.
-
-Se puede correr las veces que se quiera. Si un municipio reenvía una sede, conserva la versión más
-alta y reporta cuántos reenvíos ignoró.
-
-### Que el consolidado se rehaga solo
-
-```bash
-python tools/vigilar.py "C:/Users/<usuario>/OneDrive - .../Entregas"
-```
-
-Mira la carpeta cada 20 segundos y vuelve a consolidar en cuanto un municipio sube algo. Espera a
-que OneDrive termine de sincronizar antes de leer —un `.json` a medio bajar es un `.json` roto— y si
-el libro está abierto en Excel avisa y reintenta en la siguiente vuelta en lugar de detenerse.
-
-### Preparar lo que se sube al hosting
-
-```bash
-python tools/preparar_publicacion.py
-```
-
-Sube la versión, refresca el sufijo `?v=` y rehace `data/generado/publicar/` con los 13 archivos
-publicables. Excluye `consola.html`, `consola.js` y `data-sed.js`, y **se detiene** si algo de lo que
-iba a publicar menciona `valor_modelo`. Siempre publicar desde esa carpeta: una copia hecha a mano se
-queda vieja y termina subiendo una versión que no es la actual.
-
-Acepta `1.0.0` para fijar la versión o `--misma` para no tocarla. Sin argumentos sube el último
-número, que es lo correcto al publicar una corrección.
-
-### Publicar una corrección
-
-```bash
-python tools/versionar.py 0.2.0
-```
-
-Sube `APP_CONFIG.VERSION` y refresca el sufijo `?v=` de todos los recursos en los dos HTML. **Sin
-esto, quien ya entró seguirá con el JavaScript viejo en caché** y la corrección no le llegará.
+Abrir `docs/diseno/mockup_v6.html`. El selector **«Ver como»** cambia entre los cuatro roles: las
+pantallas fuera de alcance quedan tachadas y el valor de referencia desaparece para Responsable de
+sede (D-6).
 
 ---
 
-## Migración a producción
+## Dónde vive cada cosa — y qué no se versiona
 
-1. Publicar el contenido de `web/` (sin `consola.html` ni `data-sed.js`).
-2. Ajustar `URL_BASE` en `tools/rutas.py` — o pasarla como argumento — y regenerar los enlaces.
-3. Desplegar `consola.html` y `data-sed.js` en un sitio interno, no público.
-4. Montar el SharePoint según [`docs/GUIA_SHAREPOINT_Y_FUNCIONAMIENTO.md`](docs/GUIA_SHAREPOINT_Y_FUNCIONAMIENTO.md).
-5. Cuando exista el flujo de Power Automate, cambiar `BACKEND` a `'http'` y poner su URL en
-   `ENDPOINT_URL`. El resto del aplicativo no cambia.
+| Qué | Dónde | ¿En git? |
+|---|---|---|
+| Decisiones y reglas de negocio | `CLAUDE.md` | Sí |
+| Diseño aprobado | `docs/diseno/mockup_v6.html` | Sí |
+| Catálogo de sedes generado | `data/generado/catalogo_sedes.json` | No — se regenera |
+| Fuentes institucionales (`fctMaestra`, `dimDaños`) | `data/insumos/` | No — datos oficiales |
+| Presupuestos reales de municipios | `data/entregas_excel/` | No — cifras institucionales, contactos |
+| Lista de usuarios internos confirmados | `data/insumos/usuarios_manual.csv` | No — nombres y correos reales |
+| Backend Apps Script (por construir) | Google Sheet + proyecto de Apps Script, fuera del repo | N/A — vive en Google, no en archivos locales |
 
-El proyecto no depende de rutas absolutas: se puede mover completo a otra carpeta, a otro equipo o
-a un repositorio sin editar nada, salvo `SED_FUENTES` si las fuentes quedan en otro lugar.
+El proyecto no depende de rutas absolutas: se puede mover completo sin editar nada, salvo
+`SED_FUENTES` si las fuentes institucionales quedan en otro lugar.

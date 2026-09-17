@@ -39,12 +39,6 @@ CATALOGO_JSON = GENERADO / "catalogo_sedes.json"
 
 DATA_JS = JS / "data.js"          # catálogo público, sin el valor del modelo
 DATA_SED_JS = JS / "data-sed.js"  # catálogo reservado, uso interno
-TOKENS_JS = JS / "tokens.js"      # solo hashes
-
-TOKENS_JSON = PRIVADO / "tokens.json"        # tokens en claro, NO se publica
-ENLACES_CSV = PRIVADO / "enlaces_alcaldias.csv"
-
-INSTRUCTIVO = DOCS / "INSTRUCTIVO ALCALDIAS - Informe tecnico-presupuestal.docx"
 
 # --- Fuentes institucionales -------------------------------------------------
 # Por defecto, la carpeta que contiene este proyecto y sus hermanas
@@ -83,8 +77,6 @@ H_DIM_DANOS = "EstadoInfraestructura"
 SALIDA = Path(os.environ.get("SED_SALIDA", GENERADO))
 
 # --- Parámetros de publicación ----------------------------------------------
-URL_BASE = os.environ.get("SED_URL_BASE", "https://sedcaldas.github.io/presupuesto-sedes/")
-
 # Debe coincidir con APP_CONFIG.VERSION en web/assets/js/config.js.
 # Al subirla hay que refrescar el sufijo ?v= de los HTML (tools/versionar.py).
 VERSION = "0.9.2"
