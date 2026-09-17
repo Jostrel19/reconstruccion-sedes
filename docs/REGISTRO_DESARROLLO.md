@@ -571,3 +571,28 @@ riesgo de continuidad que ya asume `circular122`, no uno nuevo.
 (`docs/PLAN_DESARROLLO.md` §4) quedan resueltos. Falta borrar el proyecto de prueba en
 script.google.com (no se necesita conservarlo) y empezar el Paso 0 real: crear el Google Sheet con
 las 6 pestañas y desplegar el backend definitivo.
+
+## 2026-09-17 — Auditoría de todo el proyecto antes de construir: README desactualizado
+
+Se pidió una revisión a profundidad de todo el repositorio antes de empezar a escribir el backend
+real. Verificado con datos, no de memoria: `catalogo_sedes.json` cuadra exacto con lo que dice
+`CLAUDE.md` (975 sedes, 37 priorizadas, $9.718.464.165, 5 priorizadas sin capítulo de daño),
+`docs/CONFLICTOS_Y_HALLAZGOS.md` tiene 19 hallazgos reales tal como se venía citando, y el mockup
+sigue autocontenido (sin referencias a los `.js` viejos de `web/assets/`).
+
+**Hallazgo grave: `README.md` describía por completo el aplicativo retirado** (SharePoint, Power
+Automate, `web/index.html` como "la app"), con comandos que ya no existen en esa ruta —
+`tools/generar_enlaces.py`, `tools/consolidar.py` y el resto de lo movido a `tools/_retirado/` — y
+sin ningún aviso de vigencia, a diferencia de los otros 5 documentos históricos que ya lo tenían. Es
+el primer archivo que ve cualquiera que entre al repositorio público. Se reescribió por completo:
+arquitectura actual (Apps Script desplegado con Gmail personal, Google Sheet de 6 pestañas), los 4
+roles, los comandos que sí existen hoy (`build_catalogo.py`, `ingesta.py`, `servir.py`), y una tabla
+de qué vive dónde y qué no se versiona.
+
+**`tools/rutas.py` — limpieza de rutas muertas.** `TOKENS_JSON`, `TOKENS_JS`, `ENLACES_CSV`,
+`INSTRUCTIVO` y `URL_BASE` (que además apuntaba a `sedcaldas.github.io`, la organización que Q-5 ya
+descartó) solo las usaban los 8 scripts ya retirados. Se eliminaron. `DATA_JS` y `DATA_SED_JS` se
+conservan porque `build_catalogo.py` (activo, no retirado) todavía los escribe — aunque su
+consumidor (`web/index.html`/`consola.html`) esté retirado como puerta de entrada, tocar esa lógica
+no era parte de lo pedido y el script sigue verificado tal como está. Verificado con
+`python -c "import rutas"` que el módulo sigue cargando bien tras el recorte.
