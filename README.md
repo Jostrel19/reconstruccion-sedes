@@ -7,6 +7,7 @@ completo.
 
 Secretaría de Educación de Caldas — practicante TIC.
 
+- **Qué es el sistema y hasta dónde llega, en un solo documento:** [`docs/ALCANCE_Y_REQUISITOS.md`](docs/ALCANCE_Y_REQUISITOS.md)
 - **Decisiones, reglas de datos y estado — la fuente de verdad:** [`CLAUDE.md`](CLAUDE.md)
 - **Plan de construcción, orden de pasos, qué falta:** [`docs/PLAN_DESARROLLO.md`](docs/PLAN_DESARROLLO.md)
 - **Bitácora cronológica de cómo se llegó hasta acá:** [`docs/REGISTRO_DESARROLLO.md`](docs/REGISTRO_DESARROLLO.md)
