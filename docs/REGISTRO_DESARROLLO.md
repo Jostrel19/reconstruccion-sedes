@@ -629,3 +629,54 @@ editor de Apps Script, correr `crearHojas()`, importar los dos CSV, volver a des
 y probar `solicitarCodigo`/`validarCodigo` de punta a punta con un correo real — guía completa en
 `backend/README.md`. Después de eso, conectar el frontend del mockup con `fetch` real es lo que
 falta para cerrar el Paso 1.
+
+## 2026-09-17 — Backend en producción: primer despliegue real, D-37 y prueba de punta a punta
+
+Se ejecutó el Paso 0 completo con el usuario, en vivo:
+
+1. Sheet real creado con el Gmail personal, 4 archivos `.gs` pegados en su editor. Un error de
+   sintaxis en `Setup.gs` (`Unexpected end of input`) apareció después de que la función ya se había
+   ejecutado bien una vez — se resolvió reemplazando el archivo completo en vez de depurarlo línea
+   por línea, más rápido y sin riesgo de dejar el archivo a medias otra vez.
+2. `crearHojas()` ejecutada: las 6 pestañas quedaron con su encabezado exacto.
+3. `tools/exportar_backend.py` (nuevo) generó `backend_sedes.csv` (975 filas) y
+   `backend_usuarios.csv` (193 filas), importados con `Reemplazar hoja actual` y la casilla de
+   "convertir texto a números" **desmarcada a propósito**: la columna `capitulos_dano` trae listas
+   como `"2,6"`, y con la configuración regional en español una hoja que sí convierta habría leído
+   la coma como separador decimal y la habría vuelto el número 2,6, perdiendo la lista de capítulos.
+   Verificado en la hoja real: los valores multi-capítulo (`1,2,3,6,7,9,10`, etc.) llegaron intactos
+   como texto.
+
+**Al escribir `exportar_backend.py` se encontró y corrigió un error propio antes de que llegara al
+Sheet**, no después: la primera versión le asignaba a los alcaldes `alcance = TODO_EL_DEPARTAMENTO`
+en vez de su municipio — habría roto D-24 dándole a cada alcalde acceso a los otros 25 municipios.
+Se corrigió a usar el campo `municipio` que el borrador ya trae por separado antes de generar el CSV
+que se importó.
+
+**D-37 — nueva decisión, a petición del usuario.** Preocupación planteada directamente: que alguien
+edite un presupuesto ya radicado y el cambio no quede registrado en ningún lado. Se resolvió en dos
+capas — la aplicación nunca sobrescribe `Presupuestos`/`Items` (cada corrección es una fila nueva,
+versión +1, la anterior se apaga pero no se borra) y el Sheet se protege con
+`Datos > Hojas y rangos protegidos` para que `Presupuestos`, `Items`, `Verificaciones`, `Usuarios` y
+`Hallazgos` solo los pueda editar el dueño de la cuenta — cualquier otro cambio tiene que pasar por
+la API, que sí versiona. Aplicado en vivo sobre las 5 pestañas.
+
+**Prueba de punta a punta, con `curl` contra el Web App real** (no la prueba de eco de ayer):
+
+- `doGet` → ping ok.
+- `POST solicitarCodigo` con `data@sedcaldas.edu.co` → `{"ok":true}`, correo recibido. Se disparó
+  3 veces por reintentos de `curl` con problemas de `schannel` en Windows al seguir la redirección
+  de Apps Script (`302` a `script.googleusercontent.com/macros/echo?...`) — cada intento ejecuta el
+  backend de verdad, así que llegaron 3 correos con 3 códigos distintos; se resolvió siguiendo la
+  redirección manualmente en dos pasos (`curl` sin `-L`, extraer `Location`, `curl` aparte) en vez de
+  confiar en `-L`.
+- `POST validarCodigo` con el último código → token firmado, `rol: ADMINISTRADOR`,
+  `nombre: JOSE ANDRES SAAVEDRA HIGUERA`, `alcance: TODO_EL_DEPARTAMENTO` — todo leído en vivo de la
+  pestaña `Usuarios` real, no de un dato de prueba.
+- `POST listarSedes` con ese token → 975 sedes, `valor_referencia` presente (correcto para
+  Administrador, D-6 no le aplica a este rol).
+
+**Sin probar:** el filtro de alcance para `RESPONSABLE_SEDE` (D-24) y `VERIFICADOR` (D-25) — el
+código ya lo implementa (`_enAlcance` en `Sedes.gs`) pero no hay forma de probarlo hoy sin acceso a
+un correo real de alcalde, rector o arquitecto. Queda para cuando se invite a alguien real o se
+decida crear una cuenta de prueba con cada rol.

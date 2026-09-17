@@ -159,6 +159,15 @@ Cada paso deja algo que se puede probar. No se avanza con el anterior sin verifi
 **Los tres bloqueantes del paso 0 están resueltos.** No queda nada pendiente para empezar el
 paso 1 (backend real) — ver `docs/REGISTRO_DESARROLLO.md` para el detalle de la prueba.
 
+**Actualizado 2026-09-17, tarde — Paso 0 y arranque de Paso 1 verificados en producción**, no solo
+en código: Sheet real creado con las 6 pestañas (`crearHojas`), `Sedes` y `Usuarios` cargadas desde
+`tools/exportar_backend.py`, las 5 pestañas de escritura protegidas contra edición directa (D-37),
+desplegado como Web App, y probado con `curl` de punta a punta: `solicitarCodigo` →
+`validarCodigo` → token real → `listarSedes` devuelve las 975 sedes con `valor_referencia` visible
+para `ADMINISTRADOR`. **Sin probar todavía:** el filtro de alcance para `RESPONSABLE_SEDE` y
+`VERIFICADOR` — el código lo implementa (`Sedes.gs::_enAlcance`) pero no hay forma de probarlo sin
+acceso a un correo real de alcalde/rector/arquitecto.
+
 **No bloquean, pero hay que resolverlos antes de dar acceso real:**
 
 | # | Qué falta | Quién |
