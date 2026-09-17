@@ -109,8 +109,11 @@ Cada paso deja algo que se puede probar. No se avanza con el anterior sin verifi
 5. Genera código de 6 dígitos, lo guarda con vencimiento de 10 min, lo manda con `MailApp`.
 6. `POST validarCodigo` → token de sesión firmado (HMAC, secreto en las Propiedades del script) +
    rol y alcance leídos de `Usuarios`.
-7. Frontend: pantalla de entrada del mockup, en dos pasos — **falta conectarla con `fetch` real** al
-   endpoint; hoy el botón solo cambia de vista sin llamar al backend.
+7. ✅ **Frontend conectado con `fetch` real (2026-09-17).** La pantalla de entrada del mockup ya
+   llama a `solicitarCodigo`/`validarCodigo` de verdad — probado de punta a punta con la cuenta
+   Administrador: el token, el rol, el nombre y el alcance que se ven en pantalla vienen del backend,
+   no de un dato simulado. El selector "Ver como" del mockup sigue existiendo aparte, para revisar
+   diseño sin necesidad de loguearse cada vez.
 
 ### Paso 2 — Armazón y lectura — arrancado
 8. Riel, barra superior, migas, y el filtrado por rol **del lado del servidor**. **`backend/Sedes.gs`
@@ -167,6 +170,17 @@ desplegado como Web App, y probado con `curl` de punta a punta: `solicitarCodigo
 para `ADMINISTRADOR`. **Sin probar todavía:** el filtro de alcance para `RESPONSABLE_SEDE` y
 `VERIFICADOR` — el código lo implementa (`Sedes.gs::_enAlcance`) pero no hay forma de probarlo sin
 acceso a un correo real de alcalde/rector/arquitecto.
+
+**Actualizado 2026-09-17, más tarde — Paso 1 cerrado.** `docs/diseno/mockup_v6.html` ya no simula el
+login: llama al backend real (`BACKEND_URL` apunta al despliegue vigente), y el rol/nombre/alcance
+que muestra la interfaz salen de la respuesta de `validarCodigo`. Probado con la cuenta
+Administrador de punta a punta en el navegador. **Hallazgo para atender antes de invitar a alguien
+externo:** `solicitarCodigo` no tiene límite de frecuencia — cualquiera que conozca la URL del
+backend (pública, viaja en el HTML) puede pedir códigos repetidamente para un correo que sí está en
+`Usuarios`, lo que llenaría esa bandeja de correos de código sin llegar a comprometer ninguna cuenta
+(cada código sigue siendo de un solo uso y vence en 10 min). No bloquea seguir construyendo; sí
+conviene agregar un límite (p. ej. máximo 1 código por correo cada 60 segundos, con
+`CacheService`) antes de repartir el enlace real a alcaldes y rectores.
 
 **No bloquean, pero hay que resolverlos antes de dar acceso real:**
 

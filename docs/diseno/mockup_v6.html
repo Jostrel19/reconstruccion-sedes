@@ -514,15 +514,17 @@
               <div id="login-p1">
                 <div class="campo"><label for="u">Correo institucional</label>
                   <input id="u" type="email" placeholder="nombre@sedcaldas.edu.co" autocomplete="username"></div>
-                <button class="b" type="button" onclick="loginEnviarCodigo()">Enviar código</button>
+                <button class="b" type="button" id="btn-enviar" onclick="loginEnviarCodigo()">Enviar código</button>
               </div>
 
               <div id="login-p2" class="oculto">
                 <div class="campo"><label for="cod">Código de 6 dígitos</label>
-                  <input id="cod" type="text" inputmode="numeric" maxlength="6" placeholder="000000" value="482913"></div>
-                <button class="b" type="button" onclick="loginEntrar()">Entrar</button>
+                  <input id="cod" type="text" inputmode="numeric" maxlength="6" placeholder="000000"></div>
+                <button class="b" type="button" id="btn-entrar" onclick="loginEntrar()">Entrar</button>
                 <button class="b sec mini" type="button" style="margin-top:.5rem" onclick="loginVolver()">Cambiar correo</button>
               </div>
+
+              <div id="login-error" class="oculto" style="color:#b3261e;font-size:.85rem;margin:.5rem 0"></div>
 
               <div class="pie2">
                 Sin contraseña: se entra con correo institucional + código de un solo uso, válido
@@ -1467,21 +1469,94 @@
 
   let vista = 'login', rol = 'admin';
 
-  /* Login D-20: correo + código de un solo uso, sin contraseña. Solo dos
-     pasos visuales — el backend real hace la validación, esto solo muestra
-     el flujo. */
-  function loginEnviarCodigo(){
-    document.getElementById('login-sub').textContent =
-      'Le enviamos un código a su correo — vence en 10 minutos, un solo uso.';
-    document.getElementById('login-p1').classList.add('oculto');
-    document.getElementById('login-p2').classList.remove('oculto');
+  /* Backend real (D-19). Único punto que cambia si el despliegue cambia de
+     URL — ver backend/README.md. */
+  const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbz28P3m9yNHcI-catJhiCN32hPgSR0Qpx5h3AEnSHITM8Uf0OrUEFSI0__HbCN5K_8/exec';
+
+  const ROL_BACKEND_A_CLAVE = {
+    ADMINISTRADOR: 'admin', VERIFICADOR: 'verif',
+    RESPONSABLE_SEDE: 'resp', CONSULTA: 'consulta',
+  };
+
+  let sesion = null; // {token, rol, nombre, alcance} una vez logueado de verdad
+  let correoActual = '';
+
+  /* Sin cabeceras a propósito: un fetch con body de texto plano es una
+     petición CORS "simple" y no dispara preflight OPTIONS, que Apps Script
+     no responde. El backend igual lo parsea como JSON (Codigo.gs). */
+  async function backend(accion, datos){
+    const resp = await fetch(BACKEND_URL, {
+      method: 'POST',
+      body: JSON.stringify(Object.assign({ accion }, datos)),
+    });
+    return resp.json();
   }
+
+  function iniciales(nombre){
+    return (nombre || '').trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase();
+  }
+
+  function errorLogin(msg){
+    const el = document.getElementById('login-error');
+    el.textContent = msg;
+    el.classList.toggle('oculto', !msg);
+  }
+
+  /* Login D-20: correo + código de un solo uso, sin contraseña, contra el
+     backend real. */
+  async function loginEnviarCodigo(){
+    errorLogin('');
+    correoActual = document.getElementById('u').value.trim();
+    if (!correoActual) { errorLogin('Escriba su correo institucional.'); return; }
+
+    const btn = document.getElementById('btn-enviar');
+    btn.disabled = true; btn.textContent = 'Enviando...';
+    try {
+      await backend('solicitarCodigo', { correo: correoActual });
+      document.getElementById('login-sub').textContent =
+        'Le enviamos un código a su correo — vence en 10 minutos, un solo uso.';
+      document.getElementById('login-p1').classList.add('oculto');
+      document.getElementById('login-p2').classList.remove('oculto');
+    } catch (err) {
+      errorLogin('No se pudo contactar el servidor. Intente de nuevo.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Enviar código';
+    }
+  }
+
   function loginVolver(){
+    errorLogin('');
     document.getElementById('login-sub').textContent = 'Escriba su correo institucional.';
     document.getElementById('login-p2').classList.add('oculto');
     document.getElementById('login-p1').classList.remove('oculto');
   }
-  function loginEntrar(){ vista = 'tablero'; pintar(); }
+
+  async function loginEntrar(){
+    errorLogin('');
+    const codigo = document.getElementById('cod').value.trim();
+    if (!codigo) { errorLogin('Escriba el código de 6 dígitos.'); return; }
+
+    const btn = document.getElementById('btn-entrar');
+    btn.disabled = true; btn.textContent = 'Validando...';
+    try {
+      const r = await backend('validarCodigo', { correo: correoActual, codigo });
+      if (!r.ok) { errorLogin(r.error || 'Código inválido.'); return; }
+
+      sesion = { token: r.token, rolBackend: r.rol, nombre: r.nombre, alcance: r.alcance };
+      const clave = ROL_BACKEND_A_CLAVE[r.rol];
+      if (!clave) { errorLogin('Rol desconocido: ' + r.rol); return; }
+
+      rol = clave;
+      ROLES[clave].nom = r.nombre;
+      ROLES[clave].ini = iniciales(r.nombre);
+      vista = ROLES[clave].ve[0];
+      pintar();
+    } catch (err) {
+      errorLogin('No se pudo contactar el servidor. Intente de nuevo.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Entrar';
+    }
+  }
 
   function pintar(){
     const R = ROLES[rol];
