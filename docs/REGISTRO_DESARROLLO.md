@@ -740,3 +740,37 @@ duplicar. Incluye una sección explícita de que es un documento vivo y el proto
 para que no quede desactualizado como pasó con el README antes de la auditoría del mismo día.
 
 Enlazado desde `README.md` como primer punto de entrada.
+
+## 2026-09-17 — Tres mejoras de resiliencia, a petición del usuario (D-38)
+
+Se preguntó directamente qué tan viable y sólido es el enfoque completo, ahora que hay backend real
+en producción. La respuesta identificó tres huecos concretos, y se pidió corregir los tres:
+
+1. **`Auth_validarCodigo` sin límite de intentos.** El código de 6 dígitos vive 10 minutos sin
+   restricción de cuántas veces se puede probar — un script podía intentar las 999.999 combinaciones
+   dentro de esa ventana. Se agregó `MAX_INTENTOS = 5`: al quinto intento fallido, el código vigente
+   se invalida (`cache.remove('otp_' + correo)`) y hay que pedir uno nuevo. La cuenta de intentos se
+   guarda con la misma llave de caché que ya se usaba (`intentos_<correo>`), y se resetea cada vez
+   que se emite un código nuevo, para no acumular intentos de una ventana vieja.
+2. **Sin respaldo del Sheet fuera del propio archivo.** Google guarda historial de versiones nativo,
+   pero vive dentro del mismo archivo — no protege contra que el archivo se corrompa, se borre o
+   quede inaccesible. Se agregó `backend/Backup.gs`: `configurarRespaldoAutomatico` crea un
+   disparador diario que llama a `respaldarSheet`, la cual copia el Sheet completo a una carpeta
+   aparte de Drive (`Respaldos - Reconstruccion de sedes`) y borra copias de más de 30 días para no
+   acumular indefinidamente.
+3. **Sin plan de continuidad si la cuenta personal deja de estar disponible.** Todo el backend
+   depende del Gmail personal del practicante (D-19 precisada) — no hay forma de evitarlo mientras
+   el dominio institucional no tenga Google Workspace, pero sí se puede documentar qué hacer.
+   `docs/RUNBOOK_CONTINUIDAD.md` (nuevo) inventaría qué vive dónde, dos acciones para reducir el
+   riesgo desde ya (compartir el Sheet/proyecto como Editor con una segunda cuenta de confianza,
+   confirmar que el respaldo automático está corriendo), y dos procedimientos: traspaso coordinado
+   (la cuenta saliente sigue activa) y recuperación de emergencia (no lo está, se reconstruye desde
+   el respaldo más reciente + el código fuente de `backend/`, que nunca depende de la cuenta
+   personal porque vive en GitHub).
+
+Verificado con `node --check` que `Auth.gs` y `Backup.gs` siguen siendo JS válido. Documentado como
+**D-38** en `CLAUDE.md`, con snapshot agregado a `docs/ALCANCE_Y_REQUISITOS.md` y a
+`docs/PLAN_DESARROLLO.md` §4. **Pendiente del lado del usuario:** pegar `Auth.gs` actualizado y
+`Backup.gs` nuevo en el proyecto real, correr `configurarRespaldoAutomatico` una vez, y actualizar la
+implementación (`Nueva versión`) para que el bloqueo de intentos quede activo — nada de esto llega
+solo al backend desplegado, igual que pasó con el límite de frecuencia.

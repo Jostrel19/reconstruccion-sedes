@@ -183,6 +183,14 @@ en `Usuarios`. **Pendiente del lado del usuario:** pegar el `Auth.gs` actualizad
 **y actualizar la implementación** (`Implementar > Administrar implementaciones > editar > Nueva
 versión`) — el código nuevo no llega solo a la URL `/exec` ya publicada.
 
+**Actualizado 2026-09-17, tarde-noche — 3 mejoras de resiliencia (D-38), a petición explícita del
+usuario tras revisar qué tan sólido está el sistema:** `Auth_validarCodigo` bloquea un código tras 5
+intentos fallidos (`backend/Auth.gs`); `backend/Backup.gs::configurarRespaldoAutomatico` respalda el
+Sheet completo a Drive todos los días; `docs/RUNBOOK_CONTINUIDAD.md` documenta el traspaso de la
+cuenta personal que sostiene todo esto. **Pendiente del lado del usuario:** pegar `Auth.gs`
+actualizado y `Backup.gs` nuevo en el proyecto real, correr `configurarRespaldoAutomatico` una vez, y
+actualizar la implementación (`Nueva versión`) para que el bloqueo de intentos quede activo.
+
 **No bloquean, pero hay que resolverlos antes de dar acceso real:**
 
 | # | Qué falta | Quién |

@@ -13,12 +13,16 @@ un archivo `.gs` acá, hay que copiar el cambio también al proyecto real.
 2. **Extensiones → Apps Script.** Se abre un proyecto ligado a ese Sheet.
 
 3. Crear un archivo de script por cada uno de los que hay en esta carpeta (`Setup`, `Codigo`,
-   `Auth`, `Sedes` — el nombre del archivo en Apps Script no necesita la extensión `.gs`) y pegar el
-   contenido tal cual.
+   `Auth`, `Sedes`, `Backup` — el nombre del archivo en Apps Script no necesita la extensión `.gs`) y
+   pegar el contenido tal cual.
 
 4. **Ejecutar `crearHojas` una vez** (desplegable de funciones, arriba del editor → seleccionar
    `crearHojas` → ▶ Ejecutar). Autorizar los permisos que pida. Esto crea las 6 pestañas con las
    columnas exactas de `CLAUDE.md` §6.
+
+4.b **Ejecutar `configurarRespaldoAutomatico` una vez** (mismo mecanismo, archivo `Backup`). Crea un
+   disparador que copia el Sheet completo a una carpeta de Drive todos los días — ver
+   `docs/RUNBOOK_CONTINUIDAD.md`. Pedirá autorizar permisos de Drive además de los de Sheets.
 
 5. **Cargar los datos reales:**
    ```bash
@@ -56,6 +60,7 @@ un archivo `.gs` acá, hay que copiar el cambio también al proyecto real.
 | `Codigo.gs` | `doGet` (ping) + `doPost` con registro de acciones | Paso 0 |
 | `Auth.gs` | Login por código de un solo uso, token de sesión firmado (D-20) | Paso 1 |
 | `Sedes.gs` | Listado de sedes filtrado por rol/alcance del lado del servidor (D-6, D-24, D-25) | Paso 2 |
+| `Backup.gs` | Respaldo diario del Sheet completo a Drive, con retención de 30 días (D-38) | — resiliencia, no es un paso del plan |
 
 **Falta:** enrutado y migas del frontend real (hoy solo existe el mockup estático), escritura de
 Presupuestos/Items (Paso 3), Verificaciones (Paso 4), Cargas (Paso 5), Hallazgos (Paso 6), y el PDF
@@ -70,3 +75,6 @@ y correo de confirmación. Cada uno se agrega como una entrada nueva en el objet
   restricción (Verificador).
 - El secreto de firma de los tokens se genera solo y se guarda en las Propiedades del script — no
   vive en ningún archivo de este repo.
+- **D-38** — `validarCodigo` bloquea un código tras 5 intentos fallidos; respaldo diario automático;
+  ver `docs/RUNBOOK_CONTINUIDAD.md` para qué hacer si la cuenta que despliega esto deja de estar
+  disponible.
