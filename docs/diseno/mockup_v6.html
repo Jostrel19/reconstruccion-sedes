@@ -1624,6 +1624,121 @@
      censo de daños son reales; presupuesto, verificación e historial todavía
      no existen (Pasos 3-5) y se muestran como estado vacío, no simulados. */
 
+  function pintarTableroReal(){
+    const franja = document.querySelector('#s-tablero .franja');
+    if (!SEDES){
+      franja.innerHTML = '<div class="c"><b class="n">…</b><span>Cargando sedes…</span></div>';
+      return;
+    }
+    const paneles = document.querySelectorAll('#s-tablero .p');
+    // [0] municipios del lote (mosaico) · [1] valor de referencia por municipio
+    // [2] del universo al lote · [3] nivel de afectación · [4] bitácora
+
+    const lote = SEDES.filter(s => esPriorizada(s.priorizada));
+    const porMuni = new Map();
+    lote.forEach(s => { if (!porMuni.has(s.municipio)) porMuni.set(s.municipio, []); porMuni.get(s.municipio).push(s); });
+    const porTamano = [...porMuni.entries()].sort((a, b) => b[1].length - a[1].length);
+
+    const valorLote = lote.reduce((a, s) => a + (Number(s.valor_referencia) || 0), 0);
+    const matriculaLote = lote.reduce((a, s) => a + (Number(s.matricula) || 0), 0);
+    const noHabilitadas = lote.filter(s => s.estado_prestacion === 'No habilitada').length;
+
+    // Franja de cifras: solo lo que ya es real. Esperando verificación y
+    // Aprobadas para obra quedan en 0 porque Verificaciones no existe todavía
+    // (Paso 4) — no se simulan para que no parezca que ya hay trámite andando.
+    franja.innerHTML =
+      `<div class="c"><b class="n">${lote.length}</b><span>Sedes en el lote 1</span></div>` +
+      `<div class="c" data-sed><b class="n">${cop(valorLote)}</b><span>Valor de referencia</span></div>` +
+      `<div class="c"><b class="n">${matriculaLote}</b><span>Estudiantes afectados</span></div>` +
+      `<div class="c er"><b class="n">${noHabilitadas}</b><span>Sedes no habilitadas</span></div>` +
+      `<div class="c"><b class="n">0</b><span>Esperando verificación</span></div>` +
+      `<div class="c"><b class="n">0</b><span>Aprobadas para obra</span></div>`;
+
+    // Municipios del lote — mosaico clicable (drill-down directo desde el Tablero)
+    let mosaico = '';
+    porTamano.forEach(([muni, sedes]) => {
+      const total = sedes.reduce((a, s) => a + (Number(s.valor_referencia) || 0), 0);
+      mosaico += `<div class="tsl" data-muni="${esc(muni)}"><b>${esc(muni)}</b><span class="sub">${sedes.length} sede${sedes.length === 1 ? '' : 's'} · ${cop(total)}</span></div>`;
+    });
+    paneles[0].querySelector('.mosaico').innerHTML = mosaico;
+    paneles[0].querySelectorAll('.tsl').forEach(el => el.addEventListener('click', () => irMuni(el.dataset.muni)));
+    // Todavía no hay presupuestos radicados en ningún municipio del lote — la
+    // leyenda de tres estados (pendiente/en curso/aprobado) no aplica todavía.
+    paneles[0].querySelector('.leyenda').innerHTML = '<span><i style="background:var(--borde-f)"></i>Sin presupuesto radicado</span>';
+    const todosMunicipios = [...new Set(SEDES.map(s => s.municipio))].sort();
+    const sinLote = todosMunicipios.filter(m => !porMuni.has(m));
+    paneles[0].querySelector('.resto').innerHTML = sinLote.length
+      ? `<b>Los otros ${sinLote.length} municipios no tienen sedes en el lote 1:</b> ${sinLote.map(esc).join(' · ')}.`
+      : '';
+
+    // Valor de referencia por municipio — barras a escala real
+    const porValor = porTamano
+      .map(([muni, sedes]) => [muni, sedes.reduce((a, s) => a + (Number(s.valor_referencia) || 0), 0)])
+      .sort((a, b) => b[1] - a[1]);
+    const maxValor = porValor.length ? porValor[0][1] : 0;
+    let rk = '';
+    porValor.forEach(([muni, total], i) => {
+      const pct = maxValor ? (total / maxValor * 100) : 0;
+      rk += `<div class="rk"><span class="nb">${esc(muni)}</span><span class="pista"><i class="${i < 2 ? 'alto' : ''}" style="width:${pct.toFixed(1)}%"></i></span><span class="vl">${cop(total)}</span></div>`;
+    });
+    paneles[1].querySelector('.cuerpo').innerHTML = rk;
+    // La nota sobre Samaná es un hallazgo real y documentado (D-27: sus 4
+    // cifras ya son presupuesto recibido, no estimación) — se deja tal cual,
+    // solo se oculta si Samaná deja de tener sedes en el lote.
+    paneles[1].querySelector('.pie').classList.toggle('oculto', !porMuni.has('SAMANÁ'));
+
+    // Del universo al lote — a escala real sobre el total de sedes en el
+    // alcance de quien mira (975 para roles con Tablero, que ven todo el
+    // departamento). Las últimas tres barras siguen en 0: nadie ha podido
+    // cargar un archivo ni radicar un presupuesto todavía (Pasos 3 y 5).
+    const totalSedes = SEDES.length;
+    const pctDe = n => totalSedes ? (n / totalSedes * 100) : 0;
+    paneles[2].querySelector('.emb').innerHTML =
+      `<div class="fila"><span>Sedes oficiales</span><span class="pista"><i style="width:100%;background:var(--gris)"></i></span><span class="vl n">${totalSedes}</span></div>` +
+      `<div class="fila"><span>Priorizadas · lote 1</span><span class="pista"><i style="width:${pctDe(lote.length).toFixed(1)}%;background:var(--gris-osc)"></i></span><span class="vl n">${lote.length}</span></div>` +
+      `<div class="fila"><span>Con archivo recibido</span><span class="pista"><i style="width:0%;background:var(--oro)"></i></span><span class="vl n">0</span></div>` +
+      `<div class="fila"><span>Presupuesto radicado</span><span class="pista"><i style="width:0%;background:var(--verde)"></i></span><span class="vl n">0</span></div>` +
+      `<div class="fila"><span>Aprobadas para obra</span><span class="pista"><i style="width:0%;background:var(--ok)"></i></span><span class="vl n">0</span></div>`;
+    paneles[2].querySelector('.pie').innerHTML =
+      `Barras a escala real sobre ${totalSedes}. El lote es ${lote.length} de ${totalSedes} (${pctDe(lote.length).toFixed(1)} %). Las últimas tres siguen en 0 porque Cargas y Registrar presupuesto (Pasos 3 y 5) todavía no están construidos.`;
+
+    // "Nivel de afectación" se repuebla como estado de prestación del
+    // servicio: es el campo real que trae el censo (dimDaños). No existe un
+    // campo de "grave/moderado/leve" que sustente las categorías originales
+    // del diseño, así que no se inventan.
+    paneles[3].querySelector('h2').textContent = 'Estado de prestación del servicio';
+    const conteo = { 'Habilitada': 0, 'Habilitada con restricción': 0, 'No habilitada': 0 };
+    let sinDato = 0;
+    lote.forEach(s => { if (conteo.hasOwnProperty(s.estado_prestacion)) conteo[s.estado_prestacion]++; else sinDato++; });
+    const colores = { 'Habilitada': 'var(--ok)', 'Habilitada con restricción': 'var(--alerta)', 'No habilitada': 'var(--err)' };
+    let dist = '', ley = '';
+    Object.keys(conteo).forEach(k => {
+      if (!conteo[k]) return;
+      const pct = lote.length ? (conteo[k] / lote.length * 100) : 0;
+      dist += `<div style="width:${pct.toFixed(1)}%;background:${colores[k]}">${conteo[k]}</div>`;
+      ley += `<span><i style="background:${colores[k]}"></i>${k}</span>`;
+    });
+    if (sinDato){
+      const pct = lote.length ? (sinDato / lote.length * 100) : 0;
+      dist += `<div style="width:${pct.toFixed(1)}%;background:var(--borde-f);color:var(--tx)">${sinDato}</div>`;
+      ley += '<span><i style="background:var(--borde-f)"></i>Sin dato</span>';
+    }
+    paneles[3].querySelector('.dist').innerHTML = dist;
+    paneles[3].querySelector('.leyenda').innerHTML = ley;
+    paneles[3].querySelector('.pie').textContent = sinDato
+      ? `${sinDato} de ${lote.length} sedes del lote no traen estado de prestación en el censo.`
+      : `Las ${lote.length} sedes del lote traen estado de prestación en el censo.`;
+
+    // Bitácora: no hay todavía ningún endpoint de actividad/auditoría en el
+    // backend (eso vendría con Presupuestos/Cargas/Verificaciones, Pasos 3-5).
+    // Se muestra vacía en vez de simular eventos — y se quita el indicador
+    // "en vivo", que implicaría una actualización en tiempo real que no existe.
+    const vivo = paneles[4].querySelector('.vivo');
+    if (vivo) vivo.remove();
+    paneles[4].querySelector('.cuerpo').innerHTML =
+      '<p style="margin:0;color:var(--tx-sec);font-size:.83rem">Todavía no hay actividad para mostrar. Esta bitácora se llenará cuando existan presupuestos radicados o cargas procesadas (Pasos 3 y 5).</p>';
+  }
+
   function pintarInicioReal(){
     const panel = document.querySelector('#s-inicio .p');
     const panelHallazgos = document.querySelectorAll('#s-inicio .p')[1];
@@ -1837,6 +1952,7 @@
     // Datos reales del backend (Paso 2): solo si hubo login real. Sin sesión,
     // estas tres pantallas se quedan con el contenido de ejemplo de la maqueta.
     if (sesion){
+      if (vista === 'tablero') pintarTableroReal();
       if (vista === 'inicio') pintarInicioReal();
       if (vista === 'muni') pintarMuniReal();
       if (vista === 'ficha') pintarFichaReal();

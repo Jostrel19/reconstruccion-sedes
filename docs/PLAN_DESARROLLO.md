@@ -115,7 +115,7 @@ Cada paso deja algo que se puede probar. No se avanza con el anterior sin verifi
    no de un dato simulado. El selector "Ver como" del mockup sigue existiendo aparte, para revisar
    diseño sin necesidad de loguearse cada vez.
 
-### Paso 2 — Armazón y lectura — en curso
+### Paso 2 — Armazón y lectura — ✅ cerrado 2026-09-17
 8. ✅ Riel y migas ya navegan de verdad (antes eran decorativos); filtrado por rol **del lado del
    servidor** en `backend/Sedes.gs` (D-24/D-25), `valor_referencia` oculto a Responsable de sede
    (D-6) — verificado también sobre datos reales, no solo en el diseño simulado.
@@ -124,7 +124,11 @@ Cada paso deja algo que se puede probar. No se avanza con el anterior sin verifi
    a sedes de un municipio, ficha con identidad y censo de daños reales (capítulos 1-14). Lo que
    todavía no existe (presupuesto, historial, ítems) se muestra vacío, no simulado — detalle en
    `docs/REGISTRO_DESARROLLO.md`.
-10. Tablero — sigue con las cifras de ejemplo del diseño; falta conectarlo igual que Sedes.
+10. ✅ **Hecho 2026-09-17.** Tablero conectado a `listarSedes`: franja de cifras, mosaico de
+    municipios (clicable, entra directo a Municipio), valor de referencia por municipio y "del
+    universo al lote" son reales. "Nivel de afectación" se repobló como "Estado de prestación del
+    servicio" (el campo real del censo; el original no tenía con qué sustentar sus categorías) y la
+    Bitácora quedó vacía (no existe todavía un registro de actividad — eso es Paso 3 en adelante).
 
 ### Paso 3 — Escritura manual (objetivo 1)
 11. Pantalla Registrar presupuesto: ítems, cálculo, validaciones, borrador.
@@ -195,11 +199,14 @@ cuenta personal que sostiene todo esto. **Pendiente del lado del usuario:** pega
 actualizado y `Backup.gs` nuevo en el proyecto real, correr `configurarRespaldoAutomatico` una vez, y
 actualizar la implementación (`Nueva versión`) para que el bloqueo de intentos quede activo.
 
-**Actualizado 2026-09-17, noche — Paso 2, ítem 9 cerrado.** `docs/diseno/mockup_v6.html` ya no
-muestra Samaná de ejemplo en Sedes/Municipio/Ficha: las tres pantallas llaman `listarSedes` y pintan
-el catálogo real, con drill-down real (clic en municipio → sus sedes; clic en sede → su ficha) y
-migas/riel funcionales. Probado de punta a punta con la cuenta Administrador. Detalle completo en
-`docs/REGISTRO_DESARROLLO.md`.
+**Actualizado 2026-09-17, noche — Paso 2 completo (ítems 9 y 10).** `docs/diseno/mockup_v6.html` ya
+no muestra Samaná de ejemplo en Sedes/Municipio/Ficha: las tres pantallas llaman `listarSedes` y
+pintan el catálogo real, con drill-down real (clic en municipio → sus sedes; clic en sede → su
+ficha) y migas/riel funcionales. El Tablero quedó igual de conectado, incluido el mosaico de
+municipios como acceso directo. Probado de punta a punta con la cuenta Administrador: cifras
+($9.718.464.165, 37 sedes, 34 no habilitadas, 2.623 estudiantes) calculadas en el navegador contra
+el catálogo real y verificadas iguales a las que ya documentaba `CLAUDE.md` §7. Detalle completo en
+`docs/REGISTRO_DESARROLLO.md`. **Sigue el Paso 3** (Registrar presupuesto).
 
 **No bloquean, pero hay que resolverlos antes de dar acceso real:**
 

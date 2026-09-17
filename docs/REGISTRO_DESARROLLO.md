@@ -823,3 +823,42 @@ el valor de referencia se oculta; con la sesión real de Administrador, se ve.
 **Con esto, el ítem 9 del Paso 2 queda cerrado** (`docs/PLAN_DESARROLLO.md` §3). Sigue pendiente el
 ítem 10 (Tablero con datos reales) y, en paralelo, el filtro de alcance para Responsable de
 sede/Verificador reales sigue sin poder probarse por falta de un correo real de esos roles.
+
+## 2026-09-17 — Paso 2 completo: Tablero con datos reales
+
+Mismo patrón que Sedes/Municipio/Ficha, aplicado al Tablero: `pintarTableroReal()` reemplaza la
+franja de cifras, el mosaico de municipios, la barra "valor de referencia por municipio" y "del
+universo al lote" con lo que devuelve `listarSedes`, ya cargado en memoria desde el login. No hubo
+que tocar el backend — es el mismo endpoint que ya probaba el Paso 0.
+
+**Dos paneles no se pudieron simplemente "conectar", había que decidir qué hacer con ellos porque no
+tienen un dato real detrás todavía:**
+
+- **"Nivel de afectación"** categorizaba en Inhabilitada/Grave/Moderado/Leve/Sin dato — categorías
+  que no existen en ningún campo real de `Sedes` (ni en el censo `dimDañosInfraestructura.xlsx`).
+  Se repobló como **"Estado de prestación del servicio"**, usando `estado_prestacion` (Habilitada /
+  Habilitada con restricción / No habilitada), que sí es un campo real del censo. Es un cambio de
+  qué se muestra, no solo de dónde sale el dato — se documenta aquí en vez de solo en el commit para
+  que quede claro por qué el panel dice algo distinto al diseño original.
+- **"Bitácora"** era una lista de eventos inventados para el diseño (aprobaciones, hallazgos,
+  archivos recibidos). No existe ningún registro de actividad en el backend — eso solo tendría
+  sentido una vez existan Presupuestos, Cargas o Verificaciones reales. Se dejó vacía, con una nota
+  de qué la va a llenar, y se quitó el indicador "en vivo" (implicaba una actualización en tiempo
+  real que el sistema no hace).
+
+El resto sí se pudo calcular directo del catálogo real: la franja de cifras (37 sedes,
+$9.718.464.165, 2.623 estudiantes, 34 no habilitadas), el mosaico de 12 municipios y los 14 sin
+sedes en el lote (antes una lista escrita a mano, ahora se calcula por diferencia contra el universo
+completo de municipios que trae `SEDES`), y el ranking de valor por municipio. El mosaico además
+quedó clicable: entra directo a la pantalla Municipio de ese municipio, mismo comportamiento que ya
+tenían las filas de la tabla en Sedes.
+
+**Verificado en el navegador con la cuenta Administrador real:** las cifras calculadas coincidieron
+exactamente con las que `CLAUDE.md` §7 ya documentaba como reales (37 sedes, $9.718.464.165, 2.623
+estudiantes, 34 no habilitadas, los mismos 14 municipios sin lote) — no es una coincidencia, es la
+confirmación de que el cálculo en el navegador reproduce lo mismo que ya se había verificado a mano
+al escribir esa sección de `CLAUDE.md`.
+
+**Con esto, el Paso 2 completo queda cerrado** (`docs/PLAN_DESARROLLO.md` §3, ítems 8-10). Sigue el
+Paso 3: pantalla Registrar presupuesto, el primer módulo que escribe en el backend en vez de solo
+leerlo.
