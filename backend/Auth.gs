@@ -7,17 +7,30 @@
  * Regla dura de D-20: si el correo no está en Usuarios, NO se manda nada —
  * pero se responde {ok:true} de todas formas, para que no se pueda usar esta
  * acción para averiguar quién tiene cuenta.
+ *
+ * Límite de frecuencia: máximo un código nuevo por correo cada 60 segundos.
+ * Se aplica ANTES de mirar si el correo existe, y con la misma respuesta
+ * {ok:true} en cualquier caso — si el límite solo se aplicara a correos
+ * reales, la respuesta distinta ya delataría cuáles existen.
  */
 var OTP_MINUTOS = 10;
 var SESION_HORAS = 12;
+var COOLDOWN_SEGUNDOS = 60;
 
 function Auth_solicitarCodigo(body) {
   var correo = _normalizarCorreo(body.correo);
-  var usuario = _buscarUsuario(correo);
+  var cache = CacheService.getScriptCache();
 
+  var cooldownKey = 'cooldown_' + correo;
+  if (cache.get(cooldownKey)) {
+    return { ok: true }; // ya se mandó uno hace poco; no se manda otro
+  }
+  cache.put(cooldownKey, '1', COOLDOWN_SEGUNDOS);
+
+  var usuario = _buscarUsuario(correo);
   if (usuario && usuario.activo) {
     var codigo = String(Math.floor(100000 + Math.random() * 900000));
-    CacheService.getScriptCache().put('otp_' + correo, codigo, OTP_MINUTOS * 60);
+    cache.put('otp_' + correo, codigo, OTP_MINUTOS * 60);
     MailApp.sendEmail(correo,
       'Código de acceso - Reconstrucción de sedes',
       'Su código de acceso es ' + codigo + '.\n\n' +
