@@ -141,6 +141,11 @@ una fila nueva, versión +1); y la hoja de cálculo en sí está protegida para 
 pueda escribir — nadie puede editar una celda a mano por fuera del sistema sin que quede un rastro
 imposible de producir.
 
+**Cómo se protege la continuidad:** el login bloquea un código tras 5 intentos fallidos, el Sheet
+completo se respalda solo todos los días a una carpeta aparte de Drive (30 días de retención), y
+`docs/RUNBOOK_CONTINUIDAD.md` documenta qué hacer si quien mantiene la cuenta que despliega el
+backend deja la práctica sin poder coordinar el traspaso (D-38).
+
 Arquitectura completa, con nombres de archivo exactos: `README.md` (estructura del proyecto) y
 `backend/README.md` (cómo se despliega).
 

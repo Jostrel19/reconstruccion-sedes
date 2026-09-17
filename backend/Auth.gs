@@ -12,10 +12,16 @@
  * Se aplica ANTES de mirar si el correo existe, y con la misma respuesta
  * {ok:true} en cualquier caso — si el límite solo se aplicara a correos
  * reales, la respuesta distinta ya delataría cuáles existen.
+ *
+ * Límite de intentos: máximo 5 intentos fallidos por código. Al llegar al
+ * límite, el código vigente se invalida (hay que pedir uno nuevo) — sin esto,
+ * nada impedía a un script probar las 999.999 combinaciones dentro de la
+ * ventana de 10 minutos.
  */
 var OTP_MINUTOS = 10;
 var SESION_HORAS = 12;
 var COOLDOWN_SEGUNDOS = 60;
+var MAX_INTENTOS = 5;
 
 function Auth_solicitarCodigo(body) {
   var correo = _normalizarCorreo(body.correo);
@@ -31,6 +37,7 @@ function Auth_solicitarCodigo(body) {
   if (usuario && usuario.activo) {
     var codigo = String(Math.floor(100000 + Math.random() * 900000));
     cache.put('otp_' + correo, codigo, OTP_MINUTOS * 60);
+    cache.remove('intentos_' + correo); // código nuevo, cuenta de intentos vuelve a cero
     MailApp.sendEmail(correo,
       'Código de acceso - Reconstrucción de sedes',
       'Su código de acceso es ' + codigo + '.\n\n' +
@@ -44,12 +51,23 @@ function Auth_solicitarCodigo(body) {
 function Auth_validarCodigo(body) {
   var correo = _normalizarCorreo(body.correo);
   var codigo = String(body.codigo || '').trim();
+  var cache = CacheService.getScriptCache();
 
-  var guardado = CacheService.getScriptCache().get('otp_' + correo);
-  if (!guardado || guardado !== codigo) {
+  var intentosKey = 'intentos_' + correo;
+  var intentos = Number(cache.get(intentosKey) || 0);
+  if (intentos >= MAX_INTENTOS) {
+    cache.remove('otp_' + correo); // se acabaron los intentos: el código ya no sirve
     return { ok: false, error: 'Código inválido o vencido' };
   }
-  CacheService.getScriptCache().remove('otp_' + correo);
+
+  var guardado = cache.get('otp_' + correo);
+  if (!guardado || guardado !== codigo) {
+    cache.put(intentosKey, String(intentos + 1), OTP_MINUTOS * 60);
+    return { ok: false, error: 'Código inválido o vencido' };
+  }
+
+  cache.remove('otp_' + correo);
+  cache.remove(intentosKey);
 
   var usuario = _buscarUsuario(correo);
   if (!usuario || !usuario.activo) {
