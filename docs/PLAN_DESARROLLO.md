@@ -174,13 +174,14 @@ acceso a un correo real de alcalde/rector/arquitecto.
 **Actualizado 2026-09-17, más tarde — Paso 1 cerrado.** `docs/diseno/mockup_v6.html` ya no simula el
 login: llama al backend real (`BACKEND_URL` apunta al despliegue vigente), y el rol/nombre/alcance
 que muestra la interfaz salen de la respuesta de `validarCodigo`. Probado con la cuenta
-Administrador de punta a punta en el navegador. **Hallazgo para atender antes de invitar a alguien
-externo:** `solicitarCodigo` no tiene límite de frecuencia — cualquiera que conozca la URL del
-backend (pública, viaja en el HTML) puede pedir códigos repetidamente para un correo que sí está en
-`Usuarios`, lo que llenaría esa bandeja de correos de código sin llegar a comprometer ninguna cuenta
-(cada código sigue siendo de un solo uso y vence en 10 min). No bloquea seguir construyendo; sí
-conviene agregar un límite (p. ej. máximo 1 código por correo cada 60 segundos, con
-`CacheService`) antes de repartir el enlace real a alcaldes y rectores.
+Administrador de punta a punta en el navegador.
+
+**Resuelto el mismo día:** `Auth_solicitarCodigo` ya limita a **un código nuevo por correo cada 60
+segundos** (`CacheService`, clave `cooldown_<correo>`), aplicado antes de mirar si el correo existe
+y con la misma respuesta `{ok:true}` en cualquier caso — así el límite no delata qué correos están
+en `Usuarios`. **Pendiente del lado del usuario:** pegar el `Auth.gs` actualizado en el proyecto real de Apps Script
+**y actualizar la implementación** (`Implementar > Administrar implementaciones > editar > Nueva
+versión`) — el código nuevo no llega solo a la URL `/exec` ya publicada.
 
 **No bloquean, pero hay que resolverlos antes de dar acceso real:**
 

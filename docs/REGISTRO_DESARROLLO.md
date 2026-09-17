@@ -712,3 +712,18 @@ un solo uso, vence en 10 min). Conviene un límite tipo "1 código por correo ca
 Con esto, **Paso 1 del plan queda cerrado**: falta el filtro de alcance para roles externos (sin
 forma de probarlo todavía) y seguir con el Paso 2 (armazón, riel, migas, Sedes → Municipio → Ficha en
 modo lectura conectados de verdad).
+
+## 2026-09-17 — Límite de frecuencia en `solicitarCodigo`
+
+Se cerró el hallazgo abierto en la entrada anterior. `Auth_solicitarCodigo` ahora guarda una llave
+`cooldown_<correo>` en `CacheService` por 60 segundos antes de decidir si manda correo — si ya existe
+la llave, responde `{ok:true}` sin hacer nada más. La llave se escribe **siempre**, exista o no el
+correo en `Usuarios`: si el límite solo aplicara a correos reales, la ausencia de límite en un correo
+inventado ya sería una forma de saber que no existe, exactamente el tipo de fuga que D-20 prohíbe.
+
+Verificado con `node --check` que el archivo sigue siendo JS válido. **Pendiente:** este cambio vive
+en `backend/Auth.gs` (el código fuente del repo) pero todavía no se ha vuelto a pegar en el proyecto
+de Apps Script desplegado. Apps Script congela el código en cada implementación — editar el archivo
+en el editor **no alcanza a la URL `/exec` ya publicada** hasta que se actualice esa implementación
+(`Implementar > Administrar implementaciones > editar > Versión: Nueva versión > Implementar`), lo
+que sí mantiene la misma URL, sin necesidad de tocar `BACKEND_URL` en el mockup.
