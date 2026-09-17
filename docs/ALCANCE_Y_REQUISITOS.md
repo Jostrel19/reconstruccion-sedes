@@ -164,6 +164,7 @@ Para el detalle paso a paso, `docs/PLAN_DESARROLLO.md` §3-4. Snapshot a la fech
 | Login por código de un solo uso | ✅ Funcionando, probado de punta a punta |
 | Lectura de sedes filtrada por rol | ✅ Funcionando para Administrador; sin probar aún para los otros 3 roles |
 | Pantallas Sedes → Municipio → Ficha con datos reales | ✅ Conectadas y probadas 2026-09-17 (identidad y censo de daños; presupuesto y verificación se muestran vacíos porque no existen todavía) |
+| Tablero con datos reales | ✅ Conectado y probado 2026-09-17 (cifras, mosaico de municipios y rankings reales; Bitácora vacía porque no hay actividad que registrar todavía) |
 | Registrar presupuesto, Verificación, Cargas, Hallazgos (escritura real) | ⏳ Diseñadas, sin construir todavía |
 | Módulo de Monitoreo/Obras | ⏸️ Aplazado — faltan datos de contratación |
 
