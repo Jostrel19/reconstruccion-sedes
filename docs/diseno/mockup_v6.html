@@ -128,13 +128,22 @@
   .eyebrow{ font-size:.71rem; letter-spacing:.1em; text-transform:uppercase; color:var(--tx-sec); font-weight:700; }
 
   /* ─── franja de cifras oscura: ancla del tablero ─── */
-  .franja{ background:var(--rail); border-radius:var(--r); display:grid; grid-template-columns:repeat(auto-fit,minmax(142px,1fr)); overflow:hidden; margin-bottom:1rem; }
-  .franja .c{ padding:.95rem 1.05rem; border-right:1px solid rgba(255,255,255,.1); }
+  /* 6 columnas fijas: con auto-fit, la 6ª tarjeta quedaba huérfana en su
+     propia fila a ciertos anchos de ventana. Con un número de tarjetas
+     conocido, es más robusto fijar el conteo y solo colapsar por breakpoint. */
+  .franja{ background:var(--rail); border-radius:var(--r); display:grid; grid-template-columns:repeat(6,1fr); overflow:hidden; margin-bottom:1rem; }
+  @media (max-width:920px){ .franja{ grid-template-columns:repeat(3,1fr); } }
+  @media (max-width:520px){ .franja{ grid-template-columns:repeat(2,1fr); } }
+  .franja .c{ padding:.95rem 1.05rem; border-right:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1); }
   .franja .c:last-child{ border-right:none; }
   .franja .c b{ display:block; font-family:var(--f-tit); font-size:1.85rem; line-height:1.02; color:#fff; font-variant-numeric:tabular-nums; }
   .franja .c b .u{ font-size:.8rem; opacity:.7; font-family:var(--f-ui); font-weight:400; }
   .franja .c span{ display:block; font-size:.75rem; color:rgba(255,255,255,.62); margin-top:.3rem; }
   .franja .c.er b{ color:#F0A49D; } .franja .c.al b{ color:#F0CE7A; } .franja .c.ok b{ color:#7FD3A8; }
+  /* Cifra que todavía no aplica (nada radicado todavía) — se distingue de un
+     cero real para no competir en peso visual con las cifras que sí importan. */
+  .franja .c.na b{ color:rgba(255,255,255,.32); font-weight:400; }
+  .franja .c.na span{ color:rgba(255,255,255,.4); }
 
   .cifras{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--borde); border:1px solid var(--borde); border-radius:var(--r); overflow:hidden; }
   .cifra{ background:var(--panel); padding:.85rem .95rem; }
@@ -1644,15 +1653,17 @@
     const noHabilitadas = lote.filter(s => s.estado_prestacion === 'No habilitada').length;
 
     // Franja de cifras: solo lo que ya es real. Esperando verificación y
-    // Aprobadas para obra quedan en 0 porque Verificaciones no existe todavía
-    // (Paso 4) — no se simulan para que no parezca que ya hay trámite andando.
+    // Aprobadas para obra todavía no aplican (Verificaciones es Paso 4) — se
+    // marcan con "—" y una clase atenuada, no con un "0" del mismo peso
+    // visual que las cifras que sí son reales, para no sugerir que ya hay
+    // trámite andando.
     franja.innerHTML =
       `<div class="c"><b class="n">${lote.length}</b><span>Sedes en el lote 1</span></div>` +
       `<div class="c" data-sed><b class="n">${cop(valorLote)}</b><span>Valor de referencia</span></div>` +
       `<div class="c"><b class="n">${matriculaLote}</b><span>Estudiantes afectados</span></div>` +
       `<div class="c er"><b class="n">${noHabilitadas}</b><span>Sedes no habilitadas</span></div>` +
-      `<div class="c"><b class="n">0</b><span>Esperando verificación</span></div>` +
-      `<div class="c"><b class="n">0</b><span>Aprobadas para obra</span></div>`;
+      `<div class="c na"><b class="n">—</b><span>Esperando verificación</span></div>` +
+      `<div class="c na"><b class="n">—</b><span>Aprobadas para obra</span></div>`;
 
     // Municipios del lote — mosaico clicable (drill-down directo desde el Tablero)
     let mosaico = '';
@@ -1702,32 +1713,25 @@
     paneles[2].querySelector('.pie').innerHTML =
       `Barras a escala real sobre ${totalSedes}. El lote es ${lote.length} de ${totalSedes} (${pctDe(lote.length).toFixed(1)} %). Las últimas tres siguen en 0 porque Cargas y Registrar presupuesto (Pasos 3 y 5) todavía no están construidos.`;
 
-    // "Nivel de afectación" se repuebla como estado de prestación del
-    // servicio: es el campo real que trae el censo (dimDaños). No existe un
-    // campo de "grave/moderado/leve" que sustente las categorías originales
-    // del diseño, así que no se inventan.
-    paneles[3].querySelector('h2').textContent = 'Estado de prestación del servicio';
-    const conteo = { 'Habilitada': 0, 'Habilitada con restricción': 0, 'No habilitada': 0 };
-    let sinDato = 0;
-    lote.forEach(s => { if (conteo.hasOwnProperty(s.estado_prestacion)) conteo[s.estado_prestacion]++; else sinDato++; });
-    const colores = { 'Habilitada': 'var(--ok)', 'Habilitada con restricción': 'var(--alerta)', 'No habilitada': 'var(--err)' };
-    let dist = '', ley = '';
-    Object.keys(conteo).forEach(k => {
-      if (!conteo[k]) return;
-      const pct = lote.length ? (conteo[k] / lote.length * 100) : 0;
-      dist += `<div style="width:${pct.toFixed(1)}%;background:${colores[k]}">${conteo[k]}</div>`;
-      ley += `<span><i style="background:${colores[k]}"></i>${k}</span>`;
-    });
-    if (sinDato){
-      const pct = lote.length ? (sinDato / lote.length * 100) : 0;
-      dist += `<div style="width:${pct.toFixed(1)}%;background:var(--borde-f);color:var(--tx)">${sinDato}</div>`;
-      ley += '<span><i style="background:var(--borde-f)"></i>Sin dato</span>';
-    }
-    paneles[3].querySelector('.dist').innerHTML = dist;
-    paneles[3].querySelector('.leyenda').innerHTML = ley;
-    paneles[3].querySelector('.pie').textContent = sinDato
-      ? `${sinDato} de ${lote.length} sedes del lote no traen estado de prestación en el censo.`
-      : `Las ${lote.length} sedes del lote traen estado de prestación en el censo.`;
+    // Nivel de afectación real: dentro del lote solo hay dos tipos posibles
+    // (es la definición misma del lote 1, D-31) — tipo 1 "colapso total o
+    // parcial" y tipo 2 "riesgo inminente". Es el mismo dato que ya se ve
+    // como badge P1/P2 en Sedes/Municipio/Ficha; se reutilizan sus mismos
+    // colores (p1=err, p2=alerta) en vez de inventar una paleta nueva, y se
+    // usa el mismo patrón de barras que "Del universo al lote" en vez de una
+    // barra apilada — con un reparto tan desigual (9 contra 28), apretar
+    // ambos números dentro de una sola barra los vuelve ilegibles.
+    const t1 = lote.filter(s => String(s.tipo_censo || '').startsWith('1.')).length;
+    const t2 = lote.filter(s => String(s.tipo_censo || '').startsWith('2.')).length;
+    const sinTipo = lote.length - t1 - t2;
+    paneles[3].querySelector('.cuerpo').innerHTML =
+      `<div class="emb">` +
+      `<div class="fila"><span><span class="pri p1">P1</span> Colapso</span><span class="pista"><i style="width:${lote.length ? (t1 / lote.length * 100).toFixed(1) : 0}%;background:var(--err)"></i></span><span class="vl n">${t1}</span></div>` +
+      `<div class="fila"><span><span class="pri p2">P2</span> Riesgo</span><span class="pista"><i style="width:${lote.length ? (t2 / lote.length * 100).toFixed(1) : 0}%;background:var(--alerta)"></i></span><span class="vl n">${t2}</span></div>` +
+      (sinTipo ? `<div class="fila"><span>Sin tipo reconocido</span><span class="pista"><i style="width:${(sinTipo / lote.length * 100).toFixed(1)}%;background:var(--borde-f)"></i></span><span class="vl n">${sinTipo}</span></div>` : '') +
+      `</div>`;
+    paneles[3].querySelector('.pie').textContent =
+      `El lote 1 se define como tipo 1 o 2 (D-31): ${t1} de colapso total o parcial, ${t2} de riesgo inminente de colapso.`;
 
     // Bitácora: no hay todavía ningún endpoint de actividad/auditoría en el
     // backend (eso vendría con Presupuestos/Cargas/Verificaciones, Pasos 3-5).
@@ -1952,6 +1956,11 @@
     // Datos reales del backend (Paso 2): solo si hubo login real. Sin sesión,
     // estas tres pantallas se quedan con el contenido de ejemplo de la maqueta.
     if (sesion){
+      // Los conteos "6" (Verificación) y "19" (Hallazgos) del riel son del
+      // ejemplo de diseño — no hay ninguna verificación pendiente real
+      // (nada radicado todavía) ni módulo de Hallazgos construido (Paso 6).
+      // Mostrarlos junto a una sesión real los haría pasar por reales.
+      document.querySelectorAll('.riel .cand').forEach(el => el.classList.add('oculto'));
       if (vista === 'tablero') pintarTableroReal();
       if (vista === 'inicio') pintarInicioReal();
       if (vista === 'muni') pintarMuniReal();
