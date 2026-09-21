@@ -1,6 +1,6 @@
 # Alcance y requisitos — Reconstrucción de sedes SED Caldas
 
-**Última actualización:** 2026-09-17. **Este documento es vivo** — se actualiza cada vez que cambia
+**Última actualización:** 2026-09-21. **Este documento es vivo** — se actualiza cada vez que cambia
 el alcance, la arquitectura o el estado del desarrollo. No reemplaza a `CLAUDE.md` (decisiones
 completas, una por una) ni a `docs/PLAN_DESARROLLO.md` (plan operativo, paso a paso): este documento
 es el resumen que se lee de corrido para entender **qué es el sistema y hasta dónde llega**, sin
@@ -165,7 +165,8 @@ Para el detalle paso a paso, `docs/PLAN_DESARROLLO.md` §3-4. Snapshot a la fech
 | Lectura de sedes filtrada por rol | ✅ Funcionando para Administrador; sin probar aún para los otros 3 roles |
 | Pantallas Sedes → Municipio → Ficha con datos reales | ✅ Conectadas y probadas 2026-09-17 (identidad y censo de daños; presupuesto y verificación se muestran vacíos porque no existen todavía) |
 | Tablero con datos reales | ✅ Conectado y probado 2026-09-17 (cifras, mosaico de municipios y rankings reales; Bitácora vacía porque no hay actividad que registrar todavía) |
-| Registrar presupuesto, Verificación, Cargas, Hallazgos (escritura real) | ⏳ Diseñadas, sin construir todavía |
+| Registrar presupuesto (escritura real, con versionado) | ✅ Verificado en producción 2026-09-21 (guardar borrador, radicar, corregir sin sobrescribir) |
+| Verificación, Cargas, Hallazgos (escritura real) | ⏳ Diseñadas, sin construir todavía |
 | Módulo de Monitoreo/Obras | ⏸️ Aplazado — faltan datos de contratación |
 
 ---

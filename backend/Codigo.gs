@@ -26,7 +26,9 @@ function doPost(e) {
   var manejadores = {
     solicitarCodigo: Auth_solicitarCodigo,
     validarCodigo: Auth_validarCodigo,
-    listarSedes: Sedes_listar
+    listarSedes: Sedes_listar,
+    obtenerPresupuesto: Presupuestos_obtener,
+    guardarPresupuesto: Presupuestos_guardar
   };
 
   var manejador = manejadores[body.accion];

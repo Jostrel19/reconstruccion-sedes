@@ -802,7 +802,7 @@
                 <div class="p">
                   <header><h2>I.E. El Bosque — Guayaquil</h2><span class="est e-rad">Radicado</span><span class="flex"></span>
                     <button class="b mini" type="button" data-edita
-                            onclick="vista='registrar';pintar()">Editar presupuesto</button>
+                            onclick="irRegistrar()">Editar presupuesto</button>
                     <button class="b sec mini" type="button" data-verifica
                             onclick="vista='verif';pintar()">Verificar</button>
                     <button class="b sec mini" type="button">Descargar PDF</button>
@@ -955,9 +955,9 @@
               <!-- ─── REGISTRAR PRESUPUESTO (diligenciamiento manual) ─── -->
               <section class="view" id="s-registrar">
                 <div class="p">
-                  <header><h2>Presupuesto — I.E. El Bosque, Guayaquil</h2>
-                    <span class="est e-pend">En diligenciamiento</span><span class="flex"></span>
-                    <span class="eyebrow">Borrador guardado 14:02</span></header>
+                  <header><h2 id="reg-h2">Presupuesto</h2>
+                    <span class="est e-pend" id="reg-badge">Sin diligenciar</span><span class="flex"></span>
+                    <span class="eyebrow" id="reg-eyebrow-estado"></span></header>
                   <div class="cuerpo">
                     <div class="pasos-f">
                       <div class="pf hecho"><span class="no">1</span>Identificación</div>
@@ -974,20 +974,20 @@
                   <div class="cuerpo">
                     <div class="campo-v">
                       <label>¿La sede resultó afectada por el sismo?</label>
-                      <div class="ayuda">El censo la clasificó como <b>tipo 2 — riesgo inminente de
-                        colapso</b>. Si usted declara algo distinto, el sistema le pedirá justificarlo
+                      <div class="ayuda" id="reg-ayuda-tipo">El censo la clasificó según el tipo de afectación registrado.
+                        Si usted declara algo distinto, el sistema le pedirá justificarlo
                         y lo marcará como discrepancia para que un arquitecto lo revise.</div>
-                      <label class="op"><input type="radio" name="af" checked>
+                      <label class="op"><input type="radio" name="af" id="reg-af-si" checked>
                         <span><b>Sí, presento presupuesto</b><small>Coincide con el censo</small></span></label>
-                      <label class="op"><input type="radio" name="af">
+                      <label class="op"><input type="radio" name="af" id="reg-af-no">
                         <span><b>No presenta afectación</b><small>Discrepa del censo — exige
                         justificación de mínimo 40 caracteres</small></span></label>
                     </div>
                     <div class="campo-v" style="margin-bottom:0">
-                      <label>Descripción de los daños</label>
+                      <label id="reg-label-desc">Descripción de los daños</label>
                       <div class="ayuda">Mínimo 60 caracteres. Describa <b>qué se dañó</b>; el trabajo
                         a ejecutar va en la tabla de abajo.</div>
-                      <textarea>Cubierta con tejas fisuradas y perfilería deformada en el aula principal. Una columna presenta grieta diagonal visible. Se restringió el acceso al salón oriental.</textarea>
+                      <textarea id="reg-descripcion"></textarea>
                     </div>
                   </div>
                 </div>
@@ -995,58 +995,15 @@
                 <!-- 3. PRESUPUESTO EDITABLE -->
                 <div class="p">
                   <header><h2>3 · Presupuesto a detalle</h2><span class="flex"></span>
-                    <span class="eyebrow">6 ítems</span>
-                    <button class="b mini" type="button">+ Agregar ítem</button></header>
+                    <span class="eyebrow" id="reg-eyebrow-items">0 ítems</span>
+                    <button class="b mini" type="button" id="btn-agregar-item">+ Agregar ítem</button></header>
                   <div class="cuerpo ras">
                     <div class="scroll"><table class="edit">
                       <thead><tr><th style="width:2rem">#</th><th style="min-width:150px">Capítulo de daño</th>
                         <th style="min-width:230px">Trabajo a ejecutar</th><th style="width:88px">Unidad</th>
                         <th class="n" style="width:86px">Cantidad</th><th class="n" style="width:112px">Vr. unitario</th>
                         <th class="n" style="width:112px">Valor total</th><th style="width:2rem"></th></tr></thead>
-                      <tbody>
-                        <tr><td class="n">1</td>
-                          <td><select><option>1. Estructural</option><option>2. Mampostería y muros</option><option>3. Cubierta</option><option>4. Cimentación y terreno</option><option>5. Elementos no estructurales</option><option>6. Acabados</option><option>7. Instalaciones</option><option>8. Unidades sanitarias</option><option>9. Cocina y restaurante escolar</option><option>10. Elementos exteriores</option><option>11. Deficiencia constructiva</option><option>12. Preliminares y obras provisionales</option><option selected>13. Demoliciones y desmontes</option><option>14. Aseo, escombros y disposición final</option></select></td>
-                          <td><input value="Demolición de estructuras en mampostería"></td>
-                          <td><select><option>m²</option><option selected>m³</option><option>ml</option><option>un</option><option>gl</option><option>kg</option><option>ton</option><option>vje</option><option>día</option><option>mes</option><option>hora</option></select></td>
-                          <td><input class="n" value="3,50" inputmode="decimal"></td>
-                          <td><input class="n" value="168.895" inputmode="decimal"></td>
-                          <td class="n calc">$ 591.132</td><td><button class="quitar" type="button" title="Quitar">×</button></td></tr>
-                        <tr><td class="n">2</td>
-                          <td><select><option>1. Estructural</option><option selected>2. Mampostería y muros</option><option>3. Cubierta</option><option>4. Cimentación y terreno</option><option>5. Elementos no estructurales</option><option>6. Acabados</option><option>7. Instalaciones</option><option>8. Unidades sanitarias</option><option>9. Cocina y restaurante escolar</option><option>10. Elementos exteriores</option><option>11. Deficiencia constructiva</option><option>12. Preliminares y obras provisionales</option><option>13. Demoliciones y desmontes</option><option>14. Aseo, escombros y disposición final</option></select></td>
-                          <td><input value="Suministro, transporte e instalación muro en bloque n.º 4 arcilla"></td>
-                          <td><select><option selected>m²</option><option>m³</option><option>ml</option><option>un</option><option>gl</option><option>kg</option><option>ton</option><option>vje</option><option>día</option><option>mes</option><option>hora</option></select></td>
-                          <td><input class="n" value="28,00" inputmode="decimal"></td>
-                          <td><input class="n" value="75.550" inputmode="decimal"></td>
-                          <td class="n calc">$ 2.115.400</td><td><button class="quitar" type="button" title="Quitar">×</button></td></tr>
-                        <tr><td class="n">3</td>
-                          <td><select><option>1. Estructural</option><option>2. Mampostería y muros</option><option selected>3. Cubierta</option><option>4. Cimentación y terreno</option><option>5. Elementos no estructurales</option><option>6. Acabados</option><option>7. Instalaciones</option><option>8. Unidades sanitarias</option><option>9. Cocina y restaurante escolar</option><option>10. Elementos exteriores</option><option>11. Deficiencia constructiva</option><option>12. Preliminares y obras provisionales</option><option>13. Demoliciones y desmontes</option><option>14. Aseo, escombros y disposición final</option></select></td>
-                          <td><input value="Recorrido de cubierta (incl. ganchos, amarras y sikaflex)"></td>
-                          <td><select><option selected>m²</option><option>m³</option><option>ml</option><option>un</option><option>gl</option><option>kg</option><option>ton</option><option>vje</option><option>día</option><option>mes</option><option>hora</option></select></td>
-                          <td><input class="n" value="42,00" inputmode="decimal"></td>
-                          <td><input class="n" value="12.095" inputmode="decimal"></td>
-                          <td class="n calc">$ 507.990</td><td><button class="quitar" type="button" title="Quitar">×</button></td></tr>
-                        <tr><td class="n">4</td>
-                          <td><select><option>1. Estructural</option><option>2. Mampostería y muros</option><option selected>3. Cubierta</option><option>4. Cimentación y terreno</option><option>5. Elementos no estructurales</option><option>6. Acabados</option><option>7. Instalaciones</option><option>8. Unidades sanitarias</option><option>9. Cocina y restaurante escolar</option><option>10. Elementos exteriores</option><option>11. Deficiencia constructiva</option><option>12. Preliminares y obras provisionales</option><option>13. Demoliciones y desmontes</option><option>14. Aseo, escombros y disposición final</option></select></td>
-                          <td><input value="Suministro, transporte e instalación teja termoacústica"></td>
-                          <td><select><option selected>m²</option><option>m³</option><option>ml</option><option>un</option><option>gl</option><option>kg</option><option>ton</option><option>vje</option><option>día</option><option>mes</option><option>hora</option></select></td>
-                          <td><input class="n" value="12,00" inputmode="decimal"></td>
-                          <td><input class="n" value="98.296" inputmode="decimal"></td>
-                          <td class="n calc">$ 1.179.552</td><td><button class="quitar" type="button" title="Quitar">×</button></td></tr>
-                        <tr><td class="n">5</td>
-                          <td><select><option>1. Estructural</option><option>2. Mampostería y muros</option><option>3. Cubierta</option><option>4. Cimentación y terreno</option><option>5. Elementos no estructurales</option><option selected>6. Acabados</option><option>7. Instalaciones</option><option>8. Unidades sanitarias</option><option>9. Cocina y restaurante escolar</option><option>10. Elementos exteriores</option><option>11. Deficiencia constructiva</option><option>12. Preliminares y obras provisionales</option><option>13. Demoliciones y desmontes</option><option>14. Aseo, escombros y disposición final</option></select></td>
-                          <td><input value="Suministro, transporte e instalación revoque liso muros 1:3"></td>
-                          <td><select><option selected>m²</option><option>m³</option><option>ml</option><option>un</option><option>gl</option><option>kg</option><option>ton</option><option>vje</option><option>día</option><option>mes</option><option>hora</option></select></td>
-                          <td><input class="n" value="32,00" inputmode="decimal"></td>
-                          <td><input class="n" value="36.948" inputmode="decimal"></td>
-                          <td class="n calc">$ 1.182.336</td><td><button class="quitar" type="button" title="Quitar">×</button></td></tr>
-                        <tr><td class="n">6</td>
-                          <td><select><option>1. Estructural</option><option>2. Mampostería y muros</option><option>3. Cubierta</option><option>4. Cimentación y terreno</option><option>5. Elementos no estructurales</option><option>6. Acabados</option><option>7. Instalaciones</option><option>8. Unidades sanitarias</option><option>9. Cocina y restaurante escolar</option><option>10. Elementos exteriores</option><option>11. Deficiencia constructiva</option><option>12. Preliminares y obras provisionales</option><option>13. Demoliciones y desmontes</option><option selected>14. Aseo, escombros y disposición final</option></select></td>
-                          <td><input value="Manejo y movilización de escombros / sobrantes"></td>
-                          <td><select><option>m²</option><option selected>m³</option><option>ml</option><option>un</option><option>gl</option><option>kg</option><option>ton</option><option>vje</option><option>día</option><option>mes</option><option>hora</option></select></td>
-                          <td><input class="n" value="6,00" inputmode="decimal"></td>
-                          <td><input class="n" value="68.594" inputmode="decimal"></td>
-                          <td class="n calc">$ 411.564</td><td><button class="quitar" type="button" title="Quitar">×</button></td></tr>
-                      </tbody>
+                      <tbody></tbody>
                     </table></div>
                   </div>
                   <div class="pie">
@@ -1074,22 +1031,22 @@
                         <label>Administración (%)</label>
                         <div class="ayuda">Dirección de obra, pólizas, ensayos, servicios públicos
                           de la obra, personal administrativo.</div>
-                        <input value="10" inputmode="decimal">
+                        <input id="reg-admin" value="10" inputmode="decimal">
                       </div>
                       <div class="campo-v" style="margin:0">
                         <label>Utilidad (%)</label>
                         <div class="ayuda">La ganancia del constructor. Sobre ella se liquida el IVA.</div>
-                        <input value="5" inputmode="decimal">
+                        <input id="reg-utilidad" value="5" inputmode="decimal">
                       </div>
                       <div class="campo-v" style="margin:0">
                         <label>Plazo de ejecución (días)</label>
                         <div class="ayuda">Días de obra <b>una vez contratada</b>. No incluye el
                           tiempo del proceso de contratación.</div>
-                        <input value="45" inputmode="decimal">
+                        <input id="reg-plazo" value="" inputmode="decimal">
                       </div>
                     </div>
 
-                    <div class="alerta-au">
+                    <div class="alerta-au" id="reg-alerta-au">
                       <b>Referencia de mercado, no tope legal</b>
                       En Colombia <b>no existe tope de AIU por ley</b> — cada entidad es autónoma
                       (Colombia Compra Eficiente). La práctica usual sin Imprevistos es
@@ -1098,12 +1055,12 @@
                       radíquelo y susténtelo.
                     </div>
 
-                    <dl class="tot">
-                      <dt>Costo directo</dt><dd class="n">$ 5.987.974</dd>
-                      <dt>Administración <span class="pct">10 %</span></dt><dd class="n">$ 598.797</dd>
-                      <dt>Utilidad <span class="pct">5 %</span></dt><dd class="n">$ 299.399</dd>
-                      <dt>IVA 19 % sobre la utilidad</dt><dd class="n">$ 56.886</dd>
-                      <dt class="gt">Total del presupuesto</dt><dd class="n gt">$ 6.943.056</dd>
+                    <dl class="tot" id="reg-tot">
+                      <dt>Costo directo</dt><dd class="n">$ 0</dd>
+                      <dt>Administración <span class="pct">10 %</span></dt><dd class="n">$ 0</dd>
+                      <dt>Utilidad <span class="pct">5 %</span></dt><dd class="n">$ 0</dd>
+                      <dt>IVA 19 % sobre la utilidad</dt><dd class="n">$ 0</dd>
+                      <dt class="gt">Total del presupuesto</dt><dd class="n gt">$ 0</dd>
                     </dl>
                   </div>
                   <div class="pie">
@@ -1115,13 +1072,14 @@
                 <!-- 4. FOTOS -->
                 <div class="p">
                   <header><h2>4 · Registro fotográfico</h2><span class="flex"></span>
-                    <span class="eyebrow">2 de 6 · mínimo 1</span></header>
+                    <span class="eyebrow">0 de 6 · mínimo 1</span></header>
                   <div class="cuerpo">
                     <div class="fotos">
-                      <div class="foto"><span class="ph">IMG</span><b>cubierta-01.jpg</b><small>1,2 MB</small></div>
-                      <div class="foto"><span class="ph">IMG</span><b>columna-grieta.jpg</b><small>0,9 MB</small></div>
                       <div class="foto add"><span class="mas">+</span><b>Agregar</b><small>jpg, png · máx 5 MB</small></div>
                     </div>
+                    <div class="pie" style="padding-top:.6rem">Todavía no disponible: el backend no tiene dónde
+                      guardar fotografías (Paso 3 cubre solo texto y cifras). El botón de esta sección no
+                      guarda nada por ahora.</div>
                     <div class="aviso-foto">
                       <b>Si vuelve a abrir esta sede, tendrá que adjuntar las fotos de nuevo</b>
                       El sistema guarda el nombre del archivo, no la imagen. Medido en Riosucio: 58
@@ -1135,12 +1093,12 @@
                 <div class="p">
                   <div class="cuerpo">
                     <div class="acciones-v">
-                      <button class="b sec" type="button">Guardar borrador</button>
+                      <button class="b sec" type="button" id="btn-guardar-borrador">Guardar borrador</button>
                       <span class="flex"></span>
-                      <span style="font-size:.79rem;color:var(--tx-sec)">Al radicar ya no podrá
-                        editarlo; si necesita corregir, se genera una <b>v2</b> y la v1 queda como
-                        evidencia.</span>
-                      <button class="b" type="button">Radicar presupuesto</button>
+                      <span style="font-size:.79rem;color:var(--tx-sec)" id="reg-msg">Al radicar ya no
+                        podrá editarlo con esta misma versión; si necesita corregir, se genera una
+                        <b>versión nueva</b> y la anterior queda como evidencia.</span>
+                      <button class="b" type="button" id="btn-radicar">Radicar presupuesto</button>
                     </div>
                   </div>
                 </div>
@@ -1533,6 +1491,269 @@
   function irInicio(){ vista = 'inicio'; muniActual = null; daneActual = null; pintar(); }
   function irMuni(m){ vista = 'muni'; muniActual = m; pintar(); }
   function irFicha(dane){ vista = 'ficha'; daneActual = dane; pintar(); }
+  function irRegistrar(){ vista = 'registrar'; cargarRegistro(daneActual); pintar(); }
+
+  /* ─── Paso 3: Registrar presupuesto (D-29, D-33) — catálogos cerrados de
+     capítulo y unidad, cálculo automático (nunca se digita un total), alerta
+     de A/U sin bloqueo (D-5; los umbrales no tienen aval de Planeación
+     todavía, Q-3) y versionado real contra el backend (D-37). ─── */
+
+  const CAPITULOS = {
+    1:'Estructural', 2:'Mampostería y muros', 3:'Cubierta', 4:'Cimentación y terreno',
+    5:'Elementos no estructurales', 6:'Acabados', 7:'Instalaciones', 8:'Unidades sanitarias',
+    9:'Cocina y restaurante escolar', 10:'Elementos exteriores', 11:'Deficiencia constructiva',
+    12:'Preliminares y obras provisionales', 13:'Demoliciones y desmontes',
+    14:'Aseo, escombros y disposición final',
+  };
+  const UNIDADES = ['m²','m³','ml','un','gl','kg','ton','vje','día','mes','hora'];
+  const ALERTA_ADMIN_PCT = 12;
+  const ALERTA_UTILIDAD_PCT = 8;
+
+  // Formato colombiano: punto de miles, coma decimal — "1.500.000" o "1.500,5".
+  function parseCOP(str){
+    if (typeof str === 'number') return str;
+    let s = String(str == null ? '' : str).trim().replace(/\$/g, '').replace(/\s/g, '');
+    if (!s) return 0;
+    s = s.replace(/\./g, '').replace(',', '.');
+    const n = parseFloat(s);
+    return isNaN(n) ? 0 : n;
+  }
+  function formatNum(n, decimales){
+    return Number(n || 0).toLocaleString('es-CO', { minimumFractionDigits: decimales || 0, maximumFractionDigits: decimales || 0 });
+  }
+
+  let registro = { dane: null, cargado: false, items: [], pctAdmin: 10, pctUtilidad: 5,
+    plazoDias: '', declaraSinAfectacion: false, descripcionAfectacion: '',
+    estadoActual: null, versionActual: null };
+
+  const ESTADOS_PRESUPUESTO = {
+    BORRADOR: ['e-pend', 'En diligenciamiento (borrador)'],
+    RADICADO: ['e-rad', 'Radicado'],
+    EN_VERIFICACION: ['e-ver', 'En verificación'],
+    REQUIERE_AJUSTE: ['e-rad', 'Requiere ajuste'],
+    APROBADO: ['e-apr', 'Aprobado'],
+  };
+
+  async function cargarRegistro(dane){
+    registro = { dane, cargado: false, items: [], pctAdmin: 10, pctUtilidad: 5,
+      plazoDias: '', declaraSinAfectacion: false, descripcionAfectacion: '',
+      estadoActual: null, versionActual: null };
+    try {
+      const r = await backend('obtenerPresupuesto', { token: sesion.token, dane_sede: dane });
+      if (r.ok && r.presupuesto) {
+        const p = r.presupuesto;
+        registro.pctAdmin = Number(p.pct_admin) || 10;
+        registro.pctUtilidad = Number(p.pct_utilidad) || 5;
+        registro.plazoDias = p.plazo_dias || '';
+        registro.declaraSinAfectacion = !!p.declara_sin_afectacion;
+        registro.descripcionAfectacion = p.declara_sin_afectacion ? (p.justificacion_discrepancia || '') : (p.descripcion_afectacion || '');
+        registro.estadoActual = p.estado;
+        registro.versionActual = p.version;
+        registro.items = (r.items || []).map(it => ({
+          capitulo: String(it.capitulo), descripcion: it.descripcion, unidad: it.unidad,
+          cantidad: Number(it.cantidad) || 0, valor_unitario: Number(it.valor_unitario) || 0,
+        }));
+      }
+    } catch (err) { /* el formulario queda en blanco, listo para un primer registro */ }
+    registro.cargado = true;
+    if (vista === 'registrar' && String(daneActual) === String(dane)) pintarRegistrarReal();
+  }
+
+  function pintarRegistrarReal(){
+    const dane = daneActual;
+    const sede = SEDES && SEDES.find(s => String(s.dane_sede) === String(dane));
+    document.getElementById('reg-h2').textContent = sede ? `Presupuesto — ${sede.sede}` : 'Presupuesto';
+
+    if (!registro.cargado){
+      document.getElementById('reg-badge').textContent = 'Cargando…';
+      return;
+    }
+
+    const [cls, txt] = ESTADOS_PRESUPUESTO[registro.estadoActual] || ['e-pend', 'Sin diligenciar'];
+    const badge = document.getElementById('reg-badge');
+    badge.className = 'est ' + cls; badge.textContent = txt;
+    document.getElementById('reg-eyebrow-estado').textContent = registro.versionActual
+      ? `Última versión: v${registro.versionActual}` : 'Todavía sin guardar';
+
+    if (sede){
+      const p1 = String(sede.tipo_censo || '').startsWith('1.');
+      document.getElementById('reg-ayuda-tipo').innerHTML =
+        `El censo la clasificó como <b>${p1 ? 'tipo 1 — colapso total o parcial' : 'tipo 2 — riesgo inminente de colapso'}</b>. ` +
+        'Si usted declara algo distinto, el sistema le pedirá justificarlo y lo marcará como discrepancia para que un arquitecto lo revise.';
+    }
+
+    document.getElementById('reg-af-si').checked = !registro.declaraSinAfectacion;
+    document.getElementById('reg-af-no').checked = registro.declaraSinAfectacion;
+    document.getElementById('reg-label-desc').textContent = registro.declaraSinAfectacion
+      ? 'Justificación (mínimo 40 caracteres)' : 'Descripción de los daños';
+    document.getElementById('reg-descripcion').value = registro.descripcionAfectacion;
+
+    document.getElementById('reg-admin').value = formatNum(registro.pctAdmin, 0);
+    document.getElementById('reg-utilidad').value = formatNum(registro.pctUtilidad, 0);
+    document.getElementById('reg-plazo').value = registro.plazoDias ? formatNum(registro.plazoDias, 0) : '';
+
+    renderItemsTabla();
+    actualizarTotales();
+
+    const yaRadicado = ['RADICADO', 'EN_VERIFICACION', 'REQUIERE_AJUSTE', 'APROBADO'].indexOf(registro.estadoActual) !== -1;
+    document.getElementById('reg-msg').innerHTML = yaRadicado
+      ? `Esta sede ya tiene un presupuesto <b>${txt.toLowerCase()}</b> (v${registro.versionActual}). Guardar aquí crea una <b>v${(Number(registro.versionActual) || 0) + 1}</b> nueva — la anterior no se borra.`
+      : 'Al radicar ya no podrá editarlo con esta misma versión; si necesita corregir, se genera una <b>versión nueva</b> y la anterior queda como evidencia.';
+  }
+
+  function renderItemsTabla(){
+    const tbody = document.querySelector('#s-registrar table.edit tbody');
+    tbody.innerHTML = registro.items.map((it, i) => {
+      const opcionesCap = Object.keys(CAPITULOS).map(n =>
+        `<option value="${n}" ${String(it.capitulo) === n ? 'selected' : ''}>${n}. ${esc(CAPITULOS[n])}</option>`).join('');
+      const opcionesUnidad = UNIDADES.map(u =>
+        `<option ${it.unidad === u ? 'selected' : ''}>${esc(u)}</option>`).join('');
+      return `<tr data-i="${i}">
+        <td class="n">${i + 1}</td>
+        <td><select data-f="capitulo">${opcionesCap}</select></td>
+        <td><input data-f="descripcion" value="${esc(it.descripcion || '')}"></td>
+        <td><select data-f="unidad">${opcionesUnidad}</select></td>
+        <td><input class="n" data-f="cantidad" inputmode="decimal" value="${formatNum(it.cantidad, 2)}"></td>
+        <td><input class="n" data-f="valor_unitario" inputmode="decimal" value="${formatNum(it.valor_unitario, 0)}"></td>
+        <td class="n calc">${cop((Number(it.cantidad) || 0) * (Number(it.valor_unitario) || 0))}</td>
+        <td><button class="quitar" type="button" data-quitar title="Quitar">×</button></td>
+      </tr>`;
+    }).join('');
+
+    tbody.querySelectorAll('tr').forEach(tr => {
+      const i = Number(tr.dataset.i);
+      tr.querySelector('[data-f="capitulo"]').addEventListener('change', e => { registro.items[i].capitulo = e.target.value; });
+      tr.querySelector('[data-f="descripcion"]').addEventListener('input', e => { registro.items[i].descripcion = e.target.value; });
+      tr.querySelector('[data-f="unidad"]').addEventListener('change', e => { registro.items[i].unidad = e.target.value; });
+      const inCant = tr.querySelector('[data-f="cantidad"]');
+      inCant.addEventListener('input', e => { registro.items[i].cantidad = parseCOP(e.target.value); actualizarFilaCalc(tr, i); });
+      inCant.addEventListener('blur', e => { e.target.value = formatNum(registro.items[i].cantidad, 2); });
+      const inVU = tr.querySelector('[data-f="valor_unitario"]');
+      inVU.addEventListener('input', e => { registro.items[i].valor_unitario = parseCOP(e.target.value); actualizarFilaCalc(tr, i); });
+      inVU.addEventListener('blur', e => { e.target.value = formatNum(registro.items[i].valor_unitario, 0); });
+      tr.querySelector('[data-quitar]').addEventListener('click', () => {
+        registro.items.splice(i, 1);
+        renderItemsTabla();
+        actualizarTotales();
+      });
+    });
+    document.getElementById('reg-eyebrow-items').textContent = `${registro.items.length} ítem${registro.items.length === 1 ? '' : 's'}`;
+  }
+
+  function actualizarFilaCalc(tr, i){
+    const it = registro.items[i];
+    tr.querySelector('.calc').textContent = cop((Number(it.cantidad) || 0) * (Number(it.valor_unitario) || 0));
+    actualizarTotales();
+  }
+
+  function actualizarTotales(){
+    registro.pctAdmin = parseCOP(document.getElementById('reg-admin').value);
+    registro.pctUtilidad = parseCOP(document.getElementById('reg-utilidad').value);
+    registro.plazoDias = parseCOP(document.getElementById('reg-plazo').value);
+
+    const costoDirecto = registro.items.reduce((a, it) => a + (Number(it.cantidad) || 0) * (Number(it.valor_unitario) || 0), 0);
+    const valorAdmin = Math.round(costoDirecto * registro.pctAdmin / 100);
+    const valorUtilidad = Math.round(costoDirecto * registro.pctUtilidad / 100);
+    const valorIva = Math.round(valorUtilidad * 0.19); // Decreto 1372/1992 art. 3 — IVA sobre la utilidad (D-5)
+    const total = costoDirecto + valorAdmin + valorUtilidad + valorIva;
+
+    document.getElementById('reg-tot').innerHTML =
+      `<dt>Costo directo</dt><dd class="n">${cop(costoDirecto)}</dd>` +
+      `<dt>Administración <span class="pct">${formatNum(registro.pctAdmin, 0)} %</span></dt><dd class="n">${cop(valorAdmin)}</dd>` +
+      `<dt>Utilidad <span class="pct">${formatNum(registro.pctUtilidad, 0)} %</span></dt><dd class="n">${cop(valorUtilidad)}</dd>` +
+      `<dt>IVA 19 % sobre la utilidad</dt><dd class="n">${cop(valorIva)}</dd>` +
+      `<dt class="gt">Total del presupuesto</dt><dd class="n gt">${cop(total)}</dd>`;
+
+    const supera = registro.pctAdmin > ALERTA_ADMIN_PCT || registro.pctUtilidad > ALERTA_UTILIDAD_PCT;
+    document.getElementById('reg-alerta-au').style.borderLeftColor = supera ? 'var(--err)' : '';
+  }
+
+  async function guardarRegistroPresupuesto(estadoDestino){
+    const dane = daneActual;
+    if (!dane) return;
+    const declara = document.getElementById('reg-af-no').checked;
+    const descripcion = document.getElementById('reg-descripcion').value.trim();
+
+    if (estadoDestino === 'RADICADO'){
+      if (!declara && registro.items.length === 0){
+        alert('Agregue al menos un ítem antes de radicar, o declare que la sede no presenta afectación.');
+        return;
+      }
+      if (declara && descripcion.length < 40){
+        alert('La justificación de "no presenta afectación" necesita mínimo 40 caracteres.');
+        return;
+      }
+      if (!declara && descripcion.length < 60){
+        alert('La descripción de los daños necesita mínimo 60 caracteres.');
+        return;
+      }
+    }
+
+    const btn = document.getElementById(estadoDestino === 'RADICADO' ? 'btn-radicar' : 'btn-guardar-borrador');
+    const textoOriginal = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Guardando...';
+    try {
+      const r = await backend('guardarPresupuesto', {
+        token: sesion.token, dane_sede: dane, estado: estadoDestino,
+        declara_sin_afectacion: declara,
+        descripcion_afectacion: declara ? '' : descripcion,
+        justificacion_discrepancia: declara ? descripcion : '',
+        items: registro.items,
+        pct_admin: registro.pctAdmin, pct_utilidad: registro.pctUtilidad,
+        plazo_dias: registro.plazoDias,
+      });
+      if (!r.ok){ alert(r.error || 'No se pudo guardar.'); return; }
+      await cargarRegistro(dane);
+      pintarRegistrarReal();
+      alert(estadoDestino === 'RADICADO' ? `Presupuesto radicado como v${r.version}.` : `Borrador guardado (v${r.version}).`);
+    } catch (err) {
+      alert('No se pudo contactar el servidor. Intente de nuevo.');
+    } finally {
+      btn.disabled = false; btn.textContent = textoOriginal;
+    }
+  }
+
+  /* Refresca los paneles de la Ficha que dependen de Presupuestos/Items, una
+     vez que se sabe si la sede ya tiene algo radicado. Se llama al final de
+     pintarFichaReal() sin esperar su resultado (fire-and-forget): la
+     identidad y el censo ya se pintaron con datos síncronos de SEDES, esto
+     solo llena lo que faltaba. */
+  async function cargarPresupuestoDeFicha(dane){
+    let r;
+    try {
+      r = await backend('obtenerPresupuesto', { token: sesion.token, dane_sede: dane });
+    } catch (err) { return; }
+    if (String(dane) !== String(daneActual) || vista !== 'ficha') return; // ya se navegó a otro lado
+    if (!r.ok || !r.presupuesto) return; // sin presupuesto: se queda el estado vacío ya pintado
+
+    const p = r.presupuesto;
+    const s = SEDES && SEDES.find(x => String(x.dane_sede) === String(dane));
+    const paneles = document.querySelectorAll('#s-ficha .p');
+    const [cls, txt] = ESTADOS_PRESUPUESTO[p.estado] || ['e-pend', p.estado];
+
+    const badge = paneles[0].querySelector('.est');
+    if (badge){ badge.className = 'est ' + cls; badge.textContent = txt; }
+
+    paneles[1].querySelector('.cuerpo').innerHTML =
+      `<div class="cmp"><div class="et"><span>Valor de referencia — arquitecto</span><b class="n">${cop(s ? s.valor_referencia : 0)}</b></div><div class="pista"><i style="width:100%;background:var(--gris)"></i></div></div>` +
+      `<div class="cmp"><div class="et"><span>Presupuesto recibido — municipio</span><b class="n">${cop(p.total_presupuesto)}</b></div><div class="pista"><i style="width:100%;background:var(--verde)"></i></div></div>`;
+
+    paneles[2].querySelector('.cuerpo').innerHTML =
+      `<div class="cmp"><div class="et"><span>Costo directo declarado</span><b class="n">${cop(p.costo_directo)}</b></div><div class="pista"><i style="width:100%;background:var(--gris)"></i></div></div>` +
+      `<div class="cmp"><div class="et"><span>Total con A, U e IVA</span><b class="n">${cop(p.total_presupuesto)}</b></div><div class="pista"><i style="width:100%;background:var(--verde)"></i></div></div>`;
+
+    const fecha = p.fecha_creacion ? new Date(p.fecha_creacion).toLocaleDateString('es-CO') : '';
+    paneles[3].querySelector('tbody').innerHTML =
+      `<tr><td><strong>v${esc(p.version)}</strong></td><td><span class="est ${cls}">${esc(txt)}</span></td><td><span class="orig man">MAN</span></td><td class="n">${cop(p.total_presupuesto)}</td><td class="hace">${esc(fecha)}</td></tr>`;
+    paneles[3].querySelector('.pie').textContent =
+      `Si se corrige, entra como v${Number(p.version) + 1} y queda vigente — esta v${p.version} no se borra.`;
+
+    const pasos = paneles[6].querySelectorAll('.paso-sec');
+    pasos[2].classList.add('done');
+    const est3 = pasos[2].querySelector('.est');
+    est3.className = 'est e-apr'; est3.textContent = 'Completa';
+    paneles[6].querySelector('.eyebrow').textContent = '2 de 5 secciones';
+  }
 
   /* Sin cabeceras a propósito: un fetch con body de texto plano es una
      petición CORS "simple" y no dispara preflight OPTIONS, que Apps Script
@@ -1916,6 +2137,8 @@
       est.className = i === 0 ? 'est e-apr' : 'est e-pend';
       est.textContent = i === 0 ? 'Completa' : 'Sin diligenciar';
     });
+
+    cargarPresupuestoDeFicha(daneActual);
   }
 
   function pintar(){
@@ -1965,6 +2188,7 @@
       if (vista === 'inicio') pintarInicioReal();
       if (vista === 'muni') pintarMuniReal();
       if (vista === 'ficha') pintarFichaReal();
+      if (vista === 'registrar') pintarRegistrarReal();
 
       if (vista === 'muni' && muniActual){
         document.getElementById('migas').innerHTML =
@@ -2004,6 +2228,28 @@
     e.preventDefault();
     if (a.dataset.nav === 'inicio') irInicio();
     else if (a.dataset.nav === 'muni') irMuni(a.dataset.muni);
+  });
+
+  // Registrar presupuesto (Paso 3): estos elementos son estáticos (no se
+  // regeneran en cada pintada, a diferencia de las filas de ítems), así que
+  // sus listeners se enganchan una sola vez acá.
+  document.getElementById('btn-agregar-item').addEventListener('click', () => {
+    registro.items.push({ capitulo: '1', descripcion: '', unidad: 'm²', cantidad: 0, valor_unitario: 0 });
+    renderItemsTabla();
+    actualizarTotales();
+  });
+  document.getElementById('btn-guardar-borrador').addEventListener('click', () => guardarRegistroPresupuesto('BORRADOR'));
+  document.getElementById('btn-radicar').addEventListener('click', () => guardarRegistroPresupuesto('RADICADO'));
+  document.getElementById('reg-admin').addEventListener('input', actualizarTotales);
+  document.getElementById('reg-utilidad').addEventListener('input', actualizarTotales);
+  document.getElementById('reg-plazo').addEventListener('input', e => { registro.plazoDias = parseCOP(e.target.value); });
+  document.getElementById('reg-af-si').addEventListener('change', () => {
+    registro.declaraSinAfectacion = false;
+    document.getElementById('reg-label-desc').textContent = 'Descripción de los daños';
+  });
+  document.getElementById('reg-af-no').addEventListener('change', () => {
+    registro.declaraSinAfectacion = true;
+    document.getElementById('reg-label-desc').textContent = 'Justificación (mínimo 40 caracteres)';
   });
 
   pintar();

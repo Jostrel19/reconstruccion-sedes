@@ -902,3 +902,105 @@ No se encontró ninguna ruta de código que pudiera producir dos nodos de texto 
 `innerHTML` reemplaza el contenido completo en cada pintada — así que se documenta como sospecha de
 artefacto de repintado del navegador (ghosting al redimensionar), no como bug confirmado. Pendiente
 de que el usuario confirme si persiste después de un refresco duro.
+
+## 2026-09-17 — Paso 3: Registrar presupuesto, código completo, despliegue quedó pendiente
+
+Primer módulo que **escribe** en el sistema — hasta acá todo (login, Sedes, Municipio, Ficha,
+Tablero) era solo lectura. Se construyó de punta a punta:
+
+- **`backend/Presupuestos.gs`** (nuevo): `Presupuestos_obtener` (lee la fila vigente de
+  `Presupuestos` y sus `Items` para un DANE, validando alcance con la misma `_enAlcance` de
+  `Sedes.gs`) y `Presupuestos_guardar` (recalcula costo directo/A/U/IVA/total él mismo — no
+  confía en el total que mande el navegador — y aplica el versionado de D-37: apaga `vigente` en
+  la fila anterior si existe, sin tocar ningún otro dato de ella, y agrega una fila nueva con
+  `version` + 1). Registradas en `Codigo.gs` (`obtenerPresupuesto`, `guardarPresupuesto`).
+- **Pantalla Registrar presupuesto** (`docs/diseno/mockup_v6.html`), que ya existía diseñada
+  desde v6 pero con contenido de ejemplo hardcodeado: se conectó a los dos endpoints nuevos.
+  Tabla de ítems totalmente editable (agregar/quitar fila, capítulo 1-14 y unidad de catálogo
+  cerrado, cálculo de valor total en vivo), sección A/U/plazo con alerta visual si supera 12 %/8 %
+  (D-5), parseo de formato colombiano (`parseCOP`) para que "1.500.000" y "12,5" se entiendan sin
+  que el usuario tenga que escribir en inglés. El botón "Editar presupuesto" de la Ficha
+  (`irRegistrar()`) ya lleva el DANE real de la sede que se estaba viendo.
+- **La Ficha se volvió reactiva a Presupuestos**: `cargarPresupuestoDeFicha()` consulta
+  `obtenerPresupuesto` cada vez que se abre una Ficha y, si existe un presupuesto real, reemplaza
+  los paneles de Seguimiento/Su presupuesto/Historial/Formato oficial que hasta ahora siempre
+  decían "sin presupuesto" — sin esto, radicar algo en Registrar nunca se hubiera visto reflejado
+  en ningún otro lado.
+- Sección 4 (fotografías) de Registrar quedó **fuera de alcance a propósito**: el backend no
+  tiene ninguna pestaña ni campo para guardar archivos todavía (ni siquiera está en el esquema de
+  `Presupuestos`/`Items` de `CLAUDE.md` §6). Se limpiaron las fotos de ejemplo que traía el
+  diseño y se dejó una nota explícita de "todavía no disponible" en vez de simular que el botón
+  "Agregar" hace algo.
+- Se le explicó al usuario, a pedido explícito, la diferencia real entre "Guardar borrador" y
+  "Radicar presupuesto": ambos botones llaman a la misma función y solo cambian el valor de
+  `estado` que se guarda; **radicar no bloquea ediciones futuras a nivel de backend todavía** —
+  es una simplificación deliberada, coherente con "alerta, no bloquea", que se deja anotada acá
+  para no perderla.
+
+**No se pudo probar en vivo.** Al intentar "Guardar borrador" el backend respondió
+`Acción desconocida: guardarPresupuesto`. Diagnóstico (reemplazando `window.alert` temporalmente
+para leer el mensaje real sin depender del diálogo nativo del navegador, que el panel compartido
+no siempre maneja bien): el usuario había creado una **implementación nueva** ("Paso 3 —
+Registrar presupuesto...", con su propia URL `AKfycbypTxkK7fAz6k8MuYUZtrV7ErEzqcjxWIA5...`) en
+vez de actualizar la versión de la implementación original ("Paso 0 — 6 pestañas...", cuya URL es
+la que está escrita en `BACKEND_URL` del mockup). Cada implementación de Apps Script es un
+`/exec` independiente — subir una "Nueva versión" a una no le llega a la otra aunque compartan el
+mismo proyecto y el mismo código fuente. Se le explicó la distinción exacta entre el botón
+**"Implementar"** de la barra superior (crea una implementación nueva, URL nueva) y **"Nueva
+versión" dentro de Administrar implementaciones sobre una implementación ya existente** (mantiene
+la misma URL) — esta última es la única que se debe usar de acá en adelante.
+
+**Se deja pausado a pedido del usuario**, con el paso siguiente clarísimo: entrar a "Paso 0 — 6
+pestañas...", editarla, Nueva versión, implementar, y repetir la prueba de guardar/radicar.
+Detalle completo de qué falta en `docs/PLAN_DESARROLLO.md` §3 (Paso 3).
+
+## 2026-09-21 — Paso 3 cerrado: primer guardado real de punta a punta
+
+Se retomó la prueba pausada el 17. **Nota sobre fechas:** la entrada anterior está fechada
+2026-09-17 correctamente (fue cuando se escribió); esta se fecha 2026-09-21 porque efectivamente
+pasaron varios días reales entre pausar y retomar — durante el tramo intermedio esta bitácora
+había arrastrado por error "2026-09-17" como si fuera la fecha del día, sin volver a verificarla.
+
+**Segunda vuelta del mismo problema de despliegue.** Al reintentar, el backend seguía respondiendo
+`Acción desconocida: guardarPresupuesto` — el usuario había vuelto a editar la implementación
+"Paso 3 — Registrar..." (la huérfana, con su propia URL) en vez de "Paso 0 — 6 pestañas..." (la
+que de verdad usa `BACKEND_URL`). Se le explicó la distinción exacta entre el botón **"Implementar"**
+de la barra superior del editor (crea una implementación nueva, URL nueva — lo que ya había pasado
+dos veces) y **"Nueva versión" dentro de Administrar implementaciones, sobre una implementación que
+ya existe** (mantiene la misma URL) — con pasos numerados exactos de qué clic hacer dónde, ya que
+las dos veces anteriores la ambigüedad de la instrucción fue la causa real del error, no un
+malentendido del usuario. Corregido sobre la implementación correcta, `guardarPresupuesto` respondió
+de inmediato.
+
+**Prueba de punta a punta, sobre `217013000602` (Aguadas, tipo 2):**
+- Guardar borrador con 1 ítem (8 m² × $450.000 = $3.600.000 costo directo) → `v1`, estado
+  `BORRADOR`. Cálculo verificado: A 10 % = $360.000, U 5 % = $180.000, IVA 19 % sobre U = $34.200,
+  total $4.174.200.
+- Radicar el mismo presupuesto → `v2`, estado `RADICADO`, mismos totales, `vigente=true`.
+- Editar el plazo y guardar borrador de nuevo → `v3`, estado `BORRADOR`. Confirmado en el Sheet
+  real que **las tres versiones quedaron como filas separadas** — v1 y v2 con `vigente=FALSE`,
+  v3 con `vigente=TRUE` — nada se sobrescribió (D-37 funcionando como se diseñó, no solo como se
+  documentó).
+- La Ficha de esa sede reflejó en vivo cada cambio de estado (badge, Seguimiento, Historial) sin
+  intervención manual, vía `cargarPresupuestoDeFicha`.
+
+**Un susto que resultó ser autoinducido:** durante la prueba, el mensaje de confirmación de
+"Radicar" mostró *"Presupuesto radicado como vundefined"* en vez del número real. Antes de asumir
+un bug, se verificó el dato real contra el servidor (consulta directa a `obtenerPresupuesto`, sin
+pasar por la UI) y el `v2` con todos sus valores estaba perfectamente correcto — el problema era
+cosmético, no de datos. Se aisló la causa reinstalando un `fetch` nativo limpio (tomado de un
+`iframe` recién creado, para no depender de que el navegador recargara el archivo `file://`, que en
+este panel de pruebas no siempre recarga el estado de JavaScript) en lugar del que se había
+interceptado unos pasos antes para diagnosticar el problema de despliegue. Con `fetch` nativo, un
+guardado nuevo mostró el mensaje correcto (`v3`) — confirma que la interceptación de `fetch` que se
+usó como herramienta de diagnóstico fue la causa, no el código que quedó desplegado. Ningún usuario
+real habría visto este mensaje.
+
+**Hallazgo menor que queda anotado, no bloqueante:** `cargarRegistro()` traga en silencio los
+errores de `obtenerPresupuesto` (token vencido, sede fuera de alcance) y dejaría el formulario en
+blanco sin explicar por qué. Corregirlo es deseable pero no urgente — el peor caso hoy es un
+formulario vacío, nunca un dato incorrecto mostrado como si fuera bueno.
+
+**Con esto, el Paso 3 completo queda cerrado** (`docs/PLAN_DESARROLLO.md` §3, ítems 11-12). Falta
+por construir: fotografías (fuera de alcance, D-29 sección 4, sin campo en el backend todavía),
+Paso 4 (Verificación) y Paso 5 (Cargas).

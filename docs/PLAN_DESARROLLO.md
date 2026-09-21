@@ -130,9 +130,37 @@ Cada paso deja algo que se puede probar. No se avanza con el anterior sin verifi
     servicio" (el campo real del censo; el original no tenía con qué sustentar sus categorías) y la
     Bitácora quedó vacía (no existe todavía un registro de actividad — eso es Paso 3 en adelante).
 
-### Paso 3 — Escritura manual (objetivo 1)
-11. Pantalla Registrar presupuesto: ítems, cálculo, validaciones, borrador.
-12. Radicación con versionado: una v2 no pisa la v1.
+### Paso 3 — Escritura manual (objetivo 1) — ✅ cerrado 2026-09-21
+11. ✅ **Verificado en producción.** `backend/Presupuestos.gs` (nuevo): `Presupuestos_obtener` y
+    `Presupuestos_guardar`, registradas en `Codigo.gs`. Pantalla Registrar presupuesto
+    (`docs/diseno/mockup_v6.html`) conectada: tabla de ítems editable (agregar/quitar fila,
+    catálogo cerrado de capítulo 1-14 y unidad), cálculo automático de costo directo/A/U/IVA/total,
+    parseo del formato colombiano (`1.500.000`), alerta visual si A > 12 % o U > 8 % (D-5, umbrales
+    sin aval de Planeación todavía, Q-3). El botón "Editar presupuesto" de la Ficha lleva el DANE
+    real a esta pantalla.
+12. ✅ **Versionado real, verificado en producción.** `Presupuestos_guardar` nunca actualiza una
+    fila: calcula los totales él mismo (no le cree el total al navegador), apaga `vigente` en la
+    versión anterior si existe, y agrega una fila nueva con `version` + 1 (D-37). Probado en el
+    Sheet real sobre `217013000602`: v1 (borrador) → v2 (radicado) → v3 (borrador editado después
+    de radicado) quedaron como tres filas separadas, ninguna se sobrescribió. La Ficha
+    (`cargarPresupuestoDeFicha`) refleja el presupuesto vigente en Seguimiento/Historial.
+
+**Bloqueante resuelto 2026-09-21** (arrastrado desde el 17): el primer intento de desplegar creó
+una implementación **nueva** ("Paso 3 — Registrar...", URL propia) en vez de subir una versión
+nueva a la implementación existente ("Paso 0 — 6 pestañas...", cuya URL es la que tiene
+`BACKEND_URL`) — cada implementación de Apps Script es un `/exec` independiente, así que el mockup
+seguía hablando con el `Codigo.gs` viejo. Corregido subiendo la versión correcta a la
+implementación original. La implementación huérfana "Paso 3 — Registrar..." quedó sin usar (no
+rompe nada, es una URL que nadie referencia) — pendiente archivarla cuando haya un rato, no urge.
+
+**Hallazgo menor, no bloqueante:** `cargarRegistro()` traga en silencio cualquier error de
+`obtenerPresupuesto` (token vencido, sede fuera de alcance) y deja el formulario en blanco sin
+avisar — el usuario vería "sin diligenciar" en vez de un mensaje de error. Corregirlo cuando se
+retome este módulo, no es urgente porque el peor caso es un formulario vacío, no un dato mal
+mostrado.
+
+**Sin construir todavía:** fotografías (D-29 sección 4) — el backend no tiene dónde guardarlas
+aún, la sección quedó marcada como "todavía no disponible" en la pantalla.
 
 ### Paso 4 — Verificación (objetivo 3 del flujo)
 13. Bandeja + emitir concepto, con la regla D-22 y el registro de auditoría de D-21.
