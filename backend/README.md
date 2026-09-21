@@ -13,8 +13,8 @@ un archivo `.gs` acá, hay que copiar el cambio también al proyecto real.
 2. **Extensiones → Apps Script.** Se abre un proyecto ligado a ese Sheet.
 
 3. Crear un archivo de script por cada uno de los que hay en esta carpeta (`Setup`, `Codigo`,
-   `Auth`, `Sedes`, `Backup` — el nombre del archivo en Apps Script no necesita la extensión `.gs`) y
-   pegar el contenido tal cual.
+   `Auth`, `Sedes`, `Backup`, `Presupuestos`, `Verificaciones` — el nombre del archivo en Apps Script
+   no necesita la extensión `.gs`) y pegar el contenido tal cual.
 
 4. **Ejecutar `crearHojas` una vez** (desplegable de funciones, arriba del editor → seleccionar
    `crearHojas` → ▶ Ejecutar). Autorizar los permisos que pida. Esto crea las 6 pestañas con las
@@ -54,18 +54,25 @@ un archivo `.gs` acá, hay que copiar el cambio también al proyecto real.
 
 ## Qué hay hecho y qué falta (ver `docs/PLAN_DESARROLLO.md` §3 para el orden completo)
 
-| Archivo | Qué resuelve | Paso del plan |
-|---|---|---|
-| `Setup.gs` | Crea las 6 pestañas con las columnas de `CLAUDE.md` §6 | Paso 0 |
-| `Codigo.gs` | `doGet` (ping) + `doPost` con registro de acciones | Paso 0 |
-| `Auth.gs` | Login por código de un solo uso, token de sesión firmado (D-20) | Paso 1 |
-| `Sedes.gs` | Listado de sedes filtrado por rol/alcance del lado del servidor (D-6, D-24, D-25) | Paso 2 |
-| `Backup.gs` | Respaldo diario del Sheet completo a Drive, con retención de 30 días (D-38) | — resiliencia, no es un paso del plan |
+| Archivo | Qué resuelve | Paso del plan | Desplegado |
+|---|---|---|---|
+| `Setup.gs` | Crea las 6 pestañas con las columnas de `CLAUDE.md` §6 | Paso 0 | ✅ |
+| `Codigo.gs` | `doGet` (ping) + `doPost` con registro de acciones | Paso 0 | ✅ |
+| `Auth.gs` | Login por código de un solo uso, token de sesión firmado (D-20) | Paso 1 | ✅ |
+| `Sedes.gs` | Listado de sedes filtrado por rol/alcance del lado del servidor (D-6, D-24, D-25) | Paso 2 | ✅ |
+| `Backup.gs` | Respaldo diario del Sheet completo a Drive, con retención de 30 días (D-38) | — resiliencia, no es un paso del plan | ✅ |
+| `Presupuestos.gs` | Guardar/obtener presupuesto, versionado real sin sobrescritura (D-37), historial completo | Paso 3 | ✅ |
+| `Verificaciones.gs` | Bandeja departamental + emitir concepto (D-21, D-22, D-39) | Paso 4 | ✅ desplegado y probado en producción 2026-09-21 |
 
-**Falta:** enrutado y migas del frontend real (hoy solo existe el mockup estático), escritura de
-Presupuestos/Items (Paso 3), Verificaciones (Paso 4), Cargas (Paso 5), Hallazgos (Paso 6), y el PDF
-y correo de confirmación. Cada uno se agrega como una entrada nueva en el objeto `manejadores` de
-`Codigo.gs`, sin tocar lo que ya funciona.
+**Falta:** enrutado y migas del frontend real (hoy solo existe el mockup estático — `docs/diseno/mockup_v6.html`
+ya llama al backend real desde ahí), Hallazgos (Paso 6), y el PDF y correo de confirmación. Cada uno
+se agrega como una entrada nueva en el objeto `manejadores` de `Codigo.gs`, sin tocar lo que ya
+funciona. **`Presupuestos.gs` (D-40) y `Verificaciones.gs` ya están pegados y desplegados** sobre la
+implementación existente ("Paso 0 — 6 pestañas..."). `obtenerBandejaVerificacion`/`emitirConcepto`
+se probaron de punta a punta contra el backend real (login, radicación, concepto, D-39 confirmado
+con mutación de una sola celda y con el candado de concurrencia). **Cargas también confirmado en
+producción el mismo día**: `guardarPresupuesto` con `origen: CARGA` desde Administrador, con
+`ingesta_ARANZAZU.json` real — ver `docs/PLAN_DESARROLLO.md` Paso 5 para el detalle.
 
 ## Decisiones que este código ya aplica
 
@@ -78,3 +85,12 @@ y correo de confirmación. Cada uno se agrega como una entrada nueva en el objet
 - **D-38** — `validarCodigo` bloquea un código tras 5 intentos fallidos; respaldo diario automático;
   ver `docs/RUNBOOK_CONTINUIDAD.md` para qué hacer si la cuenta que despliega esto deja de estar
   disponible.
+- **D-37** — `Presupuestos_guardar` nunca sobrescribe una fila: cada guardado agrega una versión
+  nueva y solo apaga `vigente` en la anterior (`Presupuestos.gs::_presupuestoVigente`).
+- **D-27** — `valor_referencia` vive únicamente en `Sedes`; `Presupuestos_guardar` nunca la lee, la
+  copia ni la sobrescribe.
+- **D-39** — `Verificaciones_emitir` extiende la misma excepción de D-37 al campo `estado`: un único
+  `setValue` dirigido sobre la fila vigente, nunca una versión nueva, porque el concepto no cambia el
+  contenido del presupuesto. El registro de auditoría completo vive aparte, en `Verificaciones`.
+- **D-40** — `Presupuestos_guardar` admite `origen: CARGA` desde el rol `VERIFICADOR` además de
+  `MANUAL` desde `RESPONSABLE_SEDE`/Administrador.

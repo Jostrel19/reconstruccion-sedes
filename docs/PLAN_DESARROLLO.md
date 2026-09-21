@@ -153,32 +153,179 @@ seguía hablando con el `Codigo.gs` viejo. Corregido subiendo la versión correc
 implementación original. La implementación huérfana "Paso 3 — Registrar..." quedó sin usar (no
 rompe nada, es una URL que nadie referencia) — pendiente archivarla cuando haya un rato, no urge.
 
-**Hallazgo menor, no bloqueante:** `cargarRegistro()` traga en silencio cualquier error de
-`obtenerPresupuesto` (token vencido, sede fuera de alcance) y deja el formulario en blanco sin
-avisar — el usuario vería "sin diligenciar" en vez de un mensaje de error. Corregirlo cuando se
-retome este módulo, no es urgente porque el peor caso es un formulario vacío, no un dato mal
-mostrado.
+**Fotografías (D-29 sección 4) — código completo 2026-09-21, pendiente desplegar.**
+`backend/Fotos.gs` (nuevo): `Fotos_subir` y `Fotos_listar`, con Drive como repositorio de
+archivos — exactamente lo que D-19 ya preveía ("Drive como repositorio de archivos") y que hasta
+ahora no se había construido. Una carpeta raíz ("Reconstrucción de sedes — Fotos", id guardado en
+las Propiedades del script, mismo mecanismo que el secreto de los tokens) y, dentro, una subcarpeta
+por DANE sede — mismo patrón que "SoportesFotograficos" en el sistema anterior (D-13), con Drive en
+vez de SharePoint. Límite de 8 MB por foto, una llamada por foto (nunca un lote) para no acercarse
+al límite de tamaño de `doPost`. Puede subir quien puede diligenciar a mano (`ADMINISTRADOR` /
+`RESPONSABLE_SEDE`, mismo criterio que `Presupuestos_guardar` con `origen: MANUAL`) — el Verificador
+no diligencia, así que no sube fotos por esta vía. Registradas en `Codigo.gs` como `subirFoto` y
+`listarFotos`.
 
-**Sin construir todavía:** fotografías (D-29 sección 4) — el backend no tiene dónde guardarlas
-aún, la sección quedó marcada como "todavía no disponible" en la pantalla.
+La pantalla Registrar (sección 4) se reconstruyó: ya no es decorativa — sube por clic o arrastrando,
+muestra miniatura de lo recién subido, y al reabrir la sede trae lo que ya existe en Drive
+(`listarFotos`). Se retira el aviso "tendrá que adjuntar las fotos de nuevo" (D-11 del sistema
+viejo): ya no aplica, el contenido persiste del lado del servidor, no del navegador. El stepper de
+la sección 4 (ver más abajo) ahora refleja si hay al menos una foto real.
 
-### Paso 4 — Verificación (objetivo 3 del flujo)
-13. Bandeja + emitir concepto, con la regla D-22 y el registro de auditoría de D-21.
+**Aprovechado para cerrar dos huecos reales de la Ficha, encontrados en la auditoría de hoy:** en
+`cargarPresupuestoDeFicha`, la sección "2 · Descripción de la afectación" del checklist "Formato
+oficial" nunca se marcaba completa aunque el presupuesto ya trajera la descripción — solo se
+marcaba la 3 (Presupuesto). Corregido con el mismo criterio de longitud mínima que ya exige
+`Presupuestos_guardar` al radicar. Se agregó `cargarFotosDeFicha` para que la sección 4 del mismo
+checklist deje de estar fija en "Sin adjuntar" y refleje `listarFotos` real. El contador
+"X de 5 secciones" ahora se recalcula sobre el DOM (`actualizarContadorFormatoOficial`) en vez de
+un número fijo, porque presupuesto y fotos llegan por dos llamadas independientes que pueden
+resolver en cualquier orden.
 
-### Paso 5 — Cargas (objetivo 2)
-14. Pantalla de importación que recibe la salida de los lectores, muestra el cruce propuesto y
-    **exige confirmar lo ambiguo** antes de volcar (D-23).
-15. **Granularidad según D-36:** si el archivo trae capítulo por fila (hoy solo Belalcázar), el
-    lector vuelca a `Items` completo; si no (Aguadas, Aranzazu, Samaná), vuelca **solo el total** a
-    `Presupuestos` — no se infiere capítulo de un texto libre.
+**Tres cambios más, 2026-09-21, a pedido explícito tras la auditoría — los tres probados con datos
+fabricados en memoria, sin tocar producción:**
+
+1. **Sección 5 de la Ficha — concepto de verificación en modo lectura (D-30), código completo,
+   pendiente desplegar.** `_verificacionDe(idPresupuesto)` (nuevo, en `Verificaciones.gs`) busca en
+   la hoja `Verificaciones` la fila más reciente para ese `id_presupuesto` y la expone como campo
+   `verificacion` en la respuesta de `Presupuestos_obtener` (mismo patrón que ya usa `historial` —
+   sin viaje nuevo desde el navegador). En la Ficha, un panel nuevo "Concepto del arquitecto"
+   (oculto si no hay verificación todavía) muestra resultado, observaciones, quién y cuándo; el
+   paso 5 del checklist "Formato oficial" deja de estar fijo en "Pendiente". Antes de esto, un
+   Responsable de sede que veía "Requiere ajuste" en el badge no tenía forma de saber *qué* corregir
+   sin preguntar por fuera del sistema — las observaciones del arquitecto se guardaban bien en
+   `Verificaciones` (D-21) pero no llegaban a ningún lado del frontend.
+2. **PDF del formato oficial, adelantado del Paso 6 — código completo, 100 % frontend, no
+   requiere desplegar backend.** Mismo truco sin librerías del sistema anterior (iframe oculto +
+   impresión del navegador), reescrito para el modelo de datos nuevo: sin firma-imagen (D-13, ya
+   reemplazada por D-21 — se imprime correo y fecha de quien radicó y quien verificó, registro de
+   auditoría de sesión, no una rúbrica escaneada) y sin fotos embebidas (`listarFotos` solo trae
+   metadatos, nunca el contenido — traerlo exigiría un endpoint nuevo que no se pidió ahora; el PDF
+   deja una nota de que las fotos se consultan en el sistema). Usa la misma caché que ya carga la
+   Ficha (`fichaPresupuestoActual`/`fichaItemsActual`/`fichaVerificacionActual`) — lo que se
+   descarga es exactamente lo que la pantalla está mostrando, sin pedir nada dos veces.
+3. **Contador real de Verificación en el riel — hecho, 100 % frontend, ya activo.** Antes se
+   ocultaba siempre (correcto: el "6" del ejemplo no debía pasar por real, pero tampoco mostraba
+   nada útil). Ahora `actualizarBadgeVerifRiel()` calcula los `RADICADO` pendientes sobre `VERIF`
+   real y los muestra — sigue oculto hasta la primera vez que se visita Verificación en la sesión
+   (no se pide la bandeja completa desde el login solo para este número), y se actualiza cada vez
+   que la bandeja se refresca.
+
+**Pendiente del lado del usuario:** pegar `Verificaciones.gs` y `Presupuestos.gs` actualizados en
+el proyecto de Apps Script y subir "Nueva versión" — mismo procedimiento de siempre. El PDF y el
+contador del riel ya funcionan con solo abrir el HTML actualizado, sin depender de este despliegue.
+
+**Auditoría del 2026-09-21, antes de seguir con los pasos 4 y 5:** se pidió revisar a fondo que no
+hubiera errores ni incongruencias antes de construir más. Se encontraron y corrigieron 4 huecos
+reales en lo que ya se había dado por cerrado:
+
+1. **`cargarPresupuestoDeFicha()` nunca actualizaba "Cruce por capítulo" ni "Presupuesto a
+   detalle".** Esos dos paneles quedaban congelados para siempre con el ejemplo de diseño
+   (Guayaquil, capítulos 2/3/6) sin importar qué sede real se estuviera viendo — el hallazgo menor
+   que quedó anotado la vez anterior (`cargarRegistro()` tragando errores) resultó ser el más chico
+   de cuatro. Corregido: ambos paneles ahora se recalculan con los `items` reales que devuelve
+   `obtenerPresupuesto`.
+2. **`Presupuestos_obtener` solo devolvía la versión vigente**, así que "Historial" nunca podía
+   mostrar más de una fila aunque el Sheet sí tuviera v1/v2/v3 guardadas. Se agregó `_historialDe()`
+   y el campo `historial` en la respuesta; la Ficha ahora lista todas las versiones.
+3. **`cargarRegistro()` corregido**: ya no traga errores de `obtenerPresupuesto` en silencio —se
+   muestra un aviso visible en la pantalla Registrar en vez de dejar el formulario vacío sin
+   explicar por qué.
+4. **La longitud mínima de la descripción (60/40 caracteres) solo se validaba en el navegador.**
+   `Presupuestos_guardar` ahora repite la misma regla en el servidor: cualquiera con un token válido
+   que llame la API directo, sin pasar por el formulario, se topa con la misma exigencia.
+
+Las cuatro correcciones se probaron en el navegador contra datos fabricados con la forma exacta de
+la respuesta real del backend (no contra el backend real, que no cambia hasta que se pegue el
+código nuevo en Apps Script) — sin errores de consola. Detalle en `docs/REGISTRO_DESARROLLO.md`.
+
+### Paso 4 — Verificación (objetivo 3 del flujo) — ✅ desplegado y probado en producción 2026-09-21
+13. ✅ `backend/Verificaciones.gs` (nuevo): `Verificaciones_bandeja` (todo lo `RADICADO` /
+    `REQUIERE_AJUSTE` / `APROBADO` del departamento, con la sede y los ítems ya adjuntos — el
+    Verificador ve hasta 37 filas, no hace falta paginar) y `Verificaciones_emitir` (guarda el
+    concepto en `Verificaciones` —D-21— y aplica D-22 sobre el `estado` vigente de `Presupuestos`,
+    con el mecanismo de D-39). Registradas en `Codigo.gs` como `obtenerBandejaVerificacion` y
+    `emitirConcepto`.
+14. ✅ Pantalla Verificación conectada: franja de cifras real, bandeja clicable, panel "Emitir
+    concepto" con el cruce daño↔presupuesto de esa sede (D-34), los 3 resultados de D-22, validación
+    de observaciones (≥20 caracteres si no es "corresponde") y el botón "Devolver al municipio" como
+    atajo de "no corresponde". El botón "Verificar" de la Ficha abre directo el concepto de esa sede
+    (`irVerificacionSede`). Probado con datos fabricados con la forma exacta del backend nuevo —
+    franja, bandeja, cruce de capítulos, las dos validaciones y el payload que viaja a
+    `emitirConcepto` quedaron verificados; sin errores de consola.
+
+**Desplegado y probado en producción 2026-09-21.** `Verificaciones.gs` y el `Presupuestos.gs`
+actualizado (D-39/D-40) se pegaron en el proyecto real y se subió "Nueva versión" sobre la
+implementación **"Paso 0 — 6 pestañas..."** correcta (sin repetir la confusión del Paso 3).
+Prueba de punta a punta con la cuenta Administrador real, contra el backend real:
+
+- Login completo (`solicitarCodigo` → correo real → `validarCodigo` con el código recibido).
+- Radicación de prueba sobre `217013000394` (Ángel de la Guarda, Aguadas) para tener algo que
+  verificar: `217013000394-v1`.
+- `obtenerBandejaVerificacion` trajo la fila real con sus ítems adjuntos.
+- Concepto emitido con `resultado: CORRESPONDE_PARCIAL` → **confirmado D-22**: `estado` pasó a
+  `REQUIERE_AJUSTE`, y **confirmado D-39**: la fila `v1` no se reemplazó (`version` siguió en 1,
+  solo cambió la celda `estado`).
+- Radicada una segunda versión (`217013000394-v2`) mientras la primera seguía "abierta" en
+  pantalla, y se intentó emitir el concepto sobre la `v1` ya obsoleta: **confirmado el candado de
+  concurrencia de D-39** — el backend rechazó con *"Esta versión ya no es la vigente (la actual es
+  217013000394-v2) — recargue la bandeja"*.
+- Concepto emitido sobre la `v2` con `resultado: CORRESPONDE` → `estado` pasó a `APROBADO`.
+- Panel "Emitir concepto" renderizando el cruce daño↔presupuesto (D-34) contra `capitulos_dano`
+  real de la sede, y `valor_referencia` vs `total_presupuesto` mostrados lado a lado sin restarse
+  (D-28).
+
+**Limpieza pendiente/hecha:** las filas anteriores son datos ficticios de esta prueba, no un
+presupuesto real. Se retiraron a mano del Sheet (Presupuestos, Items, Verificaciones) con una
+función de un solo uso corrida directo en el editor de Apps Script y luego eliminada — el sistema
+no tiene ni debe tener una acción de borrado (D-37), así que esta limpieza no deja rastro en la API
+a propósito, igual que no lo dejaría un alcalde real que nunca llegó a existir.
+
+### Paso 5 — Cargas (objetivo 2) — ✅ código completo y desplegado 2026-09-21, prueba en producción pendiente
+15. ✅ **`tools/ingesta.py` gana un modo `--json`.** Hasta ahora los 4 lectores solo imprimían el
+    informe por consola: no había ningún archivo que la pantalla Cargas pudiera recibir. Ahora
+    `python tools/ingesta.py <MUNICIPIO> --json` además escribe `data/generado/ingesta_<MUNICIPIO>.json`
+    (`esquema: 1`, mismo patrón que D-12 en el sistema viejo) con los `registros` y `hallazgos` tal
+    cual los calculó el lector. Probado de verdad contra los archivos reales: Samaná (77 registros,
+    29 hallazgos) y Aranzazu (9 registros, todos con DANE propuesto por nombre).
+16. ✅ **`Presupuestos_guardar` admite `origen: CARGA` desde `VERIFICADOR`** (D-40) — antes solo
+    `RESPONSABLE_SEDE`/Administrador podían guardar presupuesto.
+17. ✅ Pantalla Cargas reconstruida por completo (antes era 100 % estática, sin un solo `id` ni
+    listener): sube el JSON (clic o arrastrar), muestra el informe real (registros leídos, errores
+    que no generaron fila, advertencias), y por cada registro deja **confirmar** el DANE cuando el
+    lector lo propuso por nombre (`dane_origen=propuesto`) — la casilla de esa fila es la
+    confirmación humana que exige D-23, nunca viene premarcada. Las filas fuera del lote 1 tampoco
+    vienen premarcadas (D-40). "Volcar confirmados" llama `guardarPresupuesto` una vez por fila
+    marcada y muestra qué quedó bien y qué falló.
+18. ✅ **Granularidad según D-36/D-41:** se verificó contra los 4 lectores reales que **ninguno**
+    —tampoco Belalcázar— exporta hoy capítulo por ítem ni A/U/IVA/plazo (`RegistroIngesta` solo trae
+    `costo_directo`). D-36 preveía ese caso para 3 de 4 municipios; en la práctica aplica a los 4
+    todavía. Se vuelca como un ítem único "sin desglose" (D-41) en vez de un total suelto —el cruce
+    daño↔presupuesto lo trata correctamente como no verificable por capítulo, sin inferir nada.
+
+**Probado de punta a punta en el navegador, con los JSON reales generados en el punto 15** (no con
+ejemplos inventados): subir el archivo, ver el informe, confirmar dos DANE propuestos de Aranzazu,
+marcar sus casillas, volcar, y confirmar que las filas volcadas correctamente desaparecen de la
+lista pendiente y las que fallan se quedan para reintentar. Sin errores de consola.
+
+**Confirmado en producción 2026-09-21.** Con `ingesta_ARANZAZU.json` (9 registros, los 9 con DANE
+propuesto por nombre — ninguno traía DANE en el Excel): la pantalla mostró las 4 filas con
+coincidencia en el catálogo sin premarcar (D-40), se confirmaron 2 a mano (Buenos Aires
+`217050000060`, Campo Alegre `217050000116`) y "Volcar confirmados" llamó `guardarPresupuesto` real
+dos veces. Verificado leyendo de vuelta ambos registros con `obtenerPresupuesto`: `origen: CARGA`,
+`archivo_origen: ingesta_ARANZAZU.json`, `creado_por: data@sedcaldas.edu.co`, un ítem único por
+sede con `capitulo` vacío/`unidad: gl`/`cantidad: 1`/`valor_unitario` = costo directo exacto del
+Excel, y la nota de D-36 en `descripcion_afectacion` sobre la falta de desglose — exactamente el
+comportamiento de D-36/D-40/D-41. Las 5 filas sin coincidencia en el catálogo (Camelia Pequeña,
+Camelia Alta, La Meseta, Buenavista, San Rafael — los 5 errores que ya reporta H-8) se quedaron sin
+volcar, tal como debía ser. Tras confirmar, la lista pendiente pasó de 9 a 7 filas.
 
 ### Paso 6 — Hallazgos y cierre
-16. Pantalla **Hallazgos** (Administrador y Verificador): lista de la pestaña `Hallazgos`,
+19. Pantalla **Hallazgos** (Administrador y Verificador): lista de la pestaña `Hallazgos`,
     filtro abierto/resuelto, botón de marcar resuelto con quién y cuándo. Reemplaza el panel de
     solo lectura del mockup inicial — sin esto, "control total del sistema" (objetivo 4) es
     incompleto: hoy los 19 hallazgos abiertos solo viven en un `.md`.
-17. PDF del formato oficial (se reusa `pdf.js`).
-18. Correo de confirmación con el radicado.
+20. PDF del formato oficial (se reusa `pdf.js`).
+21. Correo de confirmación con el radicado.
 
 ---
 
@@ -235,6 +382,24 @@ municipios como acceso directo. Probado de punta a punta con la cuenta Administr
 ($9.718.464.165, 37 sedes, 34 no habilitadas, 2.623 estudiantes) calculadas en el navegador contra
 el catálogo real y verificadas iguales a las que ya documentaba `CLAUDE.md` §7. Detalle completo en
 `docs/REGISTRO_DESARROLLO.md`. **Sigue el Paso 3** (Registrar presupuesto).
+
+**Actualizado 2026-09-21 — Pasos 4 y 5 desplegados; Verificación confirmada en producción, Cargas
+pendiente de probar.** `backend/Verificaciones.gs` (nuevo) y los cambios de `backend/Presupuestos.gs`
+(D-39, D-40) se pegaron en el proyecto real y se subió "Nueva versión" sobre la implementación
+correcta ("Paso 0 — 6 pestañas..."). `obtenerBandejaVerificacion`/`emitirConcepto` se probaron de
+punta a punta contra el backend real con la cuenta Administrador (detalle completo en el Paso 4 de
+§3): D-22, D-28, D-34, D-39 (mutación de una sola celda) y el candado de concurrencia de D-39
+quedaron confirmados con datos reales, no simulados. Los datos de esa prueba (`217013000394-v1/v2`)
+eran ficticios y se retiraron del Sheet a mano — ver nota de limpieza en el Paso 4.
+
+**Cargas confirmado en producción el mismo día** (detalle en el Paso 5 de §3): `ingesta_ARANZAZU.json`
+volcado con 2 de 9 registros confirmados y verificados contra el backend real. Igual que con
+Responsable de sede, tampoco hay todavía un correo real de arquitecto para probar el alcance del
+rol Verificador en producción — Verificación y Cargas siguen probadas solo con Administrador.
+
+**Datos de prueba en el Sheet real, pendientes de limpiar en una sola pasada:** `217013000602`
+(v1/v2/v3, prueba del Paso 3), `217050000060-v1` y `217050000116-v1` (prueba de Cargas). Ninguno es
+un presupuesto real de un municipio.
 
 **No bloquean, pero hay que resolverlos antes de dar acceso real:**
 

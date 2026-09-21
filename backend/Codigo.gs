@@ -28,7 +28,11 @@ function doPost(e) {
     validarCodigo: Auth_validarCodigo,
     listarSedes: Sedes_listar,
     obtenerPresupuesto: Presupuestos_obtener,
-    guardarPresupuesto: Presupuestos_guardar
+    guardarPresupuesto: Presupuestos_guardar,
+    obtenerBandejaVerificacion: Verificaciones_bandeja,
+    emitirConcepto: Verificaciones_emitir,
+    subirFoto: Fotos_subir,
+    listarFotos: Fotos_listar
   };
 
   var manejador = manejadores[body.accion];

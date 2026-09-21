@@ -354,15 +354,22 @@
   .acciones-v{ display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
 
   /* ─── v6: diligenciamiento manual (alcalde / rector) ─── */
-  .pasos-f{ display:flex; gap:.35rem; flex-wrap:wrap; }
-  .pf{ display:flex; align-items:center; gap:.45rem; font-size:.82rem; color:var(--tx-sec);
-       border:1px solid var(--borde); border-radius:3px; padding:.35rem .7rem; background:var(--fondo); }
+  .pasos-f{ display:flex; gap:0; flex-wrap:wrap; position:relative; counter-reset:paso; }
+  .pasos-f::before{ content:""; position:absolute; left:19px; right:19px; top:50%; height:2px;
+       background:var(--borde); z-index:-1; }
+  .pf{ display:flex; align-items:center; gap:.45rem; font:inherit; font-size:.82rem; color:var(--tx-sec);
+       border:1px solid var(--borde); border-radius:999px; padding:.35rem .8rem .35rem .35rem;
+       background:var(--panel); cursor:pointer; margin:0 .55rem .35rem 0; transition:border-color .15s,background .15s,color .15s,transform .1s; }
+  .pf:hover{ border-color:var(--borde-f); color:var(--tx); transform:translateY(-1px); }
+  .pf:active{ transform:translateY(0); }
   .pf .no{ display:grid; place-items:center; width:19px; height:19px; border-radius:50%;
-           background:var(--borde); color:var(--tx-sec); font-size:.72rem; font-weight:800; }
+           background:var(--borde); color:var(--tx-sec); font-size:.72rem; font-weight:800; flex:none;
+           font-family:var(--f-mono); transition:background .15s,color .15s; }
   .pf.hecho{ border-color:#AFD3C1; background:var(--ok-bg); color:var(--ok); font-weight:600; }
   .pf.hecho .no{ background:var(--ok); color:#fff; }
   .pf.act{ border-color:var(--oro); background:var(--alerta-bg); color:var(--alerta); font-weight:700; }
   .pf.act .no{ background:var(--oro); color:#3B2F05; }
+  .pf.act{ box-shadow:0 0 0 3px var(--alerta-bg); }
 
   table.edit td{ padding:.3rem .35rem; }
   table.edit input, table.edit select{ width:100%; font:inherit; font-size:.82rem;
@@ -557,7 +564,7 @@
             <a href="#" data-mod="inicio" class="sel">
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 14V6.2L8 2l6 4.2V14"/><path d="M2 14h12"/><path d="M6.2 14V9.5h3.6V14"/></svg>Sedes</a>
             <a href="#" data-mod="verif" data-sed>
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 2.6h10v10.8H3z"/><path d="M5.4 8.2 7.1 9.9l3.5-3.6"/></svg>Verificación<span class="cand" style="font-size:.7rem;font-weight:700;background:var(--oro);color:#2C3334;border-radius:9px;padding:0 .35rem">6</span></a>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 2.6h10v10.8H3z"/><path d="M5.4 8.2 7.1 9.9l3.5-3.6"/></svg>Verificación<span class="cand" id="riel-cand-verif" style="font-size:.7rem;font-weight:700;background:var(--oro);color:#2C3334;border-radius:9px;padding:0 .35rem">6</span></a>
             <a href="#" data-mod="cargas" data-sed>
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 1.8v7.4"/><path d="M5 6.3 8 9.3l3-3"/><path d="M2 10.6v2.2a1.4 1.4 0 0 0 1.4 1.4h9.2a1.4 1.4 0 0 0 1.4-1.4v-2.2"/></svg>Cargas</a>
             <a href="#" class="bloq" title="Se habilita cuando existan los datos de contratación">
@@ -804,8 +811,8 @@
                     <button class="b mini" type="button" data-edita
                             onclick="irRegistrar()">Editar presupuesto</button>
                     <button class="b sec mini" type="button" data-verifica
-                            onclick="vista='verif';pintar()">Verificar</button>
-                    <button class="b sec mini" type="button">Descargar PDF</button>
+                            onclick="irVerificacionSede(daneActual)">Verificar</button>
+                    <button class="b sec mini" type="button" onclick="generarPdfFicha()">Descargar PDF</button>
                   </header>
                   <div class="cuerpo">
                     <dl class="kv">
@@ -921,7 +928,7 @@
                       </tbody>
                     </table></div>
                   </div>
-                  <div class="cuerpo" style="border-top:1px solid var(--borde)">
+                  <div class="cuerpo" id="ficha-detalle-totales" style="border-top:1px solid var(--borde)">
                     <dl class="tot">
                       <dt>Costo directo</dt><dd class="n">$ 5.987.974</dd>
                       <dt>Administración <span class="pct">10 %</span></dt><dd class="n">$ 598.797</dd>
@@ -950,6 +957,24 @@
                   </div>
                   <div class="pie">La sección 5 se emite desde <b>Verificación</b>, no aquí: los arquitectos trabajan por bandeja (D-30). Aquí solo se lee el concepto ya emitido.</div>
                 </div>
+
+                <!-- Concepto del arquitecto (D-30): solo visible si ya existe una fila en
+                     Verificaciones para el id_presupuesto vigente. -->
+                <div class="p oculto" id="ficha-concepto">
+                  <header><h2>Concepto del arquitecto</h2><span class="flex"></span>
+                    <span class="est e-pend" id="ficha-concepto-badge">—</span></header>
+                  <div class="cuerpo">
+                    <dl class="kv">
+                      <dt>Verificado por</dt><dd id="ficha-concepto-quien">—</dd>
+                      <dt>Fecha</dt><dd id="ficha-concepto-fecha">—</dd>
+                    </dl>
+                    <div class="campo-v" style="margin:.9rem 0 0">
+                      <label>Observaciones</label>
+                      <p id="ficha-concepto-obs" style="margin:0;font-size:.86rem;line-height:1.55;color:var(--tx)"></p>
+                    </div>
+                  </div>
+                  <div class="pie">Este concepto es el registro de auditoría de la sesión real que lo emitió (D-21) — no una firma escaneada.</div>
+                </div>
               </section>
 
               <!-- ─── REGISTRAR PRESUPUESTO (diligenciamiento manual) ─── -->
@@ -959,17 +984,31 @@
                     <span class="est e-pend" id="reg-badge">Sin diligenciar</span><span class="flex"></span>
                     <span class="eyebrow" id="reg-eyebrow-estado"></span></header>
                   <div class="cuerpo">
-                    <div class="pasos-f">
-                      <div class="pf hecho"><span class="no">1</span>Identificación</div>
-                      <div class="pf hecho"><span class="no">2</span>Afectación</div>
-                      <div class="pf act"><span class="no">3</span>Presupuesto</div>
-                      <div class="pf"><span class="no">4</span>Fotografías</div>
-                    </div>
+                    <nav class="pasos-f" id="reg-stepper" aria-label="Secciones del formato de presupuesto">
+                      <button type="button" class="pf" data-goto="reg-panel-1"><span class="no">1</span>Identificación</button>
+                      <button type="button" class="pf" data-goto="reg-panel-2"><span class="no">2</span>Afectación</button>
+                      <button type="button" class="pf" data-goto="reg-panel-3"><span class="no">3</span>Presupuesto</button>
+                      <button type="button" class="pf" data-goto="reg-panel-4"><span class="no">4</span>Fotografías</button>
+                    </nav>
+                    <div class="aviso-foto oculto" id="reg-error" style="margin-top:.9rem"></div>
                   </div>
                 </div>
 
+                <!-- 1. IDENTIFICACIÓN (solo lectura — viene del catálogo, D-26; nunca se digita) -->
+                <div class="p" id="reg-panel-1">
+                  <header><h2>1 · Identificación de la sede</h2><span class="flex"></span>
+                    <span class="eyebrow">Del catálogo — no se edita aquí</span></header>
+                  <div class="cuerpo">
+                    <dl class="kv" id="reg-ident-kv">
+                      <dt>DANE sede</dt><dd>—</dd>
+                    </dl>
+                  </div>
+                  <div class="pie">Esta información sale de <span class="mono">fctMaestra</span> y del censo de
+                    daños. Si algo está mal acá, se corrige en la fuente — nunca a mano en este formulario.</div>
+                </div>
+
                 <!-- 2. AFECTACIÓN -->
-                <div class="p">
+                <div class="p" id="reg-panel-2">
                   <header><h2>2 · Descripción de la afectación</h2></header>
                   <div class="cuerpo">
                     <div class="campo-v">
@@ -993,7 +1032,7 @@
                 </div>
 
                 <!-- 3. PRESUPUESTO EDITABLE -->
-                <div class="p">
+                <div class="p" id="reg-panel-3">
                   <header><h2>3 · Presupuesto a detalle</h2><span class="flex"></span>
                     <span class="eyebrow" id="reg-eyebrow-items">0 ítems</span>
                     <button class="b mini" type="button" id="btn-agregar-item">+ Agregar ítem</button></header>
@@ -1069,24 +1108,18 @@
                   </div>
                 </div>
 
-                <!-- 4. FOTOS -->
-                <div class="p">
+                <!-- 4. FOTOS (D-29 sección 4 — Drive, D-19) -->
+                <div class="p" id="reg-panel-4">
                   <header><h2>4 · Registro fotográfico</h2><span class="flex"></span>
-                    <span class="eyebrow">0 de 6 · mínimo 1</span></header>
+                    <span class="eyebrow" id="reg-fotos-eyebrow">0 fotos</span></header>
                   <div class="cuerpo">
-                    <div class="fotos">
-                      <div class="foto add"><span class="mas">+</span><b>Agregar</b><small>jpg, png · máx 5 MB</small></div>
+                    <div class="fotos" id="reg-fotos-lista">
+                      <div class="foto add" id="reg-foto-agregar"><span class="mas">+</span><b>Agregar</b><small>jpg, png · máx 8 MB</small></div>
                     </div>
-                    <div class="pie" style="padding-top:.6rem">Todavía no disponible: el backend no tiene dónde
-                      guardar fotografías (Paso 3 cubre solo texto y cifras). El botón de esta sección no
-                      guarda nada por ahora.</div>
-                    <div class="aviso-foto">
-                      <b>Si vuelve a abrir esta sede, tendrá que adjuntar las fotos de nuevo</b>
-                      El sistema guarda el nombre del archivo, no la imagen. Medido en Riosucio: 58
-                      sedes con 3 fotos llegan a 49 MB y el navegador empieza a rechazar guardados
-                      <b>en silencio</b> — se perdieron 10 borradores sin que nadie viera un error.
-                      Es deliberado, y por eso se le avisa aquí en vez de dejarlo fallar callado.
-                    </div>
+                    <input type="file" id="reg-foto-input" accept="image/*" multiple style="display:none">
+                    <div class="pie" style="padding-top:.6rem">Se suben directo a Drive al elegirlas o al
+                      arrastrarlas aquí — no dependen del navegador. Si cierra y vuelve a esta sede más
+                      tarde, las va a encontrar ya cargadas.</div>
                   </div>
                 </div>
 
@@ -1106,12 +1139,12 @@
 
               <!-- ─── VERIFICACIÓN (solo SED) ─── -->
               <section class="view" id="s-verif">
-                <div class="franja">
-                  <div class="c al"><b class="n">6</b><span>Esperando concepto</span></div>
-                  <div class="c"><b class="n">9</b><span>Presupuestos radicados</span></div>
-                  <div class="c ok"><b class="n">3</b><span>Aprobadas para obra</span></div>
-                  <div class="c er"><b class="n">2</b><span>Devueltas al municipio</span></div>
-                  <div class="c"><b class="n">$1.512<span class="u"> M</span></b><span>Radicado sin verificar</span></div>
+                <div class="franja" id="verif-franja">
+                  <div class="c al"><b class="n">—</b><span>Esperando concepto</span></div>
+                  <div class="c"><b class="n">—</b><span>Presupuestos radicados</span></div>
+                  <div class="c ok"><b class="n">—</b><span>Aprobadas para obra</span></div>
+                  <div class="c er"><b class="n">—</b><span>Devueltas al municipio</span></div>
+                  <div class="c"><b class="n">—</b><span>Radicado sin verificar</span></div>
                 </div>
 
                 <div class="p">
@@ -1121,39 +1154,9 @@
                     <div class="scroll"><table>
                       <thead><tr><th>Sede</th><th>Municipio</th><th>Pri.</th><th class="n">Daños</th>
                         <th class="n">Referencia</th><th class="n">Radicado</th><th>Origen</th>
-                        <th>Espera</th><th></th></tr></thead>
-                      <tbody>
-                        <tr class="click"><td>I.E. San Antonio de Arma — Sede Principal</td><td>Aguadas</td>
-                          <td><span class="pri p2">P2</span></td><td class="n">4</td>
-                          <td class="n">$ 1.350.000.000</td><td class="n"><b>$ 1.512.000.000</b></td>
-                          <td><span class="orig xls">XLS</span></td><td class="hace">3 días</td>
-                          <td><button class="b mini" type="button">Verificar</button></td></tr>
-                        <tr class="click"><td>Escuela La Esperanza</td><td>Risaralda</td>
-                          <td><span class="pri p2">P2</span></td><td class="n">2</td>
-                          <td class="n">$ 250.000.000</td><td class="n"><b>$ 235.000.000</b></td>
-                          <td><span class="orig man">MAN</span></td><td class="hace">2 días</td>
-                          <td><button class="b sec mini" type="button">Abrir</button></td></tr>
-                        <tr class="click"><td>Escuela Antonio José de Sucre</td><td>Risaralda</td>
-                          <td><span class="pri p2">P2</span></td><td class="n">2</td>
-                          <td class="n">$ 85.259.000</td><td class="n"><b>$ 95.490.080</b></td>
-                          <td><span class="orig xls">XLS</span></td><td class="hace">2 días</td>
-                          <td><button class="b sec mini" type="button">Abrir</button></td></tr>
-                        <tr class="click"><td>I.E. El Águila — Sede Principal <span class="sig hall">!</span></td>
-                          <td>Belalcázar</td>
-                          <td><span class="pri p1">P1</span></td><td class="n">3</td>
-                          <td class="n">$ 600.782.132</td><td class="n"><b>$ 600.782.132</b></td>
-                          <td><span class="orig xls">XLS</span></td><td class="hace">1 día</td>
-                          <td><button class="b sec mini" type="button">Abrir</button></td></tr>
-                        <tr class="click"><td>Escuela Monterredondo</td><td>Belalcázar</td>
-                          <td><span class="pri p1">P1</span></td><td class="n">3</td>
-                          <td class="n">$ 125.000.000</td><td class="n"><b>$ 140.000.000</b></td>
-                          <td><span class="orig xls">XLS</span></td><td class="hace">1 día</td>
-                          <td><button class="b sec mini" type="button">Abrir</button></td></tr>
-                        <tr class="click"><td>Escuela Rural Camelia Baja</td><td>Aranzazu</td>
-                          <td><span class="pri p2">P2</span></td><td class="n">1</td>
-                          <td class="n">$ 19.766.127</td><td class="n"><b>$ 22.138.062</b></td>
-                          <td><span class="orig xls">XLS</span></td><td class="hace">6 h</td>
-                          <td><button class="b sec mini" type="button">Abrir</button></td></tr>
+                        <th>Versión</th><th></th></tr></thead>
+                      <tbody id="verif-bandeja-tbody">
+                        <tr><td colspan="9" style="text-align:center;color:var(--tx-sec);padding:1rem">Cargando…</td></tr>
                       </tbody>
                     </table></div>
                   </div>
@@ -1166,114 +1169,30 @@
 
                 <div class="p">
                   <header><h2>Emitir concepto</h2>
-                    <span class="est e-rad">Radicado</span><span class="flex"></span>
-                    <span class="eyebrow">I.E. San Antonio de Arma · Aguadas</span></header>
-                  <div class="cuerpo">
-                    <div class="rejilla" style="margin-bottom:1.1rem">
-                      <div class="cmp"><div class="et"><span>Valor de referencia — su visita</span><b class="n">$ 1.350.000.000</b></div>
-                        <div class="pista"><i style="width:89.3%;background:var(--gris)"></i></div></div>
-                      <div class="cmp"><div class="et"><span>Presupuesto radicado por el municipio</span><b class="n">$ 1.512.000.000</b></div>
-                        <div class="pista"><i style="width:100%;background:var(--verde)"></i></div></div>
-                    </div>
-
-                    <div class="caps" style="margin-bottom:1.1rem">
-                      <div class="cap dano pres"><span class="cn">1</span>Estructural<span class="flex"></span><span class="cok">✓ $</span></div>
-                      <div class="cap dano pres"><span class="cn">3</span>Cubierta<span class="flex"></span><span class="cok">✓ $</span></div>
-                      <div class="cap dano pres"><span class="cn">4</span>Cimentación<span class="flex"></span><span class="cok">✓ $</span></div>
-                      <div class="cap dano"><span class="cn">2</span>Mampostería<span class="flex"></span><span class="cer">sin $</span></div>
-                    </div>
-
-                    <div class="campo-v">
-                      <label>Resultado de la verificación</label>
-                      <div class="ayuda">Lo que marque se guarda tal cual. A qué estado pasa la sede lo
-                        decide la regla D-22, conservadora mientras Planeación responde Q-7.</div>
-                      <label class="op"><input type="radio" name="rv" checked>
-                        <span><b>Corresponde</b><small>Cantidades y valores corresponden a los daños
-                        registrados. → pasa a <b>APROBADO</b></small></span></label>
-                      <label class="op"><input type="radio" name="rv">
-                        <span><b>Corresponde parcialmente</b><small>Parte está sustentada, parte no.
-                        → pasa a <b>REQUIERE AJUSTE</b></small></span></label>
-                      <label class="op"><input type="radio" name="rv">
-                        <span><b>No corresponde</b><small>No se sustenta en los daños registrados.
-                        → pasa a <b>REQUIERE AJUSTE</b></small></span></label>
-                    </div>
-
-                    <div class="campo-v">
-                      <label>Observaciones técnicas</label>
-                      <div class="ayuda">Obligatorias si el resultado no es «corresponde»: son las que
-                        le llegan al municipio para saber qué corregir.</div>
-                      <textarea placeholder="Ej.: el capítulo 2 (mampostería) figura con daño en el censo y no tiene ítems presupuestados…"></textarea>
-                    </div>
-
-                    <div class="firma">
-                      <b>Firma electrónica — registro de auditoría</b>
-                      Queda quién verificó, con qué cuenta institucional y cuándo. No hay que subir
-                      imagen de firma ni digitar cédula: el ingreso con cuenta real ya identifica a la
-                      persona de forma verificable (D-21).
-                    </div>
-
-                    <div class="acciones-v">
-                      <button class="b sec" type="button">Guardar sin emitir</button>
-                      <span class="flex"></span>
-                      <button class="b sec" type="button" style="color:var(--err);border-color:var(--err)">Devolver al municipio</button>
-                      <button class="b" type="button">Emitir concepto</button>
-                    </div>
+                    <span class="est e-pend" id="verif-c-badge">—</span><span class="flex"></span>
+                    <span class="eyebrow" id="verif-c-eyebrow">Seleccione una fila de la bandeja</span></header>
+                  <div class="cuerpo" id="verif-c-cuerpo">
+                    <p style="color:var(--tx-sec);font-size:.85rem;margin:0">Haga clic en una fila de la bandeja (o en "Verificar"/"Abrir") para ver su detalle acá.</p>
                   </div>
                 </div>
               </section>
 
               <!-- ─── CARGAS (solo SED) ─── -->
               <section class="view" id="s-cargas">
-                <div class="p soltar" style="margin-bottom:1rem">
+                <div class="p soltar" id="cargas-dropzone" style="margin-bottom:1rem">
                   <div class="vacio">
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1.8v7.4"/><path d="M5 6.3 8 9.3l3-3"/><path d="M2 10.6v2.2a1.4 1.4 0 0 0 1.4 1.4h9.2a1.4 1.4 0 0 0 1.4-1.4v-2.2"/></svg>
-                    <h3>Arrastre aquí el Excel de una alcaldía</h3>
-                    <p>O <a href="#">selecciónelo del equipo</a>. Se acepta .xlsx y .xlsm. El archivo se archiva tal como llegó y nunca se modifica.</p>
+                    <h3>Suba el JSON del lector</h3>
+                    <p>Corra <code>python tools/ingesta.py &lt;MUNICIPIO&gt; --json</code> en su equipo y
+                      suba acá el archivo que produce (o arrástrelo a esta zona), o
+                      <a href="#" id="cargas-elegir">selecciónelo del equipo</a>. El Excel original
+                      <b>no</b> se sube a esta pantalla — ya lo leyó el lector, en su computador (D-23).</p>
                   </div>
+                  <input type="file" id="cargas-input" accept=".json,application/json" style="display:none">
                 </div>
 
-                <div class="p">
-                  <header><h2>Informe de validación</h2><span class="flex"></span><span class="eyebrow">Nada se vuelca sin pasar por aquí</span></header>
-                  <div class="archivo">
-                    <div class="ico">XLSX</div>
-                    <div class="meta"><b>PRESUPUESTO ESTIMADO I.E.xlsx F.xlsx</b>
-                      <span>Samaná · 8 hojas · 15 sep 2026, 08:42</span></div>
-                    <span class="flex"></span><span class="orig xls">XLS</span>
-                  </div>
-                  <div class="cuerpo">
-                    <div class="barra-val" role="img" aria-label="77 leídas, 25 advertencias, 4 errores">
-                      <div style="width:72.6%;background:var(--ok)">77 leídas</div>
-                      <div style="width:23.6%;background:var(--alerta)">25 advertencias</div>
-                      <div style="width:3.8%;background:var(--err)">4</div>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;margin-top:.45rem;font-size:.79rem;color:var(--tx-sec)">
-                      <span>96 filas revisadas</span><span class="n">4 con error — no se vuelcan</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="p">
-                  <div class="gh" style="--g:var(--err);--gbg:var(--err-bg);--gtx:var(--err)">
-                    <div class="cab"><span class="sig hall">!</span>Error · no se vuelcan<span class="cnt">4</span></div>
-                    <div class="hf"><span class="sig hall">!</span><span class="ref">FELIX NARANJO · f5</span><span>Donde va el DANE hay texto: «fuera de servisio por falta de estudiantes»</span></div>
-                    <div class="hf"><span class="sig hall">!</span><span class="ref">FELIX NARANJO · f13</span><span>Donde va el DANE hay texto: «fuera de servisio por falta de estudiantes»</span></div>
-                    <div class="hf"><span class="sig hall">!</span><span class="ref">RANCHO LARGO · f11</span><span>Donde va el DANE hay texto: «NO ES»</span></div>
-                    <div class="hf"><span class="sig hall">!</span><span class="ref">RANCHO LARGO · f19</span><span>Donde va el DANE hay texto: «NO EST»</span></div>
-                  </div>
-                </div>
-
-                <div class="p">
-                  <div class="gh" style="--g:var(--alerta);--gbg:var(--alerta-bg);--gtx:var(--alerta)">
-                    <div class="cab"><span>▲</span>Advertencia · se vuelcan con marca<span class="cnt">25</span></div>
-                    <div class="hf"><span>▲</span><span class="ref">PIO XII · f4</span><span><b>Afecta una sede del lote 1.</b> DANE de 14 dígitos: <code class="dane">21766200280204</code>. La priorización dice <code class="dane">217662002631</code>.</span></div>
-                    <div class="hf"><span>▲</span><span class="ref">PIO XII · f3, f6, f8, f9, f11</span><span>Otros 5 DANE con longitud distinta de 12 dígitos. Ninguno pertenece al lote 1.</span></div>
-                    <div class="hf"><span>▲</span><span class="ref">EL BOSQUE · f5, f6, f8 · y 16 más</span><span>Sin valor de materiales ni mano de obra — probablemente sin afectación, confirmar antes de reportarlas en cero.</span></div>
-                  </div>
-                  <div class="pie" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">
-                    <span>El archivo original queda archivado tal como llegó.</span><span class="flex"></span>
-                    <button class="b sec mini" type="button">Descartar</button>
-                    <button class="b mini" type="button">Volcar 77 + 25 con marca</button>
-                  </div>
+                <div id="cargas-contenido">
+                  <div class="p"><div class="cuerpo"><p style="color:var(--tx-sec);font-size:.85rem;margin:0">Todavía no se ha subido ningún archivo.</p></div></div>
                 </div>
               </section>
 
@@ -1454,6 +1373,13 @@
   let muniActual = null;
   let daneActual = null;
 
+  // Caché de lo último que la Ficha trajo del backend para esta sede — el PDF
+  // (generarPdfFicha) lo reusa tal cual en vez de pedirlo otra vez, para que
+  // lo que se descarga sea exactamente lo que la pantalla está mostrando.
+  let fichaPresupuestoActual = null;
+  let fichaItemsActual = [];
+  let fichaVerificacionActual = null;
+
   function esc(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -1524,7 +1450,7 @@
 
   let registro = { dane: null, cargado: false, items: [], pctAdmin: 10, pctUtilidad: 5,
     plazoDias: '', declaraSinAfectacion: false, descripcionAfectacion: '',
-    estadoActual: null, versionActual: null };
+    estadoActual: null, versionActual: null, error: null };
 
   const ESTADOS_PRESUPUESTO = {
     BORRADOR: ['e-pend', 'En diligenciamiento (borrador)'],
@@ -1537,7 +1463,7 @@
   async function cargarRegistro(dane){
     registro = { dane, cargado: false, items: [], pctAdmin: 10, pctUtilidad: 5,
       plazoDias: '', declaraSinAfectacion: false, descripcionAfectacion: '',
-      estadoActual: null, versionActual: null };
+      estadoActual: null, versionActual: null, error: null };
     try {
       const r = await backend('obtenerPresupuesto', { token: sesion.token, dane_sede: dane });
       if (r.ok && r.presupuesto) {
@@ -1553,16 +1479,162 @@
           capitulo: String(it.capitulo), descripcion: it.descripcion, unidad: it.unidad,
           cantidad: Number(it.cantidad) || 0, valor_unitario: Number(it.valor_unitario) || 0,
         }));
+      } else if (!r.ok) {
+        // No se traga el error: sin esto, un token vencido o una sede fuera de
+        // alcance dejaban el formulario en blanco sin explicar por qué.
+        registro.error = r.error || 'No se pudo verificar si esta sede ya tiene un presupuesto.';
       }
-    } catch (err) { /* el formulario queda en blanco, listo para un primer registro */ }
+    } catch (err) {
+      registro.error = 'No se pudo contactar el servidor para revisar si ya existe un presupuesto. Puede seguir diligenciando, pero verifique su conexión antes de guardar.';
+    }
     registro.cargado = true;
     if (vista === 'registrar' && String(daneActual) === String(dane)) pintarRegistrarReal();
+    cargarFotosRegistro(dane);
+  }
+
+  /* ─── Fotos (D-29 sección 4, D-19): suben directo a Drive, una carpeta por
+     DANE sede (backend/Fotos.gs). Nunca se guarda el contenido en el
+     navegador — ni siquiera aquí: `previewDataUrl` es solo la miniatura de lo
+     que ya se subió en esta misma sesión, y se pierde al recargar; lo que
+     persiste de verdad es lo que devuelve `listarFotos`. ─── */
+  let fotosRegistro = [];
+
+  async function cargarFotosRegistro(dane){
+    fotosRegistro = [];
+    if (vista === 'registrar' && String(daneActual) === String(dane)) renderFotosRegistro();
+    try {
+      const r = await backend('listarFotos', { token: sesion.token, dane_sede: dane });
+      if (r.ok) fotosRegistro = r.fotos.map(f => Object.assign({}, f, { estado: 'subida' }));
+    } catch (err) { /* la sección queda vacía; no bloquea el resto del formulario */ }
+    if (vista === 'registrar' && String(daneActual) === String(dane)) {
+      renderFotosRegistro();
+      sincronizarHechoRegistro();
+    }
+  }
+
+  function renderFotosRegistro(){
+    const cont = document.getElementById('reg-fotos-lista');
+    if (!cont) return;
+    const tarjetas = fotosRegistro.map(f => {
+      const nombreVisible = esc(String(f.nombre || '').replace(/^\d{8}_\d{6}_/, ''));
+      const miniatura = f.previewDataUrl
+        ? `<div class="ph" style="background:center/cover no-repeat url('${f.previewDataUrl}')"></div>`
+        : `<div class="ph">${esc((f.nombre || '').split('.').pop().slice(0, 4).toUpperCase() || 'IMG')}</div>`;
+      if (f.estado === 'subiendo') return `<div class="foto">${miniatura}<b title="${nombreVisible}">${nombreVisible}</b><small>Subiendo…</small></div>`;
+      if (f.estado === 'error') return `<div class="foto" style="border-color:var(--err)"><div class="ph" style="color:var(--err);background:var(--err-bg)">!</div><b title="${nombreVisible}">${nombreVisible}</b><small style="color:var(--err)">No se pudo subir</small></div>`;
+      const kb = f.tamano ? `${Math.max(1, Math.round(f.tamano / 1024))} KB` : '';
+      return `<div class="foto">${miniatura}<b title="${nombreVisible}">${nombreVisible}</b><small>${kb}</small></div>`;
+    }).join('');
+    cont.innerHTML = tarjetas + '<div class="foto add" id="reg-foto-agregar"><span class="mas">+</span><b>Agregar</b><small>jpg, png · máx 8 MB</small></div>';
+    document.getElementById('reg-foto-agregar').addEventListener('click', () => document.getElementById('reg-foto-input').click());
+    const nSubidas = fotosRegistro.filter(f => f.estado === 'subida').length;
+    document.getElementById('reg-fotos-eyebrow').textContent = `${nSubidas} foto${nSubidas === 1 ? '' : 's'}`;
+  }
+
+  function subirFotosSeleccionadas(files){
+    [...files].forEach(file => {
+      if (!file.type.startsWith('image/')) { alert(`«${file.name}» no es una imagen — no se sube.`); return; }
+      if (file.size > 8 * 1024 * 1024) { alert(`«${file.name}» supera 8 MB — redúzcala antes de subir.`); return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = String(reader.result || '');
+        const base64 = dataUrl.split(',')[1] || '';
+        const entrada = { nombre: file.name, estado: 'subiendo', previewDataUrl: dataUrl };
+        fotosRegistro.unshift(entrada);
+        renderFotosRegistro();
+        backend('subirFoto', {
+          token: sesion.token, dane_sede: daneActual, nombre: file.name,
+          tipo_mime: file.type, contenido_base64: base64
+        }).then(r => {
+          if (r.ok) {
+            entrada.estado = 'subida'; entrada.id = r.id;
+            entrada.nombre = r.nombre; entrada.tamano = r.tamano;
+          } else {
+            entrada.estado = 'error';
+            alert(`No se pudo subir «${file.name}»: ${r.error || 'error desconocido'}`);
+          }
+          renderFotosRegistro();
+          sincronizarHechoRegistro();
+        }).catch(() => {
+          entrada.estado = 'error';
+          renderFotosRegistro();
+          sincronizarHechoRegistro();
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // El stepper es un lector de estado real, no una decoración fija: "hecho" sale
+  // de si esa sección ya tiene algo que la sustente, no de un valor hardcodeado.
+  function pintarIdentificacionRegistro(sede){
+    const kv = document.getElementById('reg-ident-kv');
+    if (!sede){ kv.innerHTML = '<dt>DANE sede</dt><dd>—</dd>'; return; }
+    const p1 = String(sede.tipo_censo || '').startsWith('1.');
+    kv.innerHTML =
+      `<dt>DANE sede</dt><dd class="dane">${esc(sede.dane_sede)}</dd>` +
+      `<dt>Institución</dt><dd>${esc(sede.institucion || '—')}</dd>` +
+      `<dt>Sede</dt><dd>${esc(sede.sede)}</dd>` +
+      `<dt>Municipio</dt><dd>${esc(sede.municipio)}${sede.zona ? ' · zona ' + esc(String(sede.zona).toLowerCase()) : ''}</dd>` +
+      `<dt>Matrícula</dt><dd class="n">${formatNum(sede.matricula, 0)} estudiante${Number(sede.matricula) === 1 ? '' : 's'}</dd>` +
+      `<dt>Afectación (censo)</dt><dd>${p1 ? 'Tipo 1 — colapso total o parcial' : 'Tipo 2 — riesgo inminente de colapso'}</dd>`;
+  }
+
+  let regStepperListo = false;
+  function iniciarStepperRegistrar(){
+    if (regStepperListo) return;
+    regStepperListo = true;
+    const nav = document.getElementById('reg-stepper');
+    const botones = [...nav.querySelectorAll('.pf')];
+
+    botones.forEach(btn => btn.addEventListener('click', () => {
+      const destino = document.getElementById(btn.dataset.goto);
+      if (destino) destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
+
+    // Scroll-spy manual en vez de IntersectionObserver con banda fija: la
+    // sección 4 (Fotografías) es corta y, siendo la última, muchas veces no
+    // alcanza a cruzar una banda central antes de que la página toque fondo
+    // — con eso, un observer de banda fija la deja marcada como "no vista"
+    // aunque esté en pantalla. Se marca activa la última sección cuyo borde
+    // superior ya pasó la referencia (110px), y si se llegó al fondo de la
+    // página, se fuerza la última sin importar el cálculo.
+    const paneles = botones.map(btn => document.getElementById(btn.dataset.goto)).filter(Boolean);
+    const REFERENCIA = 110;
+    const actualizarActivo = () => {
+      const alFondo = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      let elegido = paneles[0];
+      if (alFondo) {
+        elegido = paneles[paneles.length - 1];
+      } else {
+        for (const p of paneles) if (p.getBoundingClientRect().top <= REFERENCIA) elegido = p;
+      }
+      botones.forEach(b => b.classList.toggle('act', document.getElementById(b.dataset.goto) === elegido));
+    };
+    window.addEventListener('scroll', actualizarActivo, { passive: true });
+    actualizarActivo();
+  }
+
+  function sincronizarHechoRegistro(){
+    const nav = document.getElementById('reg-stepper');
+    const botones = [...nav.querySelectorAll('.pf')];
+    const [b1, b2, b3, b4] = botones;
+    b1.classList.add('hecho'); // 1 · Identificación: siempre viene resuelta del catálogo
+    b2.classList.toggle('hecho', registro.declaraSinAfectacion
+      ? (registro.descripcionAfectacion || '').trim().length >= 40
+      : (registro.descripcionAfectacion || '').trim().length >= 60);
+    b3.classList.toggle('hecho', registro.items.length > 0);
+    const hayFoto = fotosRegistro.some(f => f.estado === 'subida');
+    b4.classList.toggle('hecho', hayFoto);
+    b4.title = hayFoto ? '' : 'Recomendado: adjunte al menos una fotografía como evidencia';
   }
 
   function pintarRegistrarReal(){
     const dane = daneActual;
     const sede = SEDES && SEDES.find(s => String(s.dane_sede) === String(dane));
     document.getElementById('reg-h2').textContent = sede ? `Presupuesto — ${sede.sede}` : 'Presupuesto';
+    pintarIdentificacionRegistro(sede);
+    iniciarStepperRegistrar();
 
     if (!registro.cargado){
       document.getElementById('reg-badge').textContent = 'Cargando…';
@@ -1574,6 +1646,10 @@
     badge.className = 'est ' + cls; badge.textContent = txt;
     document.getElementById('reg-eyebrow-estado').textContent = registro.versionActual
       ? `Última versión: v${registro.versionActual}` : 'Todavía sin guardar';
+
+    const errBox = document.getElementById('reg-error');
+    errBox.classList.toggle('oculto', !registro.error);
+    if (registro.error) errBox.innerHTML = `<b>No se pudo confirmar si ya existe un presupuesto</b>${esc(registro.error)}`;
 
     if (sede){
       const p1 = String(sede.tipo_censo || '').startsWith('1.');
@@ -1594,6 +1670,7 @@
 
     renderItemsTabla();
     actualizarTotales();
+    sincronizarHechoRegistro();
 
     const yaRadicado = ['RADICADO', 'EN_VERIFICACION', 'REQUIERE_AJUSTE', 'APROBADO'].indexOf(registro.estadoActual) !== -1;
     document.getElementById('reg-msg').innerHTML = yaRadicado
@@ -1635,6 +1712,7 @@
         registro.items.splice(i, 1);
         renderItemsTabla();
         actualizarTotales();
+        sincronizarHechoRegistro();
       });
     });
     document.getElementById('reg-eyebrow-items').textContent = `${registro.items.length} ítem${registro.items.length === 1 ? '' : 's'}`;
@@ -1727,6 +1805,12 @@
     if (!r.ok || !r.presupuesto) return; // sin presupuesto: se queda el estado vacío ya pintado
 
     const p = r.presupuesto;
+    const items = r.items || [];
+    fichaPresupuestoActual = p; fichaItemsActual = items; fichaVerificacionActual = r.verificacion || null;
+    // Presupuestos_obtener (backend) ya trae el historial completo (todas las
+    // versiones, no solo la vigente) — si por alguna razón no viniera (backend
+    // viejo sin actualizar todavía), se degrada a mostrar solo la vigente.
+    const historial = (r.historial && r.historial.length) ? r.historial : [p];
     const s = SEDES && SEDES.find(x => String(x.dane_sede) === String(dane));
     const paneles = document.querySelectorAll('#s-ficha .p');
     const [cls, txt] = ESTADOS_PRESUPUESTO[p.estado] || ['e-pend', p.estado];
@@ -1742,17 +1826,784 @@
       `<div class="cmp"><div class="et"><span>Costo directo declarado</span><b class="n">${cop(p.costo_directo)}</b></div><div class="pista"><i style="width:100%;background:var(--gris)"></i></div></div>` +
       `<div class="cmp"><div class="et"><span>Total con A, U e IVA</span><b class="n">${cop(p.total_presupuesto)}</b></div><div class="pista"><i style="width:100%;background:var(--verde)"></i></div></div>`;
 
-    const fecha = p.fecha_creacion ? new Date(p.fecha_creacion).toLocaleDateString('es-CO') : '';
-    paneles[3].querySelector('tbody').innerHTML =
-      `<tr><td><strong>v${esc(p.version)}</strong></td><td><span class="est ${cls}">${esc(txt)}</span></td><td><span class="orig man">MAN</span></td><td class="n">${cop(p.total_presupuesto)}</td><td class="hace">${esc(fecha)}</td></tr>`;
-    paneles[3].querySelector('.pie').textContent =
-      `Si se corrige, entra como v${Number(p.version) + 1} y queda vigente — esta v${p.version} no se borra.`;
+    // [3] Historial: TODAS las versiones que existan, no solo la vigente —
+    // D-37 solo tiene sentido si el histórico se puede ver, no solo guardar.
+    paneles[3].querySelector('tbody').innerHTML = historial.map(v => {
+      const [vcls, vtxt] = ESTADOS_PRESUPUESTO[v.estado] || ['e-pend', v.estado];
+      const origen = v.origen === 'CARGA' ? ['xls', 'XLS'] : ['man', 'MAN'];
+      const fechaV = v.fecha_creacion ? new Date(v.fecha_creacion).toLocaleDateString('es-CO') : '';
+      return `<tr><td><strong>v${esc(v.version)}</strong></td><td><span class="est ${vcls}">${esc(vtxt)}</span></td>` +
+        `<td><span class="orig ${origen[0]}">${origen[1]}</span></td><td class="n">${cop(v.total_presupuesto)}</td>` +
+        `<td class="hace">${esc(fechaV)}</td></tr>`;
+    }).join('');
+    paneles[3].querySelector('.pie').textContent = historial.length > 1
+      ? `${historial.length} versiones guardadas — la vigente es v${p.version}. Ninguna versión anterior se borró (D-37).`
+      : `Si se corrige, entra como v${Number(p.version) + 1} y queda vigente — esta v${p.version} no se borra.`;
 
+    // [4] Cruce por capítulo (D-34): daño del censo contra capítulo de cada
+    // ítem realmente radicado. Un ítem con capítulo vacío ("Sin desglose",
+    // típico de una carga masiva sin itemización, D-36) no marca ningún
+    // capítulo como presupuestado — nunca se infiere de un texto libre.
+    const capsConPresupuesto = new Set(items.map(it => String(it.capitulo || '')).filter(Boolean));
+    const cd = s ? capitulosDeSede(s) : { lista: [], corrupto: false };
+    const cuerpoCaps = paneles[4].querySelector('.cuerpo');
+    const pieCaps = paneles[4].querySelector('.pie');
+    if (cd.corrupto){
+      cuerpoCaps.innerHTML =
+        `<div class="aviso-foto"><b>Dato de capítulo no legible</b>El campo capitulos_dano llegó como el número ${esc(cd.crudo)} en vez de una lista de texto. Repórtelo como hallazgo.</div>`;
+      pieCaps.classList.add('oculto');
+    } else {
+      let html = '';
+      for (let n = 1; n <= 11; n++){
+        const dano = cd.lista.includes(String(n));
+        const pres = capsConPresupuesto.has(String(n));
+        const marca = dano
+          ? (pres ? '<span class="flex"></span><span class="cok">✓ $</span>' : '<span class="flex"></span><span class="cer">sin $</span>')
+          : '';
+        html += `<div class="cap${dano ? ' dano' : ''}${pres ? ' pres' : ''}"><span class="cn">${n}</span>${esc(CAPITULOS[n])}${marca}</div>`;
+      }
+      for (let n = 12; n <= 14; n++){
+        const pres = capsConPresupuesto.has(String(n));
+        html += `<div class="cap trans${pres ? ' pres' : ''}"><span class="cn">${n}</span>${esc(CAPITULOS[n])}<span class="flex"></span><span class="ctr">transversal</span></div>`;
+      }
+      cuerpoCaps.innerHTML = `<div class="caps">${html}</div>`;
+      pieCaps.classList.remove('oculto');
+      const sinItemizar = items.length > 0 && capsConPresupuesto.size === 0;
+      const sinPresupuestar = cd.lista.filter(n => !capsConPresupuesto.has(n));
+      pieCaps.innerHTML = !cd.lista.length
+        ? 'El censo no marca ningún capítulo con daño para esta sede.'
+        : sinItemizar
+          ? 'El presupuesto llegó <b>sin desglose por capítulo</b> (carga masiva sin itemización en el archivo de origen, D-36) — no se puede cruzar automáticamente. El arquitecto revisa el Excel adjunto al verificar.'
+          : !items.length
+            ? 'Todavía no hay presupuesto radicado para cruzar contra ellos.'
+            : sinPresupuestar.length
+              ? `El censo marca daño en ${cd.lista.length} capítulo(s) (${cd.lista.join(', ')}). <b>Quedan sin presupuestar: ${sinPresupuestar.join(', ')}.</b>`
+              : `El censo marca daño en ${cd.lista.length} capítulo(s) (${cd.lista.join(', ')}) y los <b>${cd.lista.length} están cubiertos</b> por el presupuesto.`;
+    }
+
+    // [5] Presupuesto a detalle: los ítems reales de la versión vigente.
+    paneles[5].querySelector('.eyebrow').textContent = `${items.length} ítem${items.length === 1 ? '' : 's'} · sección 3`;
+    const cuerpos5 = paneles[5].querySelectorAll('.cuerpo');
+    if (!items.length){
+      cuerpos5[0].innerHTML = p.declara_sin_afectacion
+        ? '<div class="vacio"><h3>Sin ítems</h3><p>El municipio declaró que esta sede no presenta afectación.</p></div>'
+        : '<div class="vacio"><h3>Sin ítems</h3><p>Presupuesto radicado sin desglose por capítulo.</p></div>';
+    } else {
+      cuerpos5[0].innerHTML = `<div class="scroll"><table>
+        <thead><tr><th>#</th><th>Capítulo</th><th>Trabajo a ejecutar</th><th>Un.</th>
+          <th class="n">Cant.</th><th class="n">Vr. unitario</th><th class="n">Valor total</th></tr></thead>
+        <tbody>${items.map((it, i) => `<tr><td class="n">${i + 1}</td>` +
+          `<td>${it.capitulo ? `<span class="dane">${esc(it.capitulo)}</span> ${esc(CAPITULOS[it.capitulo] || '')}` : 'Sin desglose'}</td>` +
+          `<td>${esc(it.descripcion || '')}</td><td class="dane">${esc(it.unidad || '')}</td>` +
+          `<td class="n">${formatNum(it.cantidad, 2)}</td><td class="n">${cop(it.valor_unitario)}</td>` +
+          `<td class="n"><b>${cop(it.valor_total)}</b></td></tr>`).join('')}</tbody>
+      </table></div>`;
+    }
+    const totalesHtml = `<dl class="tot">
+        <dt>Costo directo</dt><dd class="n">${cop(p.costo_directo)}</dd>
+        <dt>Administración <span class="pct">${formatNum(p.pct_admin, 0)} %</span></dt><dd class="n">${cop(p.valor_admin)}</dd>
+        <dt>Utilidad <span class="pct">${formatNum(p.pct_utilidad, 0)} %</span></dt><dd class="n">${cop(p.valor_utilidad)}</dd>
+        <dt>IVA 19 % sobre la utilidad</dt><dd class="n">${cop(p.valor_iva)}</dd>
+        <dt class="gt">Total del presupuesto</dt><dd class="n gt">${cop(p.total_presupuesto)}</dd>
+        <dt>Plazo de ejecución</dt><dd class="n">${p.plazo_dias ? formatNum(p.plazo_dias, 0) + ' días' : '—'}</dd>
+      </dl>`;
+    // pintarFichaReal() quita este bloque del DOM cuando pinta el estado
+    // "sin presupuesto" — hay que recrearlo si ya no existe, no solo actualizarlo.
+    let cuerpoTotales = document.getElementById('ficha-detalle-totales');
+    if (!cuerpoTotales){
+      cuerpoTotales = document.createElement('div');
+      cuerpoTotales.className = 'cuerpo';
+      cuerpoTotales.id = 'ficha-detalle-totales';
+      cuerpoTotales.style.borderTop = '1px solid var(--borde)';
+      paneles[5].querySelector('.pie').before(cuerpoTotales);
+    }
+    cuerpoTotales.innerHTML = totalesHtml;
+
+    // Antes solo se marcaba completa la sección 3 (Presupuesto) aunque ya
+    // hubiera un presupuesto radicado con su descripción de afectación — la
+    // sección 2 se quedaba "sin diligenciar" para siempre. Se corrige leyendo
+    // el mismo campo real que ya trae `p` (mismo criterio de longitud mínima
+    // que exige Presupuestos_guardar al radicar).
     const pasos = paneles[6].querySelectorAll('.paso-sec');
+    const step2Completo = p.declara_sin_afectacion
+      ? (p.justificacion_discrepancia || '').trim().length >= 40
+      : (p.descripcion_afectacion || '').trim().length >= 60;
+    pasos[1].classList.toggle('done', step2Completo);
+    const est2 = pasos[1].querySelector('.est');
+    est2.className = step2Completo ? 'est e-apr' : 'est e-pend';
+    est2.textContent = step2Completo ? 'Completa' : 'Sin diligenciar';
+
     pasos[2].classList.add('done');
     const est3 = pasos[2].querySelector('.est');
     est3.className = 'est e-apr'; est3.textContent = 'Completa';
-    paneles[6].querySelector('.eyebrow').textContent = '2 de 5 secciones';
+
+    // Sección 5 (D-30): antes no existía ninguna llamada que trajera el
+    // concepto real de `Verificaciones` — el badge de arriba de la Ficha ya
+    // reflejaba el `estado`, pero las observaciones (lo único que le dice al
+    // municipio QUÉ corregir) no llegaban a ningún lado. `Presupuestos_obtener`
+    // ahora las trae en `verificacion`, en la misma llamada, sin viaje nuevo.
+    const RESULTADO_TXT = { CORRESPONDE: 'Corresponde', CORRESPONDE_PARCIAL: 'Corresponde parcialmente', NO_CORRESPONDE: 'No corresponde' };
+    const panelConcepto = document.getElementById('ficha-concepto');
+    const pasoVerif = pasos[4];
+    const estVerif = pasoVerif.querySelector('.est');
+    if (r.verificacion) {
+      pasoVerif.classList.add('done');
+      const txt = RESULTADO_TXT[r.verificacion.resultado] || r.verificacion.resultado;
+      estVerif.className = r.verificacion.resultado === 'CORRESPONDE' ? 'est e-apr' : 'est e-rad';
+      estVerif.textContent = txt;
+
+      panelConcepto.classList.remove('oculto');
+      const badge = document.getElementById('ficha-concepto-badge');
+      badge.className = estVerif.className; badge.textContent = txt;
+      document.getElementById('ficha-concepto-quien').textContent = r.verificacion.verificador_correo || '—';
+      document.getElementById('ficha-concepto-fecha').textContent = r.verificacion.fecha_verificacion
+        ? new Date(r.verificacion.fecha_verificacion).toLocaleString('es-CO') : '—';
+      document.getElementById('ficha-concepto-obs').textContent = r.verificacion.observaciones || '(sin observaciones — el resultado fue "corresponde")';
+    } else {
+      pasoVerif.classList.remove('done');
+      estVerif.className = 'est e-pend'; estVerif.textContent = 'Pendiente';
+      panelConcepto.classList.add('oculto');
+    }
+
+    actualizarContadorFormatoOficial();
+  }
+
+  // Recuenta sobre el DOM en vez de sumar a mano: dos llamadas independientes
+  // (presupuesto y fotos) tocan secciones distintas del mismo checklist y
+  // pueden resolver en cualquier orden — así el contador siempre queda
+  // correcto sin que una le gane la carrera a la otra.
+  function actualizarContadorFormatoOficial(){
+    const paneles = document.querySelectorAll('#s-ficha .p');
+    const pasos = paneles[6].querySelectorAll('.paso-sec');
+    const completos = [...pasos].filter(p => p.classList.contains('done')).length;
+    paneles[6].querySelector('.eyebrow').textContent = `${completos} de ${pasos.length} secciones`;
+  }
+
+  async function cargarFotosDeFicha(dane){
+    let r;
+    try { r = await backend('listarFotos', { token: sesion.token, dane_sede: dane }); }
+    catch (err) { return; }
+    if (String(dane) !== String(daneActual) || vista !== 'ficha') return;
+    const paneles = document.querySelectorAll('#s-ficha .p');
+    const pasos = paneles[6].querySelectorAll('.paso-sec');
+    const n = (r.ok && r.fotos) ? r.fotos.length : 0;
+    pasos[3].classList.toggle('done', n > 0);
+    const est4 = pasos[3].querySelector('.est');
+    est4.className = n > 0 ? 'est e-apr' : 'est e-pend';
+    est4.textContent = n > 0 ? `${n} adjunta${n === 1 ? '' : 's'}` : 'Sin adjuntar';
+    actualizarContadorFormatoOficial();
+  }
+
+  /* ─── PDF del formato oficial (Paso 6, adelantado a pedido) — mismo truco
+     sin librerías del sistema anterior: un iframe oculto con el documento
+     completo, impreso desde ahí ("Guardar como PDF" lo resuelve el propio
+     diálogo de impresión del navegador). Reescrito para el modelo de datos
+     nuevo: ya no hay firma-imagen (D-13) porque D-21 la reemplazó por el
+     registro de auditoría de la sesión — se imprime el correo y la fecha de
+     quien radicó y de quien verificó, no una rúbrica escaneada. Tampoco
+     imprime las fotos: `listarFotos` solo trae metadatos (id, nombre,
+     tamaño), nunca el contenido — traerlo aquí exigiría un endpoint nuevo que
+     descargue cada imagen, y no es lo que se pidió resolver ahora. Se lista
+     la cantidad, con la nota de que se consultan en el sistema. ─── */
+
+  function generarPdfFicha(){
+    const s = SEDES && SEDES.find(x => String(x.dane_sede) === String(daneActual));
+    if (!s){ alert('No hay datos de esta sede todavía.'); return; }
+    if (!fichaPresupuestoActual){ alert('Esta sede no tiene presupuesto radicado — no hay nada que generar.'); return; }
+    _imprimirFormatoOficial(s, fichaPresupuestoActual, fichaItemsActual, fichaVerificacionActual);
+  }
+
+  function _pdfPesos(n){ return '$' + Math.round(Number(n) || 0).toLocaleString('es-CO'); }
+  function _pdfFecha(iso){
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  function _imprimirFormatoOficial(s, p, items, verificacion){
+    const previo = document.getElementById('marcoImpresion');
+    if (previo) previo.remove();
+    const marco = document.createElement('iframe');
+    marco.id = 'marcoImpresion';
+    marco.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+    document.body.appendChild(marco);
+    const doc = marco.contentDocument;
+    doc.open();
+    doc.write(_htmlFormatoOficial(s, p, items, verificacion));
+    doc.close();
+    const imprimir = () => { marco.contentWindow.focus(); marco.contentWindow.print(); };
+    marco.onload = imprimir;
+    if (doc.readyState === 'complete') imprimir();
+  }
+
+  function _htmlFormatoOficial(s, p, items, verificacion){
+    const filasItems = items.length ? items.map((it, i) => `
+      <tr>
+        <td class="c">${i + 1}</td>
+        <td>${esc(it.capitulo ? `${it.capitulo}. ${CAPITULOS[it.capitulo] || ''}` : 'Sin desglose por capítulo')}<br><span class="peq">${esc(it.descripcion || '')}</span></td>
+        <td class="c">${esc(it.unidad || '')}</td>
+        <td class="d">${formatNum(it.cantidad, 2)}</td>
+        <td class="d">${_pdfPesos(it.valor_unitario)}</td>
+        <td class="d">${_pdfPesos(it.valor_total)}</td>
+      </tr>`).join('') : `<tr><td colspan="6" style="text-align:center;color:#666">Presupuesto radicado sin desglose por capítulo (carga masiva, D-36) — el detalle está en el Excel original adjunto en Cargas.</td></tr>`;
+
+    const RESULTADO_TXT = { CORRESPONDE: 'Corresponde', CORRESPONDE_PARCIAL: 'Corresponde parcialmente', NO_CORRESPONDE: 'No corresponde' };
+
+    return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
+<title>${esc(p.id_presupuesto)}</title>
+<style>
+  @page { size: letter; margin: 1.8cm 1.6cm; }
+  * { box-sizing: border-box; }
+  body { font-family: Georgia, "Times New Roman", serif; font-size: 10.5pt; color: #111; margin: 0; line-height: 1.35; }
+  .enc { text-align: center; border-bottom: 2px solid #12395f; padding-bottom: .4rem; margin-bottom: .9rem; }
+  .enc .ent { font-family: Arial, sans-serif; font-size: 9pt; letter-spacing: .06em; color: #12395f; font-weight: bold; }
+  h1 { font-size: 13pt; margin: .5rem 0 .15rem; text-transform: uppercase; }
+  .sub { font-size: 9.5pt; font-style: italic; color: #444; }
+  h2 { font-family: Arial, sans-serif; font-size: 10pt; text-transform: uppercase;
+       background: #eef2f6; border-left: 3px solid #12395f; padding: .25rem .5rem;
+       margin: 1rem 0 .45rem; page-break-after: avoid; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: .5rem; }
+  th, td { border: 1px solid #9aa7b3; padding: .22rem .35rem; vertical-align: top; font-size: 9.5pt; }
+  th { background: #eef2f6; font-family: Arial, sans-serif; font-size: 8.5pt; text-transform: uppercase; }
+  td.c { text-align: center; } td.d { text-align: right; }
+  .ident td:nth-child(odd) { background: #f6f8fa; font-family: Arial, sans-serif;
+       font-size: 8.5pt; text-transform: uppercase; width: 20%; }
+  .peq { font-size: 8.5pt; color: #555; }
+  .total { text-align: right; font-weight: bold; font-size: 11pt; margin: .3rem 0 .8rem;
+           border-top: 2px solid #12395f; padding-top: .25rem; }
+  .firmas { display: flex; gap: 2.5rem; margin-top: 1.4rem; page-break-inside: avoid; }
+  .firmas > div { flex: 1; border-top: 1px solid #111; padding-top: .2rem; font-size: 9pt; }
+  .pie { margin-top: 1.2rem; border-top: 1px solid #ccc; padding-top: .3rem;
+         font-family: Arial, sans-serif; font-size: 8pt; color: #666; }
+  .radicado { float: right; font-family: Arial, sans-serif; font-size: 8.5pt;
+              border: 1px solid #12395f; padding: .15rem .45rem; color: #12395f; }
+  section { page-break-inside: avoid; }
+</style></head><body>
+
+<div class="enc">
+  <div class="radicado">${esc(p.id_presupuesto)}</div>
+  <div class="ent">GOBERNACIÓN DE CALDAS · SECRETARÍA DE EDUCACIÓN</div>
+  <div class="ent" style="font-weight:normal">Dirección de Planeación — Infraestructura Educativa</div>
+  <h1>Informe técnico-presupuestal</h1>
+  <div class="sub">Reparación de infraestructura educativa afectada por el sismo del 10 de agosto de 2026</div>
+</div>
+
+<section>
+<h2>1. Datos de identificación</h2>
+<table class="ident">
+  <tr><td>Municipio</td><td>${esc(s.municipio)}</td>
+      <td>Institución</td><td>${esc(s.institucion || '—')}</td></tr>
+  <tr><td>Sede educativa</td><td colspan="3">${esc(s.sede)}</td></tr>
+  <tr><td>Código DANE</td><td>${esc(s.dane_sede)}</td>
+      <td>Zona / Matrícula</td><td>${esc(s.zona || '—')} · ${formatNum(s.matricula, 0)} estudiantes</td></tr>
+  <tr><td>Radicado por</td><td>${esc(p.creado_por)}</td>
+      <td>Fecha de radicación</td><td>${_pdfFecha(p.fecha_creacion)}</td></tr>
+  <tr><td>Origen</td><td>${p.origen === 'CARGA' ? 'Carga masiva de Excel' : 'Diligenciamiento manual'}</td>
+      <td>Versión</td><td>v${esc(p.version)}</td></tr>
+</table>
+</section>
+
+<section>
+<h2>2. Necesidad y grado de afectación</h2>
+<table>
+  <tr><td style="width:26%;background:#f6f8fa"><b>Clasificación del censo</b></td>
+      <td>${esc(s.tipo_censo || '—')}</td></tr>
+  <tr><td style="background:#f6f8fa"><b>Declaración del municipio</b></td>
+      <td>${p.declara_sin_afectacion
+            ? 'La sede <b>NO</b> presenta afectación que requiera inversión.'
+            : 'La sede <b>SÍ</b> presenta afectación que requiere inversión.'}</td></tr>
+</table>
+<p><b>${p.declara_sin_afectacion ? 'Justificación de la discrepancia con el censo' : 'Descripción de la afectación'}:</b></p>
+<p style="text-align:justify">${esc(p.declara_sin_afectacion ? p.justificacion_discrepancia : p.descripcion_afectacion)}</p>
+</section>
+
+${!p.declara_sin_afectacion ? `
+<section>
+<h2>3. Presupuesto detallado y discriminado</h2>
+<table>
+  <thead><tr>
+    <th style="width:4%">Ítem</th><th>Capítulo y trabajo a ejecutar</th>
+    <th style="width:9%">Unidad</th><th style="width:11%">Cantidad</th>
+    <th style="width:15%">Valor unitario</th><th style="width:16%">Valor total</th>
+  </tr></thead>
+  <tbody>${filasItems}</tbody>
+</table>
+</section>
+
+<section>
+<h2>3.1 Resumen económico</h2>
+<table>
+  <tr><td style="width:60%">Costo directo</td><td class="d">${_pdfPesos(p.costo_directo)}</td></tr>
+  <tr><td>Administración (${formatNum(p.pct_admin, 0)} %)</td><td class="d">${_pdfPesos(p.valor_admin)}</td></tr>
+  <tr><td>Utilidad (${formatNum(p.pct_utilidad, 0)} %)</td><td class="d">${_pdfPesos(p.valor_utilidad)}</td></tr>
+  <tr><td>IVA 19 % sobre la utilidad <span class="peq">(Decreto 1372 de 1992, art. 3)</span></td>
+      <td class="d">${_pdfPesos(p.valor_iva)}</td></tr>
+  <tr><td><b>TOTAL PRESUPUESTO</b></td><td class="d"><b>${_pdfPesos(p.total_presupuesto)}</b></td></tr>
+</table>
+<p class="peq">No se incluyen imprevistos (D-5). AIU sin tope legal — práctica de mercado, no umbral obligatorio.</p>
+</section>
+
+<section>
+<h2>4. Plazo de ejecución</h2>
+<p><b>Plazo total estimado de ejecución:</b> ${p.plazo_dias ? formatNum(p.plazo_dias, 0) + ' días calendario' : 'sin especificar'}.</p>
+</section>
+` : ''}
+
+<section>
+<h2>5. Observaciones de verificación</h2>
+<table>
+  <tr><td style="width:40%;background:#f6f8fa"><b>Resultado</b></td><td><b>Observaciones</b></td></tr>
+  <tr>
+    <td>${verificacion ? esc(RESULTADO_TXT[verificacion.resultado] || verificacion.resultado) : 'Pendiente de verificación'}</td>
+    <td>${verificacion ? esc(verificacion.observaciones || '(sin observaciones)') : '—'}</td>
+  </tr>
+</table>
+
+<div class="firmas">
+  <div>
+    <b>Radicado por</b><br>${esc(p.creado_por)}<br>
+    <span class="peq">${_pdfFecha(p.fecha_creacion)} — registro de sesión (D-21), sin firma escaneada</span>
+  </div>
+  <div>
+    <b>Verificado por</b><br>${verificacion ? esc(verificacion.verificador_correo) : '(sin verificar todavía)'}<br>
+    <span class="peq">${verificacion ? _pdfFecha(verificacion.fecha_verificacion) + ' — registro de sesión (D-21), sin firma escaneada' : ''}</span>
+  </div>
+</div>
+</section>
+
+<div class="pie">
+  Radicado ${esc(p.id_presupuesto)} · versión ${esc(p.version)} · generado el ${_pdfFecha(new Date().toISOString())} ·
+  Secretaría de Educación de Caldas — Dirección de Planeación. El registro fotográfico de esta sede
+  se consulta en el sistema (Registrar → sección 4), no se imprime en este documento.
+</div>
+
+</body></html>`;
+  }
+
+  /* ─── Paso 4: Verificación (D-21, D-22, D-30) — el arquitecto trabaja por
+     BANDEJA departamental, nunca sede por sede. Se recarga cada vez que se
+     entra a la vista (a diferencia de SEDES, que se carga una sola vez al
+     loguearse): esto es una cola de trabajo activa, no un catálogo fijo. ─── */
+  let VERIF = null;            // null = todavía no se ha pedido al backend
+  let verifSeleccion = null;   // id_presupuesto abierto en "Emitir concepto"
+  let verifAutoAbrirDane = null; // viene de irVerificacionSede(), se consume una vez
+
+  function irVerificacion(){ vista = 'verif'; pintar(); }
+  function irVerificacionSede(dane){ verifAutoAbrirDane = dane; vista = 'verif'; pintar(); }
+
+  async function cargarBandejaVerificacion(){
+    try {
+      const r = await backend('obtenerBandejaVerificacion', { token: sesion.token });
+      VERIF = r.ok ? r.presupuestos : [];
+    } catch (err) { VERIF = []; }
+    if (verifAutoAbrirDane){
+      const match = VERIF.find(p => String(p.dane_sede) === String(verifAutoAbrirDane));
+      if (match) verifSeleccion = match.id_presupuesto;
+      verifAutoAbrirDane = null;
+    }
+    if (vista === 'verif') pintarVerificacionReal();
+    actualizarBadgeVerifRiel();
+  }
+
+  // El riel muestra cuántas hay RADICADO esperando concepto — el mismo
+  // cálculo que ya hace pintarVerificacionReal() para la franja de cifras,
+  // solo que aquí puede correr sin haber pintado esa pantalla (por eso lee
+  // VERIF directo en vez de reusar una variable ya calculada). Antes de la
+  // primera carga (VERIF === null) se oculta: mostrar un número viejo o un
+  // cero falso sería peor que no mostrar nada.
+  function actualizarBadgeVerifRiel(){
+    const el = document.getElementById('riel-cand-verif');
+    if (!el) return;
+    if (VERIF === null){ el.classList.add('oculto'); return; }
+    const pendientes = VERIF.filter(p => p.estado === 'RADICADO').length;
+    el.textContent = String(pendientes);
+    el.classList.toggle('oculto', pendientes === 0);
+  }
+
+  function nombreSedeCorto(s){
+    if (!s || !s.sede) return '';
+    return (s.institucion && s.sede.toUpperCase().indexOf(s.institucion.toUpperCase()) !== -1)
+      ? s.sede : `${s.institucion} — ${s.sede}`;
+  }
+
+  function pintarVerificacionReal(){
+    const tbody = document.getElementById('verif-bandeja-tbody');
+    if (VERIF === null){
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--tx-sec);padding:1rem">Cargando…</td></tr>';
+      return;
+    }
+
+    const pendientes = VERIF.filter(p => p.estado === 'RADICADO');
+    const aprobadas = VERIF.filter(p => p.estado === 'APROBADO');
+    const devueltas = VERIF.filter(p => p.estado === 'REQUIERE_AJUSTE');
+    const sinVerificar = pendientes.reduce((a, p) => a + (Number(p.total_presupuesto) || 0), 0);
+
+    const cifras = document.querySelectorAll('#verif-franja .n');
+    cifras[0].textContent = String(pendientes.length);
+    cifras[1].textContent = String(VERIF.length);
+    cifras[2].textContent = String(aprobadas.length);
+    cifras[3].textContent = String(devueltas.length);
+    cifras[4].innerHTML = sinVerificar >= 1000000
+      ? `$${formatNum(sinVerificar / 1000000, 1)}<span class="u"> M</span>` : cop(sinVerificar);
+
+    if (!VERIF.length){
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--tx-sec);padding:1rem">Sin presupuestos radicados todavía.</td></tr>';
+      renderConceptoPanel(null);
+      return;
+    }
+
+    const orden = { RADICADO: 0, REQUIERE_AJUSTE: 1, APROBADO: 2 };
+    const filas = VERIF.slice().sort((a, b) => (orden[a.estado] ?? 9) - (orden[b.estado] ?? 9));
+
+    tbody.innerHTML = filas.map(p => {
+      const s = p.sede_info || {};
+      const p1 = String(s.tipo_censo || '').startsWith('1.');
+      const pri = esPriorizada(s.priorizada) ? `<span class="pri ${p1 ? 'p1' : 'p2'}">${p1 ? 'P1' : 'P2'}</span>` : '—';
+      const cd = capitulosDeSede(s);
+      const nDanos = cd.corrupto ? '—' : cd.lista.length;
+      const origen = p.origen === 'CARGA' ? ['xls', 'XLS'] : ['man', 'MAN'];
+      const accion = p.estado === 'RADICADO' ? 'Verificar' : 'Abrir';
+      const claseBtn = p.estado === 'RADICADO' ? 'b mini' : 'b sec mini';
+      return `<tr class="click" data-id="${esc(p.id_presupuesto)}">
+        <td>${esc(nombreSedeCorto(s) || p.dane_sede)}</td><td>${esc(s.municipio || '')}</td>
+        <td>${pri}</td><td class="n">${nDanos}</td>
+        <td class="n">${cop(s.valor_referencia)}</td><td class="n"><b>${cop(p.total_presupuesto)}</b></td>
+        <td><span class="orig ${origen[0]}">${origen[1]}</span></td><td>v${esc(p.version)}</td>
+        <td><button class="${claseBtn}" type="button" data-abrir="${esc(p.id_presupuesto)}">${accion}</button></td>
+      </tr>`;
+    }).join('');
+
+    tbody.querySelectorAll('[data-abrir]').forEach(b =>
+      b.addEventListener('click', e => { e.stopPropagation(); abrirConceptoVerif(b.dataset.abrir); }));
+    tbody.querySelectorAll('tr[data-id]').forEach(tr =>
+      tr.addEventListener('click', () => abrirConceptoVerif(tr.dataset.id)));
+
+    // Si ya había algo abierto (o venía de irVerificacionSede) y sigue en la
+    // bandeja, se refresca con el dato más nuevo en vez de perder la selección.
+    const sigue = verifSeleccion && VERIF.find(p => String(p.id_presupuesto) === String(verifSeleccion));
+    renderConceptoPanel(sigue || null);
+  }
+
+  function abrirConceptoVerif(idPresupuesto){
+    verifSeleccion = idPresupuesto;
+    renderConceptoPanel(VERIF.find(x => String(x.id_presupuesto) === String(idPresupuesto)) || null);
+  }
+
+  function renderConceptoPanel(p){
+    const badge = document.getElementById('verif-c-badge');
+    const eyebrow = document.getElementById('verif-c-eyebrow');
+    const cuerpo = document.getElementById('verif-c-cuerpo');
+
+    if (!p){
+      badge.className = 'est e-pend'; badge.textContent = '—';
+      eyebrow.textContent = 'Seleccione una fila de la bandeja';
+      cuerpo.innerHTML = '<p style="color:var(--tx-sec);font-size:.85rem;margin:0">Haga clic en una fila de la bandeja (o en "Verificar"/"Abrir") para ver su detalle acá.</p>';
+      return;
+    }
+
+    const s = p.sede_info || {};
+    const items = p.items || [];
+    const [cls, txt] = ESTADOS_PRESUPUESTO[p.estado] || ['e-pend', p.estado];
+    badge.className = 'est ' + cls; badge.textContent = txt;
+    eyebrow.textContent = `${nombreSedeCorto(s) || p.dane_sede} · ${s.municipio || ''}`;
+
+    const capsConPresupuesto = new Set(items.map(it => String(it.capitulo || '')).filter(Boolean));
+    const cd = capitulosDeSede(s);
+    let capsHtml = '';
+    if (!cd.corrupto){
+      cd.lista.forEach(n => {
+        const pres = capsConPresupuesto.has(String(n));
+        capsHtml += `<div class="cap dano${pres ? ' pres' : ''}"><span class="cn">${esc(n)}</span>${esc(CAPITULOS[n] || '')}<span class="flex"></span>` +
+          (pres ? '<span class="cok">✓ $</span>' : '<span class="cer">sin $</span>') + `</div>`;
+      });
+    }
+    if (!capsHtml) capsHtml = '<div class="cap">Sin capítulos de daño marcados en el censo para esta sede.</div>';
+
+    const puedeEmitir = p.estado === 'RADICADO';
+
+    cuerpo.innerHTML = `
+      <div class="rejilla" style="margin-bottom:1.1rem">
+        <div class="cmp"><div class="et"><span>Valor de referencia — su visita</span><b class="n">${cop(s.valor_referencia)}</b></div>
+          <div class="pista"><i style="width:100%;background:var(--gris)"></i></div></div>
+        <div class="cmp"><div class="et"><span>Presupuesto radicado por el municipio</span><b class="n">${cop(p.total_presupuesto)}</b></div>
+          <div class="pista"><i style="width:100%;background:var(--verde)"></i></div></div>
+      </div>
+      <div class="caps" style="margin-bottom:1.1rem">${capsHtml}</div>
+      ${puedeEmitir ? '' : `<div class="ayuda" style="margin-bottom:1rem">Esta versión ya tiene concepto (<b>${esc(txt)}</b>). Si el municipio radica una versión nueva, vuelve a aparecer pendiente para un concepto nuevo.</div>`}
+      <div class="campo-v">
+        <label>Resultado de la verificación</label>
+        <div class="ayuda">Lo que marque se guarda tal cual. A qué estado pasa la sede lo
+          decide la regla D-22, conservadora mientras Planeación responde Q-7.</div>
+        <label class="op"><input type="radio" name="rv" value="CORRESPONDE" checked ${puedeEmitir ? '' : 'disabled'}>
+          <span><b>Corresponde</b><small>Cantidades y valores corresponden a los daños
+          registrados. → pasa a <b>APROBADO</b></small></span></label>
+        <label class="op"><input type="radio" name="rv" value="CORRESPONDE_PARCIAL" ${puedeEmitir ? '' : 'disabled'}>
+          <span><b>Corresponde parcialmente</b><small>Parte está sustentada, parte no.
+          → pasa a <b>REQUIERE AJUSTE</b></small></span></label>
+        <label class="op"><input type="radio" name="rv" value="NO_CORRESPONDE" ${puedeEmitir ? '' : 'disabled'}>
+          <span><b>No corresponde</b><small>No se sustenta en los daños registrados.
+          → pasa a <b>REQUIERE AJUSTE</b></small></span></label>
+      </div>
+      <div class="campo-v">
+        <label>Observaciones técnicas</label>
+        <div class="ayuda">Obligatorias (mínimo 20 caracteres) si el resultado no es «corresponde»:
+          son las que le llegan al municipio para saber qué corregir.</div>
+        <textarea id="verif-c-obs" ${puedeEmitir ? '' : 'disabled'}
+          placeholder="Ej.: el capítulo 2 (mampostería) figura con daño en el censo y no tiene ítems presupuestados…"></textarea>
+      </div>
+      <div class="firma">
+        <b>Firma electrónica — registro de auditoría</b>
+        Queda quién verificó, con qué cuenta institucional y cuándo. No hay que subir
+        imagen de firma ni digitar cédula: el ingreso con cuenta real ya identifica a la
+        persona de forma verificable (D-21).
+      </div>
+      <div class="acciones-v">
+        <span class="flex"></span>
+        <span style="font-size:.79rem;color:var(--tx-sec)" id="verif-c-msg"></span>
+        <button class="b sec" type="button" id="verif-btn-devolver" style="color:var(--err);border-color:var(--err)" ${puedeEmitir ? '' : 'disabled'}>Devolver al municipio</button>
+        <button class="b" type="button" id="verif-btn-emitir" ${puedeEmitir ? '' : 'disabled'}>Emitir concepto</button>
+      </div>`;
+
+    if (puedeEmitir){
+      document.getElementById('verif-btn-emitir').addEventListener('click', () => emitirConceptoVerificacion(p, null));
+      document.getElementById('verif-btn-devolver').addEventListener('click', () => emitirConceptoVerificacion(p, 'NO_CORRESPONDE'));
+    }
+  }
+
+  async function emitirConceptoVerificacion(p, resultadoForzado){
+    const seleccionado = document.querySelector('input[name="rv"]:checked');
+    const resultado = resultadoForzado || (seleccionado && seleccionado.value);
+    if (!resultado) return;
+    const observaciones = document.getElementById('verif-c-obs').value.trim();
+    if (resultado !== 'CORRESPONDE' && observaciones.length < 20){
+      alert('Las observaciones son obligatorias (mínimo 20 caracteres) cuando el resultado no es "corresponde".');
+      return;
+    }
+    const btnEmitir = document.getElementById('verif-btn-emitir');
+    const btnDevolver = document.getElementById('verif-btn-devolver');
+    const msg = document.getElementById('verif-c-msg');
+    btnEmitir.disabled = true; btnDevolver.disabled = true; msg.textContent = 'Guardando...';
+    try {
+      const r = await backend('emitirConcepto', {
+        token: sesion.token, dane_sede: p.dane_sede, id_presupuesto: p.id_presupuesto,
+        resultado, observaciones
+      });
+      if (!r.ok){
+        alert(r.error || 'No se pudo emitir el concepto.');
+        btnEmitir.disabled = false; btnDevolver.disabled = false; msg.textContent = '';
+        return;
+      }
+      const nombres = { CORRESPONDE: 'corresponde', CORRESPONDE_PARCIAL: 'corresponde parcialmente', NO_CORRESPONDE: 'no corresponde' };
+      alert(`Concepto emitido: ${nombres[resultado]} → ${r.estado}.`);
+      await cargarBandejaVerificacion();
+    } catch (err) {
+      alert('No se pudo contactar el servidor. Intente de nuevo.');
+      btnEmitir.disabled = false; btnDevolver.disabled = false; msg.textContent = '';
+    }
+  }
+
+  /* ─── Paso 5: Cargas (D-23, D-33, D-36) — el arquitecto sube el JSON que ya
+     produjo "python tools/ingesta.py <MUNICIPIO> --json" en su computador;
+     esta pantalla nunca lee el Excel original. Ningún capítulo se infiere de
+     texto libre (D-36): un registro sin desglose estructurado se vuelca como
+     un único ítem "sin desglose" — nunca repartido a ciegas entre capítulos.
+     Las filas fuera del lote 1 no vienen premarcadas para volcar: el catálogo
+     completo ya vive en el sistema, pero el ciclo activo de seguimiento hoy
+     es el lote 1 (ALCANCE_Y_REQUISITOS.md §6) — cargarlas queda disponible
+     para cuando el arquitecto decida que sí, no por defecto. ─── */
+  let CARGA = null;      // el JSON subido, tal cual (esquema 1)
+  let cargaFilas = [];   // un estado de confirmación/inclusión por registro
+
+  function cargasLeerArchivo(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      let json;
+      try { json = JSON.parse(reader.result); }
+      catch (err) { alert('El archivo no es JSON válido.'); return; }
+      if (json.esquema !== 1){
+        alert('Este archivo no tiene "esquema": 1 — ¿es la salida de "python tools/ingesta.py <MUNICIPIO> --json"?');
+        return;
+      }
+      CARGA = json;
+      CARGA._archivoNombre = file.name;
+      const sedesMuni = (SEDES || []).filter(s => String(s.municipio).toUpperCase() === String(json.municipio).toUpperCase());
+      cargaFilas = (json.registros || []).map((r, i) => {
+        // esDeArchivo=true: el DANE venía en el Excel, no hay nada que
+        // confirmar. esDeArchivo=false: lo propuso el lector por nombre
+        // (o no propuso nada) — el <select> ya lo preselecciona como ayuda,
+        // pero SOLO marcar la casilla "incluir" cuenta como confirmación
+        // humana (Un registro con dane_sede None NO se vuelca sin eso).
+        const esDeArchivo = r.dane_sede != null;
+        const dane = esDeArchivo ? String(r.dane_sede) : (r.dane_propuesto != null ? String(r.dane_propuesto) : '');
+        const sedeInfo = dane ? (sedesMuni.find(s => String(s.dane_sede) === dane) || null) : null;
+        return {
+          i, r, esDeArchivo, daneElegido: dane, sedeInfo,
+          incluir: esDeArchivo && !!sedeInfo && esPriorizada(sedeInfo.priorizada),
+        };
+      });
+      pintarCargasReal();
+    };
+    reader.onerror = () => alert('No se pudo leer el archivo.');
+    reader.readAsText(file);
+  }
+
+  function filaCargaHtml(f){
+    const r = f.r;
+    const sinCatalogo = !!f.daneElegido && !f.sedeInfo;
+    let colDane;
+    if (f.esDeArchivo){
+      colDane = `<span class="dane">${esc(r.dane_sede)}</span>`;
+    } else {
+      const sedesMuni = (SEDES || []).filter(s => String(s.municipio).toUpperCase() === String(CARGA.municipio).toUpperCase());
+      const opciones = ['<option value="">— sin confirmar —</option>'].concat(
+        sedesMuni.map(s => `<option value="${esc(s.dane_sede)}" ${String(s.dane_sede) === f.daneElegido ? 'selected' : ''}>${esc(s.dane_sede)} · ${esc(s.sede)}</option>`)
+      );
+      colDane = `<select data-elegir-dane="${f.i}" style="max-width:230px">${opciones.join('')}</select>` +
+        (r.dane_propuesto != null ? `<div class="ayuda" style="margin:.2rem 0 0">Propuesto por el lector por coincidencia de nombre — revise que sea la sede correcta antes de marcar la casilla.</div>` : '');
+    }
+    const catalogoTxt = sinCatalogo
+      ? '<span class="cer">no está en el catálogo</span>'
+      : f.sedeInfo
+        ? (esPriorizada(f.sedeInfo.priorizada) ? '<span class="pri p1">Lote 1</span>' : '<span class="ctr">fuera del lote 1</span>')
+        : '—';
+    // La casilla solo se habilita si hay una sede resuelta contra el catálogo.
+    // Que esté habilitada no es lo mismo que estar confirmada: para un DANE
+    // propuesto por nombre (esDeArchivo=false), MARCAR la casilla es en sí
+    // mismo el acto de confirmación humana — por eso no viene premarcada.
+    const puedeIncluir = !!f.sedeInfo;
+    return `<tr>
+      <td><input type="checkbox" data-incluir="${f.i}" ${f.incluir ? 'checked' : ''} ${puedeIncluir ? '' : 'disabled'}></td>
+      <td>${esc(r.sede || '')}</td>
+      <td>${colDane}</td>
+      <td>${catalogoTxt}</td>
+      <td class="n">${cop(r.costo_directo)}</td>
+    </tr>`;
+  }
+
+  function pintarCargasReal(){
+    const cont = document.getElementById('cargas-contenido');
+    if (!CARGA){
+      cont.innerHTML = '<div class="p"><div class="cuerpo"><p style="color:var(--tx-sec);font-size:.85rem;margin:0">Todavía no se ha subido ningún archivo.</p></div></div>';
+      return;
+    }
+    const errores = (CARGA.hallazgos || []).filter(h => h.severidad === 'error');
+    const advertencias = (CARGA.hallazgos || []).filter(h => h.severidad === 'advertencia');
+    const total = cargaFilas.length;
+    const sinCatalogo = cargaFilas.filter(f => !!f.daneElegido && !f.sedeInfo).length;
+    const deArchivo = cargaFilas.filter(f => f.esDeArchivo).length;
+
+    let html = `<div class="p">
+      <header><h2>Informe de validación</h2><span class="flex"></span><span class="eyebrow">Nada se vuelca sin pasar por aquí</span></header>
+      <div class="archivo">
+        <div class="ico">JSON</div>
+        <div class="meta"><b>${esc(CARGA._archivoNombre)}</b>
+          <span>${esc(CARGA.municipio)} · generado ${esc(new Date(CARGA.generado_en).toLocaleString('es-CO'))}</span></div>
+        <span class="flex"></span><span class="orig xls">XLS → JSON</span>
+      </div>
+      <div class="cuerpo">
+        <div style="display:flex;justify-content:space-between;font-size:.79rem;color:var(--tx-sec)">
+          <span>${total} registro(s) leídos · ${deArchivo} con DANE del archivo · ${total - deArchivo} con DANE propuesto por nombre${sinCatalogo ? ` · ${sinCatalogo} sin coincidencia en el catálogo` : ''}</span>
+          <span class="n">${errores.length} fila(s) con error no generaron registro</span>
+        </div>
+      </div>
+    </div>`;
+
+    if (errores.length){
+      html += `<div class="p"><div class="gh" style="--g:var(--err);--gbg:var(--err-bg);--gtx:var(--err)">
+        <div class="cab"><span class="sig hall">!</span>Error · no generaron registro<span class="cnt">${errores.length}</span></div>
+        ${errores.map(h => `<div class="hf"><span class="sig hall">!</span><span class="ref">${esc(h.referencia)}</span><span>${esc(h.motivo)}</span></div>`).join('')}
+      </div></div>`;
+    }
+    if (advertencias.length){
+      html += `<div class="p"><div class="gh" style="--g:var(--alerta);--gbg:var(--alerta-bg);--gtx:var(--alerta)">
+        <div class="cab"><span>▲</span>Advertencia · revisar antes de confirmar<span class="cnt">${advertencias.length}</span></div>
+        ${advertencias.map(h => `<div class="hf"><span>▲</span><span class="ref">${esc(h.referencia)}</span><span>${esc(h.motivo)}</span></div>`).join('')}
+      </div></div>`;
+    }
+
+    html += `<div class="p">
+      <header><h2>Registros a volcar</h2><span class="flex"></span><span class="eyebrow">${total} sede(s) leídas</span></header>
+      <div class="cuerpo ras"><div class="scroll"><table>
+        <thead><tr><th></th><th>Sede (archivo)</th><th>DANE</th><th>Catálogo</th><th class="n">Costo directo</th></tr></thead>
+        <tbody>${cargaFilas.map(f => filaCargaHtml(f)).join('')}</tbody>
+      </table></div></div>
+      <div class="pie" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">
+        <span id="cargas-resumen"></span>
+        <span class="flex"></span>
+        <button class="b sec mini" type="button" id="cargas-descartar">Descartar archivo</button>
+        <button class="b mini" type="button" id="cargas-volcar">Volcar confirmados</button>
+      </div>
+    </div>`;
+
+    cont.innerHTML = html;
+    actualizarResumenCargas();
+
+    cont.querySelectorAll('[data-incluir]').forEach(chk => chk.addEventListener('change', e => {
+      cargaFilas[Number(e.target.dataset.incluir)].incluir = e.target.checked;
+      actualizarResumenCargas();
+    }));
+    cont.querySelectorAll('[data-elegir-dane]').forEach(sel => sel.addEventListener('change', e => {
+      const f = cargaFilas[Number(e.target.dataset.elegirDane)];
+      f.daneElegido = e.target.value;
+      f.sedeInfo = f.daneElegido ? ((SEDES || []).find(s => String(s.dane_sede) === f.daneElegido) || null) : null;
+      // Elegir del desplegable ya es la confirmación humana explícita que
+      // pide el lector (dane_origen='propuesto'): si escogió una sede real,
+      // queda marcada para volcar; si la dejó en "sin confirmar", se desmarca.
+      f.incluir = !!f.sedeInfo;
+      pintarCargasReal(); // re-pinta la fila con el nuevo estado (Lote 1 / fuera de lote)
+    }));
+    document.getElementById('cargas-descartar').addEventListener('click', () => { CARGA = null; cargaFilas = []; pintarCargasReal(); });
+    document.getElementById('cargas-volcar').addEventListener('click', volcarCargas);
+  }
+
+  function actualizarResumenCargas(){
+    const total = cargaFilas.length;
+    const fuera = cargaFilas.filter(f => f.sedeInfo && !esPriorizada(f.sedeInfo.priorizada)).length;
+    const el = document.getElementById('cargas-resumen');
+    if (!el) return;
+    el.textContent = `${cargaFilas.filter(f => f.incluir).length} de ${total} marcadas para volcar` +
+      (fuera ? ` (${fuera} fuera del lote 1 — no vienen premarcadas)` : '');
+  }
+
+  async function volcarCargas(){
+    const filas = cargaFilas.filter(f => f.incluir && f.sedeInfo);
+    if (!filas.length){ alert('No hay ninguna fila marcada y confirmada para volcar.'); return; }
+    if (!confirm(`¿Volcar ${filas.length} presupuesto(s) como RADICADO (origen carga, archivo ${CARGA._archivoNombre})? Si una sede ya tenía presupuesto, esto crea una versión nueva sin borrar la anterior (D-37).`)) return;
+
+    const btn = document.getElementById('cargas-volcar');
+    btn.disabled = true;
+    const resultados = [];
+    for (const f of filas){
+      btn.textContent = `Volcando ${resultados.length + 1} de ${filas.length}...`;
+      try {
+        const r = await backend('guardarPresupuesto', {
+          token: sesion.token, dane_sede: f.daneElegido, estado: 'RADICADO', origen: 'CARGA',
+          archivo_origen: CARGA._archivoNombre,
+          // Sin desglose por capítulo (D-36): un único ítem "gl" con el costo
+          // directo del archivo. capitulo vacío = no marca ningún capítulo
+          // como presupuestado en el cruce daño↔presupuesto (D-34) — más
+          // honesto que adivinar a cuál pertenece.
+          items: [{ capitulo: '', descripcion: 'Costo directo según Excel de la alcaldía, cargado por lote — sin desglose por capítulo en el archivo de origen (D-36)', unidad: 'gl', cantidad: 1, valor_unitario: f.r.costo_directo }],
+          pct_admin: 0, pct_utilidad: 0, plazo_dias: 0,
+          descripcion_afectacion: `Cargado por lote desde ${CARGA._archivoNombre}. El archivo no separa Administración/Utilidad/IVA — quedan en 0 hasta que el municipio los declare o el arquitecto los confirme al verificar.`,
+        });
+        resultados.push({ f, ok: r.ok, error: r.error, version: r.version });
+      } catch (err) {
+        resultados.push({ f, ok: false, error: 'No se pudo contactar el servidor' });
+      }
+    }
+    btn.disabled = false; btn.textContent = 'Volcar confirmados';
+
+    const ok = resultados.filter(x => x.ok).length;
+    const fail = resultados.filter(x => !x.ok);
+    let resumen = `${ok} de ${filas.length} volcados correctamente.`;
+    if (fail.length) resumen += '\n\nCon error:\n' + fail.map(x => `- ${x.f.r.sede} (${x.f.daneElegido}): ${x.error}`).join('\n');
+    alert(resumen);
+
+    // Los que sí se volcaron salen del listado para no volcarlos dos veces
+    // por accidente; los que fallaron quedan para poder reintentar.
+    const idsOk = new Set(resultados.filter(x => x.ok).map(x => x.f.i));
+    cargaFilas = cargaFilas.filter(f => !idsOk.has(f.i));
+    pintarCargasReal();
   }
 
   /* Sin cabeceras a propósito: un fetch con body de texto plano es una
@@ -2130,15 +2981,24 @@
     const cuerpos5 = paneles[5].querySelectorAll('.cuerpo');
     if (cuerpos5[1]) cuerpos5[1].remove();
 
-    paneles[6].querySelector('.eyebrow').textContent = '1 de 5 secciones';
+    const TEXTO_PENDIENTE = ['', 'Sin diligenciar', 'Sin diligenciar', 'Sin adjuntar', 'Pendiente'];
     paneles[6].querySelectorAll('.paso-sec').forEach((p, i) => {
       p.classList.toggle('done', i === 0);
       const est = p.querySelector('.est');
       est.className = i === 0 ? 'est e-apr' : 'est e-pend';
-      est.textContent = i === 0 ? 'Completa' : 'Sin diligenciar';
+      est.textContent = i === 0 ? 'Completa' : TEXTO_PENDIENTE[i];
     });
+    actualizarContadorFormatoOficial();
+    // Se oculta acá, síncrono, antes de que la carga async decida si lo
+    // vuelve a mostrar — si no, al navegar de una sede CON concepto a una
+    // sede SIN presupuesto, el panel se quedaría pegado con el dato de la
+    // sede anterior (cargarPresupuestoDeFicha no llega a tocarlo cuando no
+    // hay presupuesto que traer).
+    document.getElementById('ficha-concepto').classList.add('oculto');
+    fichaPresupuestoActual = null; fichaItemsActual = []; fichaVerificacionActual = null;
 
     cargarPresupuestoDeFicha(daneActual);
+    cargarFotosDeFicha(daneActual);
   }
 
   function pintar(){
@@ -2179,16 +3039,25 @@
     // Datos reales del backend (Paso 2): solo si hubo login real. Sin sesión,
     // estas tres pantallas se quedan con el contenido de ejemplo de la maqueta.
     if (sesion){
-      // Los conteos "6" (Verificación) y "19" (Hallazgos) del riel son del
-      // ejemplo de diseño — no hay ninguna verificación pendiente real
-      // (nada radicado todavía) ni módulo de Hallazgos construido (Paso 6).
-      // Mostrarlos junto a una sesión real los haría pasar por reales.
-      document.querySelectorAll('.riel .cand').forEach(el => el.classList.add('oculto'));
+      // El conteo "19" de Hallazgos es del ejemplo de diseño — el módulo no
+      // está construido (Paso 6), no hay ningún dato real que mostrar en su
+      // lugar. Se oculta siempre, para no hacerlo pasar por real.
+      document.querySelectorAll('.riel .cand').forEach(el => { if (el.id !== 'riel-cand-verif') el.classList.add('oculto'); });
+      // El de Verificación sí tiene dato real detrás (VERIF) — pero solo
+      // después de haber visitado esa pantalla al menos una vez en la sesión
+      // (no se pide la bandeja completa desde el login solo para este
+      // número). Mientras VERIF sea null, se oculta en vez de mostrar el "6"
+      // de ejemplo; en cuanto se carga, actualizarBadgeVerifRiel() la
+      // reemplaza y la mantiene al día cada vez que se refresca la bandeja.
+      actualizarBadgeVerifRiel();
       if (vista === 'tablero') pintarTableroReal();
       if (vista === 'inicio') pintarInicioReal();
       if (vista === 'muni') pintarMuniReal();
       if (vista === 'ficha') pintarFichaReal();
       if (vista === 'registrar') pintarRegistrarReal();
+      // Verificación es una cola de trabajo activa (a diferencia de SEDES,
+      // que se carga una sola vez): se refresca cada vez que se entra acá.
+      if (vista === 'verif') { pintarVerificacionReal(); cargarBandejaVerificacion(); }
 
       if (vista === 'muni' && muniActual){
         document.getElementById('migas').innerHTML =
@@ -2237,19 +3106,53 @@
     registro.items.push({ capitulo: '1', descripcion: '', unidad: 'm²', cantidad: 0, valor_unitario: 0 });
     renderItemsTabla();
     actualizarTotales();
+    sincronizarHechoRegistro();
   });
   document.getElementById('btn-guardar-borrador').addEventListener('click', () => guardarRegistroPresupuesto('BORRADOR'));
   document.getElementById('btn-radicar').addEventListener('click', () => guardarRegistroPresupuesto('RADICADO'));
   document.getElementById('reg-admin').addEventListener('input', actualizarTotales);
   document.getElementById('reg-utilidad').addEventListener('input', actualizarTotales);
   document.getElementById('reg-plazo').addEventListener('input', e => { registro.plazoDias = parseCOP(e.target.value); });
+  document.getElementById('reg-descripcion').addEventListener('input', e => {
+    registro.descripcionAfectacion = e.target.value;
+    sincronizarHechoRegistro();
+  });
   document.getElementById('reg-af-si').addEventListener('change', () => {
     registro.declaraSinAfectacion = false;
     document.getElementById('reg-label-desc').textContent = 'Descripción de los daños';
+    sincronizarHechoRegistro();
   });
   document.getElementById('reg-af-no').addEventListener('change', () => {
     registro.declaraSinAfectacion = true;
     document.getElementById('reg-label-desc').textContent = 'Justificación (mínimo 40 caracteres)';
+    sincronizarHechoRegistro();
+  });
+  // Fotos (D-29 sección 4): elegir por clic (el botón "Agregar" se reengancha
+  // en cada renderFotosRegistro) o soltarlas sobre la cuadrícula.
+  document.getElementById('reg-foto-input').addEventListener('change', e => {
+    if (e.target.files.length) subirFotosSeleccionadas(e.target.files);
+    e.target.value = '';
+  });
+  const regFotosLista = document.getElementById('reg-fotos-lista');
+  regFotosLista.addEventListener('dragover', e => e.preventDefault());
+  regFotosLista.addEventListener('drop', e => {
+    e.preventDefault();
+    if (e.dataTransfer.files.length) subirFotosSeleccionadas(e.dataTransfer.files);
+  });
+
+  // Cargas (Paso 5): elegir archivo por clic o soltarlo sobre la zona.
+  document.getElementById('cargas-elegir').addEventListener('click', e => {
+    e.preventDefault();
+    document.getElementById('cargas-input').click();
+  });
+  document.getElementById('cargas-input').addEventListener('change', e => {
+    if (e.target.files[0]) cargasLeerArchivo(e.target.files[0]);
+  });
+  const cargasDropzone = document.getElementById('cargas-dropzone');
+  cargasDropzone.addEventListener('dragover', e => e.preventDefault());
+  cargasDropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    if (e.dataTransfer.files[0]) cargasLeerArchivo(e.dataTransfer.files[0]);
   });
 
   pintar();
