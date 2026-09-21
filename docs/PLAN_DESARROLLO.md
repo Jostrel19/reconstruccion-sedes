@@ -153,7 +153,7 @@ seguía hablando con el `Codigo.gs` viejo. Corregido subiendo la versión correc
 implementación original. La implementación huérfana "Paso 3 — Registrar..." quedó sin usar (no
 rompe nada, es una URL que nadie referencia) — pendiente archivarla cuando haya un rato, no urge.
 
-**Fotografías (D-29 sección 4) — código completo 2026-09-21, pendiente desplegar.**
+**Fotografías (D-29 sección 4) — desplegado y verificado en producción 2026-09-21.**
 `backend/Fotos.gs` (nuevo): `Fotos_subir` y `Fotos_listar`, con Drive como repositorio de
 archivos — exactamente lo que D-19 ya preveía ("Drive como repositorio de archivos") y que hasta
 ahora no se había construido. Una carpeta raíz ("Reconstrucción de sedes — Fotos", id guardado en
@@ -181,11 +181,11 @@ checklist deje de estar fija en "Sin adjuntar" y refleje `listarFotos` real. El 
 un número fijo, porque presupuesto y fotos llegan por dos llamadas independientes que pueden
 resolver en cualquier orden.
 
-**Tres cambios más, 2026-09-21, a pedido explícito tras la auditoría — los tres probados con datos
-fabricados en memoria, sin tocar producción:**
+**Tres cambios más, 2026-09-21, a pedido explícito tras la auditoría — probados primero con datos
+fabricados en memoria y luego, tras el despliegue, contra el backend real:**
 
-1. **Sección 5 de la Ficha — concepto de verificación en modo lectura (D-30), código completo,
-   pendiente desplegar.** `_verificacionDe(idPresupuesto)` (nuevo, en `Verificaciones.gs`) busca en
+1. **Sección 5 de la Ficha — concepto de verificación en modo lectura (D-30), desplegado y
+   verificado en producción.** `_verificacionDe(idPresupuesto)` (nuevo, en `Verificaciones.gs`) busca en
    la hoja `Verificaciones` la fila más reciente para ese `id_presupuesto` y la expone como campo
    `verificacion` en la respuesta de `Presupuestos_obtener` (mismo patrón que ya usa `historial` —
    sin viaje nuevo desde el navegador). En la Ficha, un panel nuevo "Concepto del arquitecto"
@@ -210,9 +210,27 @@ fabricados en memoria, sin tocar producción:**
    (no se pide la bandeja completa desde el login solo para este número), y se actualiza cada vez
    que la bandeja se refresca.
 
-**Pendiente del lado del usuario:** pegar `Verificaciones.gs` y `Presupuestos.gs` actualizados en
-el proyecto de Apps Script y subir "Nueva versión" — mismo procedimiento de siempre. El PDF y el
-contador del riel ya funcionan con solo abrir el HTML actualizado, sin depender de este despliegue.
+**Prueba de producción, 2026-09-21, tras el despliegue de `Fotos.gs`, `Codigo.gs`,
+`Verificaciones.gs` y `Presupuestos.gs`:** login real (`data@sedcaldas.edu.co`, código de un solo
+uso), sobre la sede 217050000060 (Buenos Aires, I.E. Antonio Nariño — Aranzazu):
+
+- Se radicó un presupuesto de prueba (`guardarPresupuesto`, MANUAL, 1 ítem, $1.020.000) →
+  `217050000060-v1`.
+- Se subió una foto real a Drive (`subirFoto`) y se confirmó con `listarFotos`: la carpeta del DANE
+  se crea sola, se guarda solo metadata (id, nombre, tamaño, fecha), nunca el contenido — tal como
+  se diseñó.
+- Se emitió un concepto real (`emitirConcepto`, `CORRESPONDE_PARCIAL` → `estado: REQUIERE_AJUSTE`,
+  D-22/D-39).
+- Se abrió la Ficha de esa sede: las 5 secciones del checklist "Formato oficial" quedaron
+  "Completa" (incluida "1 adjunta" en fotos), y el panel "Concepto del arquitecto" mostró resultado,
+  observaciones, verificador y fecha reales — antes vacío en toda prueba anterior porque no existía
+  ninguna verificación real sobre un presupuesto que siguiera vigente.
+- Se generó el HTML del PDF (`_htmlFormatoOficial`) sobre esos mismos datos cacheados: trae
+  radicado, sede, municipio, el ítem, el total ($1.020.000), el concepto y las observaciones.
+
+Es un registro de **prueba**, igual que las radicaciones de prueba anteriores (Aguadas-Viboral,
+Aranzazu): queda en `Presupuestos`/`Items`/`Verificaciones` y una foto en Drive hasta que se limpie
+a mano, como se hizo la vez pasada.
 
 **Auditoría del 2026-09-21, antes de seguir con los pasos 4 y 5:** se pidió revisar a fondo que no
 hubiera errores ni incongruencias antes de construir más. Se encontraron y corrigieron 4 huecos

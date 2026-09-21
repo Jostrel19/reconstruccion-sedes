@@ -1263,3 +1263,40 @@ verificación en la Ficha requiere el mismo despliegue de backend ya conocido; f
 contador del riel no requieren nada nuevo del lado de Apps Script salvo Fotos.gs. Sigue pendiente:
 Hallazgos, Usuarios y correo de confirmación (Paso 6), y probar el alcance real de los roles
 Verificador y Responsable de sede (sigue sin haber un correo real de arquitecto, alcalde o rector).
+
+## 2026-09-21 (noche) — Fotos, concepto de verificación y PDF confirmados en producción
+
+Se pegaron `Fotos.gs`, `Codigo.gs`, `Verificaciones.gs` y `Presupuestos.gs` en el proyecto de Apps
+Script y se subió "Nueva versión" sobre la implementación existente ("Paso 0 — 6 pestañas..."). Con
+el despliegue hecho, se repitió contra el backend real la misma prueba que antes solo se había hecho
+con datos fabricados en memoria — login real (`data@sedcaldas.edu.co`) sobre la sede 217050000060
+(Buenos Aires, Aranzazu):
+
+- **Se descubrió, antes de poder probar, que la limpieza que había hecho el usuario en la hoja
+  `Presupuestos` (mencionada al cerrar la tarde anterior) borró también los dos radicados reales de
+  Aranzazu volcados por Cargas y el de Aguadas-Viboral con su verificación** — `obtenerPresupuesto`
+  devolvió `presupuesto: null` para los tres DANE, y la bandeja de verificación quedó vacía. Correcto
+  y esperado: eran datos de prueba, y confirma que no queda nada residual de las pruebas anteriores.
+- Se radicó un presupuesto de prueba nuevo (`guardarPresupuesto`, MANUAL, 1 ítem de $1.020.000) sobre
+  217050000060 → `217050000060-v1`.
+- Se subió una foto real con `subirFoto` (PNG de prueba) y se confirmó con `listarFotos`: Drive creó
+  sola la carpeta del DANE, y la respuesta solo trae `id`/`nombre`/`tamaño`/`fecha`, nunca el
+  contenido — exactamente como se diseñó (D-29 sección 4).
+- Se emitió un concepto real con `emitirConcepto` (`CORRESPONDE_PARCIAL` → `estado: REQUIERE_AJUSTE`,
+  D-22/D-39).
+- Se abrió la Ficha real de la sede: las 5 secciones del checklist "Formato oficial" quedaron
+  "Completa" (incluida "1 adjunta" en fotografías) y el panel "Concepto del arquitecto" — hasta ahora
+  nunca visto con datos reales, porque no había sobrevivido ninguna verificación vigente a una
+  limpieza — mostró resultado, observaciones, verificador y fecha correctos.
+- Se generó el HTML del PDF (`_htmlFormatoOficial`) sobre esos mismos datos cacheados: trae radicado,
+  sede, municipio, el ítem, el total y el concepto correctos.
+
+**Un error de transcripción propio, detectado y corregido en el momento:** el primer intento de
+`subirFoto` usó los nombres de parámetro `tipo`/`contenido_b64`, que no son los que el frontend real
+envía (`tipo_mime`/`contenido_base64`) — el backend respondió `"Sin contenido de imagen"`. Corregido
+leyendo la llamada real en `mockup_v6.html` antes de reintentar.
+
+**Queda, otra vez, como dato de prueba** en `Presupuestos`/`Items`/`Verificaciones` y una foto en
+Drive — para que el usuario lo limpie cuando quiera, igual que la vez anterior. Con esto, **los tres
+huecos que dejó abiertos la auditoría del 2026-09-21 quedan cerrados y confirmados en producción**,
+no solo con datos fabricados en memoria.

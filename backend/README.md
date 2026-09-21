@@ -62,17 +62,22 @@ un archivo `.gs` acá, hay que copiar el cambio también al proyecto real.
 | `Sedes.gs` | Listado de sedes filtrado por rol/alcance del lado del servidor (D-6, D-24, D-25) | Paso 2 | ✅ |
 | `Backup.gs` | Respaldo diario del Sheet completo a Drive, con retención de 30 días (D-38) | — resiliencia, no es un paso del plan | ✅ |
 | `Presupuestos.gs` | Guardar/obtener presupuesto, versionado real sin sobrescritura (D-37), historial completo | Paso 3 | ✅ |
-| `Verificaciones.gs` | Bandeja departamental + emitir concepto (D-21, D-22, D-39) | Paso 4 | ✅ desplegado y probado en producción 2026-09-21 |
+| `Verificaciones.gs` | Bandeja departamental + emitir concepto (D-21, D-22, D-39) + `_verificacionDe` para la Ficha (D-30) | Paso 4 | ✅ desplegado y probado en producción 2026-09-21 |
+| `Fotos.gs` | Registro fotográfico en Drive, carpeta por DANE sede, solo metadata en `listarFotos` (D-29 sección 4) | — | ✅ desplegado y probado en producción 2026-09-21 |
 
 **Falta:** enrutado y migas del frontend real (hoy solo existe el mockup estático — `docs/diseno/mockup_v6.html`
-ya llama al backend real desde ahí), Hallazgos (Paso 6), y el PDF y correo de confirmación. Cada uno
-se agrega como una entrada nueva en el objeto `manejadores` de `Codigo.gs`, sin tocar lo que ya
-funciona. **`Presupuestos.gs` (D-40) y `Verificaciones.gs` ya están pegados y desplegados** sobre la
-implementación existente ("Paso 0 — 6 pestañas..."). `obtenerBandejaVerificacion`/`emitirConcepto`
-se probaron de punta a punta contra el backend real (login, radicación, concepto, D-39 confirmado
-con mutación de una sola celda y con el candado de concurrencia). **Cargas también confirmado en
-producción el mismo día**: `guardarPresupuesto` con `origen: CARGA` desde Administrador, con
-`ingesta_ARANZAZU.json` real — ver `docs/PLAN_DESARROLLO.md` Paso 5 para el detalle.
+ya llama al backend real desde ahí), Hallazgos (Paso 6), Usuarios (Paso 6) y el correo de confirmación
+del radicado. Cada uno se agrega como una entrada nueva en el objeto `manejadores` de `Codigo.gs`, sin
+tocar lo que ya funciona. **`Presupuestos.gs` (D-40), `Verificaciones.gs`, `Fotos.gs` y `Codigo.gs`
+ya están pegados y desplegados** sobre la implementación existente ("Paso 0 — 6 pestañas...").
+`obtenerBandejaVerificacion`/`emitirConcepto` se probaron de punta a punta contra el backend real
+(login, radicación, concepto, D-39 confirmado con mutación de una sola celda y con el candado de
+concurrencia). **Cargas también confirmado en producción el mismo día**: `guardarPresupuesto` con
+`origen: CARGA` desde Administrador, con `ingesta_ARANZAZU.json` real — ver
+`docs/PLAN_DESARROLLO.md` Paso 5 para el detalle. **Fotos, el concepto de verificación en la Ficha y
+el PDF también confirmados en producción 2026-09-21** — ver `docs/PLAN_DESARROLLO.md` para el
+detalle de la prueba (radicación de prueba en 217050000060, Buenos Aires - Aranzazu, con concepto
+emitido y foto real subida a Drive; pendiente de limpieza igual que las pruebas anteriores).
 
 ## Decisiones que este código ya aplica
 
