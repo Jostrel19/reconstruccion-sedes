@@ -8,7 +8,10 @@ vino cada dato.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import json
+from dataclasses import dataclass, field, asdict
+from datetime import datetime, timezone
+from pathlib import Path
 
 
 @dataclass
@@ -56,3 +59,26 @@ def imprimir_informe(municipio: str, registros: list[RegistroIngesta], hallazgos
 
     if not errores and not advertencias:
         print("Sin errores ni advertencias.")
+
+
+def exportar_json(ruta: Path, municipio: str, registros: list[RegistroIngesta], hallazgos: list[Hallazgo]) -> None:
+    """Escribe el mismo resultado que ya imprime `imprimir_informe()` a un
+    archivo JSON (D-23): es lo que la pantalla Cargas del sistema recibe para
+    mostrar el informe y, si el arquitecto confirma, volcarlo. Solo serializa
+    lo que un lector real ya calculó — nunca genera nada por su cuenta.
+
+    `esquema: 1` viaja en el archivo a propósito (mismo patrón que D-12 en el
+    sistema anterior): si el contrato cambia alguna vez, la pantalla puede
+    reconocer un archivo viejo y rechazarlo en vez de leerlo mal.
+    """
+    payload = {
+        "esquema": 1,
+        "municipio": municipio,
+        "generado_en": datetime.now(timezone.utc).isoformat(),
+        "registros": [asdict(r) for r in registros],
+        "hallazgos": [asdict(h) for h in hallazgos],
+    }
+    ruta = Path(ruta)
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    ruta.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"\nEscrito: {ruta} ({len(registros)} registros, {len(hallazgos)} hallazgos)")

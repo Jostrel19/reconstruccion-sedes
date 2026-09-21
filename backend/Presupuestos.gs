@@ -19,17 +19,31 @@ function Presupuestos_obtener(body) {
   if (!_enAlcance(sesion, sede.municipio, daneSede)) return { ok: false, error: 'Sede fuera de su alcance' };
 
   var vigente = _presupuestoVigente(daneSede);
-  if (!vigente) return { ok: true, presupuesto: null, items: [] };
+  if (!vigente) return { ok: true, presupuesto: null, items: [], historial: [] };
 
-  return { ok: true, presupuesto: vigente.datos, items: _itemsDe(vigente.datos.id_presupuesto) };
+  return {
+    ok: true, presupuesto: vigente.datos, items: _itemsDe(vigente.datos.id_presupuesto),
+    // Todas las versiones (D-37 solo sirve si el histórico se puede CONSULTAR,
+    // no solo guardar) — la Ficha las lista todas, no solo la vigente.
+    historial: _historialDe(daneSede),
+    // Concepto de verificación de la versión vigente, o null si nadie lo ha
+    // emitido todavía — sección 5 de la Ficha en modo lectura (D-30).
+    verificacion: _verificacionDe(vigente.datos.id_presupuesto)
+  };
 }
 
 function Presupuestos_guardar(body) {
   var sesion = verificarToken(body.token);
   if (!sesion) return { ok: false, error: 'Sesión inválida o vencida' };
-  if (sesion.rol !== 'RESPONSABLE_SEDE' && sesion.rol !== 'ADMINISTRADOR') {
-    return { ok: false, error: 'Su rol no puede registrar presupuesto' };
-  }
+  var origen = body.origen === 'CARGA' ? 'CARGA' : 'MANUAL';
+  // MANUAL: quien diligencia a mano (alcalde/rector) o el Administrador de prueba.
+  // CARGA: el arquitecto, subiendo lo que ya leyó tools/ingesta*.py (Paso 5,
+  // D-33/D-23) — el Verificador nunca diligencia a mano (tabla de roles),
+  // pero sí carga masivamente lo que el municipio ya mandó en Excel.
+  var puede = sesion.rol === 'ADMINISTRADOR' ||
+    (origen === 'MANUAL' && sesion.rol === 'RESPONSABLE_SEDE') ||
+    (origen === 'CARGA' && sesion.rol === 'VERIFICADOR');
+  if (!puede) return { ok: false, error: 'Su rol no puede registrar presupuesto por esta vía' };
 
   var daneSede = String(body.dane_sede || '');
   var sede = _sedeDelCatalogo(daneSede);
@@ -41,6 +55,19 @@ function Presupuestos_guardar(body) {
   var items = Array.isArray(body.items) ? body.items : [];
   if (estado === 'RADICADO' && items.length === 0 && !declaraSinAfectacion) {
     return { ok: false, error: 'Un presupuesto radicado necesita al menos un ítem, o declarar sin afectación' };
+  }
+  // La misma regla de longitud mínima que ya exige el navegador (mockup_v6.html,
+  // guardarRegistroPresupuesto) — repetida acá porque cualquiera con un token
+  // válido puede llamar esta acción directo, sin pasar por el formulario.
+  if (estado === 'RADICADO' && origen === 'MANUAL') {
+    var descripcion = String(body.descripcion_afectacion || '');
+    var justificacion = String(body.justificacion_discrepancia || '');
+    if (declaraSinAfectacion && justificacion.length < 40) {
+      return { ok: false, error: 'La justificación de "no presenta afectación" necesita mínimo 40 caracteres' };
+    }
+    if (!declaraSinAfectacion && descripcion.length < 60) {
+      return { ok: false, error: 'La descripción de los daños necesita mínimo 60 caracteres' };
+    }
   }
 
   var costoDirecto = 0;
@@ -69,7 +96,8 @@ function Presupuestos_guardar(body) {
   var idPresupuesto = daneSede + '-v' + nuevaVersion;
   var valoresP = {
     id_presupuesto: idPresupuesto, dane_sede: daneSede, version: nuevaVersion,
-    origen: 'MANUAL', archivo_origen: '', costo_directo: costoDirecto,
+    origen: origen, archivo_origen: origen === 'CARGA' ? String(body.archivo_origen || '') : '',
+    costo_directo: costoDirecto,
     pct_admin: pctAdmin, pct_utilidad: pctUtilidad, valor_admin: valorAdmin,
     valor_utilidad: valorUtilidad, valor_iva: valorIva, total_presupuesto: total,
     plazo_dias: Number(body.plazo_dias) || 0,
@@ -128,6 +156,26 @@ function _presupuestoVigente(daneSede) {
     }
   }
   return null;
+}
+
+// Todas las versiones de un DANE (vigente + históricas), más nueva primero.
+// Usada solo para lectura (Presupuestos_obtener) — el versionado real (D-37)
+// lo sigue decidiendo _presupuestoVigente, esto no cambia esa lógica.
+function _historialDe(daneSede) {
+  var hoja = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Presupuestos');
+  var datos = hoja.getDataRange().getValues();
+  var enc = datos[0];
+  var idxDane = enc.indexOf('dane_sede');
+  var historial = [];
+  for (var i = 1; i < datos.length; i++) {
+    if (String(datos[i][idxDane]) === daneSede) {
+      var obj = {};
+      enc.forEach(function (c, j) { obj[c] = datos[i][j]; });
+      historial.push(obj);
+    }
+  }
+  historial.sort(function (a, b) { return Number(b.version) - Number(a.version); });
+  return historial;
 }
 
 function _itemsDe(idPresupuesto) {

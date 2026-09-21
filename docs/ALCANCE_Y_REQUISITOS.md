@@ -165,8 +165,17 @@ Para el detalle paso a paso, `docs/PLAN_DESARROLLO.md` §3-4. Snapshot a la fech
 | Lectura de sedes filtrada por rol | ✅ Funcionando para Administrador; sin probar aún para los otros 3 roles |
 | Pantallas Sedes → Municipio → Ficha con datos reales | ✅ Conectadas y probadas 2026-09-17 (identidad y censo de daños; presupuesto y verificación se muestran vacíos porque no existen todavía) |
 | Tablero con datos reales | ✅ Conectado y probado 2026-09-17 (cifras, mosaico de municipios y rankings reales; Bitácora vacía porque no hay actividad que registrar todavía) |
-| Registrar presupuesto (escritura real, con versionado) | ✅ Verificado en producción 2026-09-21 (guardar borrador, radicar, corregir sin sobrescribir) |
-| Verificación, Cargas, Hallazgos (escritura real) | ⏳ Diseñadas, sin construir todavía |
+| Registrar presupuesto (escritura real, con versionado) | ✅ Verificado en producción 2026-09-21 (guardar borrador, radicar, corregir sin sobrescribir); 4 huecos encontrados en auditoría posterior (Ficha sin reflejar cruce/detalle/historial reales, validación de longitud solo en el navegador) — corregidos el mismo día |
+| Verificación (bandeja + emitir concepto) | ✅ Desplegado y verificado en producción 2026-09-21: login, radicación, bandeja, emisión de concepto (D-22), mutación de una sola celda (D-39) y candado de concurrencia (D-39), todo confirmado contra el backend real |
+| Cargas (subir JSON del lector, confirmar y volcar) | ✅ Confirmado en producción 2026-09-21: `ingesta_ARANZAZU.json`, 2 de 9 registros confirmados a mano y volcados con `origen: CARGA`, verificados contra el backend real (D-36/D-40/D-41) |
+| Registro fotográfico (D-29 sección 4) | 🟡 Código completo 2026-09-21 (`backend/Fotos.gs`, Drive por DANE sede, D-19) — pendiente desplegar y probar en producción |
+| Checklist "Formato oficial" de la Ficha (5 secciones) | ✅ Las 5 secciones se calculan solas con datos reales (2026-09-21): 1-4 desde `obtenerPresupuesto`/`listarFotos`, la 5 desde `verificacion` |
+| Sección 5 de la Ficha (concepto de verificación, modo lectura, D-30) | 🟡 Código completo 2026-09-21 — `_verificacionDe` en `Verificaciones.gs`, expuesto en `Presupuestos_obtener`; panel "Concepto del arquitecto" en la Ficha. Pendiente desplegar |
+| PDF del formato oficial | 🟡 Código completo 2026-09-21 (adelantado del Paso 6, mismo truco sin librerías del sistema anterior) — sin firma-imagen (D-21 la reemplaza), sin fotos embebidas (`listarFotos` no trae el contenido). 100 % frontend, no requiere desplegar backend |
+| Contador real de Verificación en el riel | ✅ Hecho 2026-09-21 — muestra pendientes reales una vez visitada la bandeja; antes se ocultaba siempre. 100 % frontend |
+| Hallazgos (pantalla administrable) | ⏳ Diseñada, sin construir todavía — pantalla 100 % de ejemplo, no lee la pestaña `Hallazgos` real |
+| Usuarios (gestión de roles) | ⏳ Diseñada, sin construir todavía — pantalla 100 % de ejemplo, "+ Agregar usuario" no hace nada |
+| Correo de confirmación con el radicado | ⏳ Sin construir (Paso 6) |
 | Módulo de Monitoreo/Obras | ⏸️ Aplazado — faltan datos de contratación |
 
 ---
