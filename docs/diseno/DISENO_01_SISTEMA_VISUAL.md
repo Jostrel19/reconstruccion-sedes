@@ -234,3 +234,23 @@ puramente visual, así que ese renombre no debería pasar aquí.
 - [ ] Versión subida (`?v=`), sin CSS cacheado.
 
 Solo con esto en verde se pasa a fase 1.
+
+---
+
+## 7. Componentes añadidos el 2026-09-24 (en `mockup_v6.html`)
+
+Se construyen sobre los tokens de §2 sin cambiarlos. Criterio: dar jerarquía y respuesta visual sin
+volver al "dashboard SaaS" que §2.4 descartó.
+
+| Componente | Qué es | Regla |
+|---|---|---|
+| Encabezado de vista (`.cab-vista`) | Título en serif, una línea de contexto y las acciones de la pantalla (selector de lote, exportar, actualizar) | Banda de papel con **curvas de nivel** al 16 % de un gris de marca — el único motivo gráfico del sistema, tomado del tema (terreno, sismo). Las zonas de datos quedan limpias |
+| Avisos (`.aviso`) | Reemplazan `alert()`: éxito (verde), error (rojo, no se va solo), información (oro) | Flotan abajo a la derecha con sombra suave: es de lo poco que va *encima* del contenido |
+| Diálogo (`.dlg`) | Reemplaza `confirm()`; revisión antes de radicar y confirmación con número de radicado | Regla de oro arriba; sombra (ya permitida en §2.4 para el diálogo). Acción de riesgo en rojo |
+| Placeholders (`.esq`) | Bloques con brillo mientras llega el dato | Nunca un texto «Cargando…» suelto |
+| Días en espera (`.espera`) | Píldora verde / oro / roja | Excepción deliberada a §3.3: es una medida, no un estado |
+| Línea de tiempo (`.linea`) | Versiones, concepto y fotos de la sede | Punto de color por tipo de evento, mismo código que los estados |
+| Menú de celular | Por debajo de 880 px el riel es un panel lateral que abre «Menú» | La barra superior queda fija |
+
+**Movimiento:** entrada de vista (220 ms), barras que crecen, conteo ascendente de la franja la primera
+vez, curvas del ingreso que se desplazan en 40 s. Todo se apaga con `prefers-reduced-motion`.

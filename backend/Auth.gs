@@ -133,7 +133,14 @@ function _crearToken(usuario) {
 
 /** Usada por cualquier otro módulo (Sedes, Presupuestos, ...) para validar el
  * token que llega en cada petición. Devuelve el payload {correo, rol,
- * alcance, exp} si es válido y no venció, o null si no. */
+ * alcance, exp} si es válido y no venció, o null si no.
+ *
+ * Además de la firma y el vencimiento, el usuario tiene que seguir activo y
+ * con el mismo rol y alcance que tenía al entrar: desde 2026-09-24 la sesión
+ * sobrevive a recargar la página (sessionStorage), así que sin esta
+ * comprobación desactivar a alguien no cortaba su sesión hasta 12 h después.
+ * El estado de Usuarios se guarda en caché ACTIVOS_CACHE_SEG segundos para no
+ * leer la hoja en cada petición; Usuarios_crear/actualizar la invalidan. */
 function verificarToken(token) {
   if (!token) return null;
   var partes = String(token).split('.');
@@ -148,5 +155,40 @@ function verificarToken(token) {
     Utilities.newBlob(Utilities.base64DecodeWebSafe(partes[0])).getDataAsString()
   );
   if (Date.now() > payload.exp) return null;
+
+  var vigente = _usuariosActivos()[_normalizarCorreo(payload.correo)];
+  if (!vigente || vigente !== _firmaPermisos(payload.rol, payload.alcance)) return null;
   return payload;
+}
+
+var ACTIVOS_CACHE_SEG = 300;
+
+// correo -> "rol|alcance" de cada usuario activo. Un token cuyo rol o alcance
+// ya no coincide con la hoja deja de valer: la persona entra de nuevo y
+// recibe los permisos actuales.
+function _usuariosActivos() {
+  var cache = CacheService.getScriptCache();
+  var guardado = cache.get('usuarios_activos');
+  if (guardado) return JSON.parse(guardado);
+
+  var datos = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Usuarios').getDataRange().getValues();
+  var enc = datos[0];
+  var cCorreo = enc.indexOf('correo'), cRol = enc.indexOf('rol');
+  var cAlcance = enc.indexOf('alcance'), cActivo = enc.indexOf('activo');
+  var activos = {};
+  for (var i = 1; i < datos.length; i++) {
+    var activo = datos[i][cActivo] === true || String(datos[i][cActivo]).toUpperCase() === 'TRUE';
+    if (!activo) continue;
+    activos[_normalizarCorreo(datos[i][cCorreo])] = _firmaPermisos(datos[i][cRol], datos[i][cAlcance]);
+  }
+  cache.put('usuarios_activos', JSON.stringify(activos), ACTIVOS_CACHE_SEG);
+  return activos;
+}
+
+function _firmaPermisos(rol, alcance) {
+  return String(rol || '') + '|' + String(alcance || '');
+}
+
+function _olvidarUsuariosActivos() {
+  CacheService.getScriptCache().remove('usuarios_activos');
 }

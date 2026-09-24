@@ -3,6 +3,12 @@
  * confirmar que el despliegue sigue vivo (mismo formato que la prueba de
  * docs/PRUEBA_DESPLIEGUE_APPS_SCRIPT.md). Toda la escritura real pasa por
  * doPost, con la acción en el cuerpo JSON: {"accion": "...", ...}.
+ *
+ * Cada respuesta de doPost devuelve `accion` (la que se pidió). Medido el
+ * 2026-09-24: con pedidos simultáneos, Apps Script a veces responde a un POST
+ * con lo de doGet — la acción no se ejecutó, pero llegaba {ok:true}. Con
+ * `accion` en la respuesta, el navegador comprueba que lo que recibió es la
+ * respuesta de SU pedido y, si no, reintenta (mockup_v6.html, backend()).
  */
 function doGet(e) {
   return _json({
@@ -20,31 +26,45 @@ function doPost(e) {
     return _json({ ok: false, error: 'Cuerpo no es JSON válido' });
   }
 
-  // Registro de acciones: cada módulo agrega las suyas acá a medida que se
-  // construye (Paso 1 ya trae login; Presupuestos/Verificaciones/Hallazgos
-  // se suman en los pasos siguientes del plan).
+  // Registro de acciones: cada módulo agrega las suyas acá.
   var manejadores = {
     solicitarCodigo: Auth_solicitarCodigo,
     validarCodigo: Auth_validarCodigo,
     listarSedes: Sedes_listar,
     obtenerPresupuesto: Presupuestos_obtener,
     guardarPresupuesto: Presupuestos_guardar,
+    volcarCarga: Presupuestos_volcarCarga,
     obtenerBandejaVerificacion: Verificaciones_bandeja,
     emitirConcepto: Verificaciones_emitir,
     subirFoto: Fotos_subir,
-    listarFotos: Fotos_listar
+    listarFotos: Fotos_listar,
+    listarHallazgos: Hallazgos_listar,
+    resolverHallazgo: Hallazgos_resolver,
+    listarUsuarios: Usuarios_listar,
+    crearUsuario: Usuarios_crear,
+    actualizarUsuario: Usuarios_actualizar,
+    // D-44: lotes creados por el Administrador
+    listarLotes: Lotes_listar,
+    crearLote: Lotes_crear,
+    agregarSedesLote: Lotes_agregarSedes,
+    quitarSedeLote: Lotes_quitarSede,
+    cerrarLote: Lotes_cerrar
   };
 
-  var manejador = manejadores[body.accion];
+  var accion = String(body.accion || '');
+  var manejador = manejadores[accion];
   if (!manejador) {
-    return _json({ ok: false, error: 'Acción desconocida: ' + body.accion });
+    return _json({ ok: false, accion: accion, error: 'Acción desconocida: ' + accion });
   }
 
+  var resultado;
   try {
-    return _json(manejador(body));
+    resultado = manejador(body);
   } catch (err) {
-    return _json({ ok: false, error: String(err) });
+    resultado = { ok: false, error: String(err) };
   }
+  resultado.accion = accion;
+  return _json(resultado);
 }
 
 function _json(obj) {

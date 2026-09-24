@@ -1,6 +1,6 @@
 /**
- * Paso 0 del plan (docs/PLAN_DESARROLLO.md): crea las 6 pestañas del backend con
- * las columnas exactas de CLAUDE.md §6. Se corre UNA vez, a mano, desde el editor
+ * Paso 0 del plan (docs/PLAN_DESARROLLO.md): crea las pestañas del backend con
+ * las columnas exactas de CLAUDE.md §6 (6 originales + Lotes y LotesSedes, D-44). Se corre UNA vez, a mano, desde el editor
  * de Apps Script (seleccionar crearHojas en el desplegable de funciones > Ejecutar).
  * Es seguro volver a correrla: no borra pestañas que ya tengan datos, solo asegura
  * que existan con el encabezado correcto.
@@ -24,7 +24,10 @@ function crearHojas() {
             'verificador_correo', 'fecha_verificacion'],
     Usuarios: ['correo', 'nombre', 'rol', 'tipo', 'alcance', 'activo'],
     Hallazgos: ['id_hallazgo', 'dane_sede', 'origen', 'severidad', 'motivo',
-            'referencia', 'estado', 'resuelto_por', 'fecha_resolucion']
+            'referencia', 'estado', 'resuelto_por', 'fecha_resolucion'],
+    // D-44 (2026-09-24): lotes creados por el Administrador (Lotes.gs)
+    Lotes: ['id_lote', 'nombre', 'descripcion', 'creado_por', 'fecha_creacion', 'activo'],
+    LotesSedes: ['id_lote', 'dane_sede', 'agregado_por', 'fecha', 'vigente']
   };
 
   var nombres = Object.keys(esquema);

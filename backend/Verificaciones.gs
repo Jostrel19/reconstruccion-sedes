@@ -50,9 +50,10 @@ function Verificaciones_bandeja(body) {
     presupuestos.push(p);
   }
 
-  // Se adjunta la sede (municipio, tipo de afectación, valor de referencia)
+  // Se adjunta la sede (municipio, tipo de afectación, capítulos con daño)
   // para que el navegador arme la bandeja sin un segundo viaje — mismo
   // patrón que Sedes_listar: el backend filtra y junta, el navegador pinta.
+  // D-43: sin `valor_referencia`, igual que Sedes_listar.
   var hojaS = ss.getSheetByName('Sedes');
   var datosS = hojaS.getDataRange().getValues();
   var encS = datosS[0];
@@ -61,6 +62,7 @@ function Verificaciones_bandeja(body) {
   for (var k = 1; k < datosS.length; k++) {
     var obj = {};
     encS.forEach(function (c, j) { obj[c] = datosS[k][j]; });
+    delete obj.valor_referencia;
     sedesPorDane[String(datosS[k][idxDaneS])] = obj;
   }
   // Se adjuntan también los ítems: la bandeja es a lo sumo las 37 sedes del
@@ -93,34 +95,47 @@ function Verificaciones_emitir(body) {
 
   var daneSede = String(body.dane_sede || '');
   var idPresupuesto = String(body.id_presupuesto || '');
-  var vigente = _presupuestoVigente(daneSede);
-  if (!vigente) return { ok: false, error: 'Esta sede no tiene presupuesto vigente' };
-  if (String(vigente.datos.id_presupuesto) !== idPresupuesto) {
-    // El municipio radicó una versión nueva mientras esta quedó abierta en
-    // pantalla: no se emite concepto sobre una versión que ya dejó de ser
-    // la vigente, para no aprobar (o devolver) algo que ya cambió.
-    return { ok: false, error: 'Esta versión ya no es la vigente (la actual es ' + vigente.datos.id_presupuesto + ') — recargue la bandeja' };
+
+  // D-42: la comprobación de "sigue siendo la vigente" de abajo reduce la
+  // ventana de carrera pero no la cierra — dos "Emitir concepto" concurrentes
+  // podrían pasar los dos la comprobación antes de que cualquiera escriba. El
+  // candado serializa el tramo completo leer-comprobar-escribir.
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(10000)) {
+    return { ok: false, error: 'El sistema está ocupado con otro concepto — intente de nuevo' };
   }
+  try {
+    var vigente = _presupuestoVigente(daneSede);
+    if (!vigente) return { ok: false, error: 'Esta sede no tiene presupuesto vigente' };
+    if (String(vigente.datos.id_presupuesto) !== idPresupuesto) {
+      // El municipio radicó una versión nueva mientras esta quedó abierta en
+      // pantalla: no se emite concepto sobre una versión que ya dejó de ser
+      // la vigente, para no aprobar (o devolver) algo que ya cambió.
+      return { ok: false, error: 'Esta versión ya no es la vigente (la actual es ' + vigente.datos.id_presupuesto + ') — recargue la bandeja' };
+    }
 
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var hojaV = ss.getSheetByName('Verificaciones');
-  var encV = hojaV.getRange(1, 1, 1, hojaV.getLastColumn()).getValues()[0];
-  var valoresV = {
-    id_presupuesto: idPresupuesto, resultado: resultado, observaciones: observaciones,
-    verificador_correo: sesion.correo, fecha_verificacion: new Date()
-  };
-  hojaV.appendRow(encV.map(function (c) { return valoresV[c]; }));
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var hojaV = ss.getSheetByName('Verificaciones');
+    var encV = hojaV.getRange(1, 1, 1, hojaV.getLastColumn()).getValues()[0];
+    var valoresV = {
+      id_presupuesto: idPresupuesto, resultado: resultado, observaciones: observaciones,
+      verificador_correo: sesion.correo, fecha_verificacion: new Date()
+    };
+    hojaV.appendRow(encV.map(function (c) { return valoresV[c]; }));
 
-  // Única celda de una fila vigente de Presupuestos que este módulo toca —
-  // mismo patrón que D-37 ya autorizó para apagar `vigente`. El concepto
-  // completo (quién, cuándo, qué dijo) queda íntegro en `Verificaciones`;
-  // esto solo refleja el estado ACTUAL, nunca reemplaza esa auditoría.
-  var hojaP = ss.getSheetByName('Presupuestos');
-  var encP = hojaP.getRange(1, 1, 1, hojaP.getLastColumn()).getValues()[0];
-  var nuevoEstado = ESTADO_SEGUN_RESULTADO[resultado];
-  hojaP.getRange(vigente.fila, encP.indexOf('estado') + 1).setValue(nuevoEstado);
+    // Única celda de una fila vigente de Presupuestos que este módulo toca —
+    // mismo patrón que D-37 ya autorizó para apagar `vigente`. El concepto
+    // completo (quién, cuándo, qué dijo) queda íntegro en `Verificaciones`;
+    // esto solo refleja el estado ACTUAL, nunca reemplaza esa auditoría.
+    var hojaP = ss.getSheetByName('Presupuestos');
+    var encP = hojaP.getRange(1, 1, 1, hojaP.getLastColumn()).getValues()[0];
+    var nuevoEstado = ESTADO_SEGUN_RESULTADO[resultado];
+    hojaP.getRange(vigente.fila, encP.indexOf('estado') + 1).setValue(nuevoEstado);
 
-  return { ok: true, estado: nuevoEstado, resultado: resultado };
+    return { ok: true, estado: nuevoEstado, resultado: resultado };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 // La Ficha (Presupuestos_obtener) la usa para la sección 5 en modo lectura

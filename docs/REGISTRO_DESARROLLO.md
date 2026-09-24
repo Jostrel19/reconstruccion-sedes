@@ -1300,3 +1300,256 @@ leyendo la llamada real en `mockup_v6.html` antes de reintentar.
 Drive — para que el usuario lo limpie cuando quiera, igual que la vez anterior. Con esto, **los tres
 huecos que dejó abiertos la auditoría del 2026-09-21 quedan cerrados y confirmados en producción**,
 no solo con datos fabricados en memoria.
+
+## 2026-09-23 — Plan de cierre: seguridad, fotos en la Ficha, Hallazgos y Usuarios (D-42)
+
+Construido y confirmado en producción con login real (`data@sedcaldas.edu.co`):
+
+- **Candado de concurrencia** (`LockService`) en `Presupuestos_guardar` y `Verificaciones_emitir`.
+- **`Fotos_subir` valida los bytes reales** (JPEG/PNG): un archivo de texto con extensión de imagen se
+  rechaza. `listarFotos` devuelve enlace y miniatura; la Ficha muestra la galería y el PDF lista las fotos.
+- **`Hallazgos.gs` nuevo**: listar/resolver + detección automática al radicar o cargar. Probados en real
+  los tres casos: AIU 20 %/10 % (`-AIU`), «sin afectación» sobre sede tipo 2 (`-CENSO`, ERROR) y DANE
+  confirmado a mano en Cargas (`-DANEPROP`). Badge del riel calculado, ya no fijo.
+- **`Usuarios.gs` nuevo**: listar, crear y activar/desactivar; creado y desactivado un usuario de prueba.
+- **Riesgo encontrado y mitigado:** los 187 Responsables de sede del borrador D-24 estaban **activos**
+  (podían pedir código). Se desactivaron los 187 vía `actualizarUsuario` (0 fallos); quedan activos los
+  6 usuarios internos.
+- Limpieza pedida por el usuario: quedan solo los datos de prueba del día (3 presupuestos, sus 3
+  hallazgos automáticos, 1 usuario de prueba inactivo, 1 foto). Las filas H-1..H-19 de `Hallazgos` las
+  borra el usuario a mano.
+
+## 2026-09-24 — Limpieza del mockup y D-43 (sin valor de referencia)
+
+**Por qué:** abierta sin sesión, la página mostraba el marco del mockup de diseño (título, «Cambios de
+v5 a v6», selectores «Pantalla» y «Ver como», una barra de navegador falsa y notas de «lo que es
+simulado») y, detrás, pantallas con **datos de ejemplo escritos en el HTML** (6 esperando verificación,
+3 aprobadas, bitácora con «Mercedes Abrego aprobada», Samaná con 77 leídas, Ficha de Guayaquil
+«Radicado»). Con sesión, Tablero, Sedes y Municipio tampoco leían `Presupuestos`: estados y conteos
+fijos («Sin presupuesto», 0, «—»). Y la única cifra en pesos era el `valor_referencia` del censo, que se
+leía como si fueran presupuestos registrados. El usuario decidió (D-43) que el sistema solo lleve lo
+que se registra en él.
+
+**Backend** (desplegado el 2026-09-24, nueva versión de la implementación existente):
+- `Sedes.gs` — `Sedes_listar` quita `valor_referencia` para todos los roles, adjunta a cada sede
+  `presupuesto` (resumen de su versión vigente + último concepto) y devuelve `actividad` (últimos 20
+  movimientos de `Presupuestos`/`Verificaciones` dentro del alcance; no se arma para Responsable de sede).
+- `Verificaciones.gs` — `Verificaciones_bandeja` quita `valor_referencia` de `sede_info`.
+
+**Frontend** (`docs/diseno/mockup_v6.html`, respaldo previo en el scratchpad de la sesión):
+- Fuera todo el marco del mockup, el buscador «Ctrl K» sin función, el enlace «Obras 🔒», las cifras
+  fijas del login y los chips de roles. Sin sesión, `pintar()` fuerza la pantalla de ingreso (probado:
+  `irFicha()` desde consola vuelve al ingreso). Nuevo botón **Salir**.
+- Tablero, Sedes, Municipio y Ficha reescritos sobre ids propios y datos reales: franja (en
+  seguimiento, radicados, esperando verificación, devueltas, aprobadas, valor radicado), mosaico por
+  estado, valor radicado por municipio, avance, tipo de afectación, bitácora clicable, «Presupuesto
+  vigente» en la Ficha. «En seguimiento» = lote 1 + cualquier sede con presupuesto registrado.
+- Los datos de sede se refrescan al entrar a Tablero/Sedes/Municipio si pasó más de un minuto, o de
+  inmediato tras radicar, emitir concepto o volcar una carga en la misma sesión.
+- Corregido: Registrar suponía que toda sede era tipo 1 o 2 (fallaba con sedes fuera del lote cargadas
+  por Cargas); las migas de la Ficha conservaban el municipio visitado antes; «$7,0 M» partía la «M»
+  a otra línea.
+
+**Verificado** con backend simulado en memoria (pestaña limpia, cerrada al terminar): cifras de la
+franja cuadran con los datos fabricados, Responsable de sede solo ve «Sedes» y no ve «Verificar», Salir
+limpia la sesión, sin desborde horizontal a 375 px.
+
+## 2026-09-24 — Prueba en real tras desplegar D-43, y dos defectos de transporte
+
+**Recorrido en real** (sesión de Administrador, `data@`): las 975 sedes llegan sin
+`valor_referencia` (ningún objeto la trae); 39 en seguimiento = 37 del lote 1 + 2 de Aranzazu fuera
+del lote con presupuesto; 3 radicados, 3 esperando verificación, $959.500 radicado (Aranzazu
+$659.500 + $300.000; Aguadas $0); bitácora con los 3 movimientos reales. Sedes, Municipio (Aranzazu,
+6 sedes, 2 radicadas), las 3 Fichas de prueba (historial, detalle, totales A/U/IVA, cruce por capítulo,
+foto, botones Verificar y PDF), Verificación (bandeja de 3, contador del riel en 3), Hallazgos (3
+abiertos automáticos: `-CENSO` ERROR, `-AIU` y `-DANEPROP` ADVERTENCIA; H-1..H-19 ya no están en la
+hoja) y Usuarios (194: 6 activos, 187 responsables y 1 de prueba inactivos). Todo cuadra.
+
+**Defecto 1 — cargas de sedes duplicadas.** Al entrar se pedían las sedes dos veces a la vez
+(`pintar` y `loginEntrar`) y una respuesta sin `sedes` dejaba el Tablero en «Cargando…».
+`cargarSedes()` ahora comparte una sola promesa, exige `Array.isArray(r.sedes)` y reintenta una vez.
+
+**Defecto 2 — Apps Script a veces no ejecuta la acción y responde `ok:true`** (causa del defecto 1 y
+de una Ficha que mostró «sin presupuesto» sobre una sede que sí lo tiene). Medido: con pedidos
+simultáneos y pesados, **2 de 9** volvieron con la respuesta de `doGet` (`{ok, mensaje, hora}`) y otro
+con una página HTML; con pedidos de a uno o livianos, 0 de 26. El mecanismo exacto del lado de Google
+no está confirmado. Riesgo real: en `guardarPresupuesto` el navegador habría dado por guardado algo
+que no se guardó. Corrección en `backend()` (`mockup_v6.html`): la respuesta de `doGet` significa que
+la acción no corrió, así que se reintenta siempre (hasta 3 veces); una respuesta HTML se reintenta solo
+en acciones de lectura, y en escritura se devuelve un error que pide revisar la Ficha antes de
+reintentar (no se sabe si se guardó). Verificado con `fetch` simulado (6 casos: lectura/escritura ×
+ping/HTML/normal) y contra el servidor real (12 simultáneos, 0 fallas en esa tanda). Falta verlo
+corregir una falla real con sesión abierta.
+
+Menor: el contador de Verificación del riel traía un «6» fijo en el HTML (oculto hasta cargar la
+bandeja); se vació.
+
+**Observado, sin corregir todavía:**
+- Tiempos: `listarSedes` 4-5 s; `obtenerPresupuesto` 6-18 s según la carga. La Ficha tarda en llenarse.
+- La miniatura de la única foto de prueba se ve negra (Drive devuelve una imagen de 1×1). No se sabe si
+  es la imagen de prueba o el enlace de miniatura; falta probar con una foto real de cámara.
+- Hallazgos muestra referencias internas en el texto («CLAUDE.md §4», «D-40/D-41»), escritas por
+  `Hallazgos.gs`.
+- En Sedes, Aguadas muestra «—» como valor radicado aunque tiene un radicado de $0.
+
+## 2026-09-24 — Plan de cierre: lógica, lotes (D-44), pulido visual y novedades
+
+**Por qué:** tras la prueba en real, el usuario pidió un plan con todos los cambios por prioridad y
+arreglar toda la lógica, más una mejora visual profesional. En el mismo paso decidió **D-44**: no hay
+lote predefinido; el Administrador crea los lotes. Plan aprobado en la sesión; dividir el `<script>`
+en archivos queda para después, a pedido del usuario.
+
+**Respaldo previo:** `mockup_v6.BACKUP-20260924-102406.html` en el scratchpad de la sesión.
+
+**Backend** (9 archivos entregados completos; **pendiente de pegar y desplegar**):
+- `Codigo.gs` — cada respuesta devuelve `accion`; registra las 5 acciones de lotes.
+- `Auth.gs` — `verificarToken` exige además que el usuario siga activo y con el mismo rol y alcance
+  (caché de 5 min); `Usuarios.gs` borra esa caché en cada cambio.
+- `Presupuestos.gs` — catálogo compacto en `CacheService` (~21 KB, 6 h; `olvidarCatalogo()` a mano tras
+  regenerar `Sedes`); `Presupuestos_obtener` lee `Presupuestos` una vez; correo de confirmación con el
+  número de radicado al radicar a mano (no en borrador ni en Cargas); la respuesta trae
+  `fecha_creacion` y `correo_confirmacion`.
+- `Fotos.gs` — comparte la foto al subirla; `listarFotos` ya no escribe en Drive en cada consulta.
+- `Hallazgos.gs` — textos de hallazgos nuevos sin «CLAUDE.md §4» ni «D-40/D-41» (las 3 filas ya
+  guardadas no se reescriben).
+- `Lotes.gs` (nuevo) y `Setup.gs` (hojas `Lotes` y `LotesSedes`); `Sedes.gs` adjunta `lote` a cada sede
+  y devuelve `lotes`.
+- **Verificado sin desplegar**, con un arnés de Node que simula `SpreadsheetApp`, `CacheService`,
+  `LockService` y `MailApp` sobre 975 sedes (`harness_gs.js` en el scratchpad): **35 de 35 casos** —
+  lotes (crear, nombre repetido, DANE inválido o fuera del catálogo, mover entre lotes con historial,
+  quitar, cerrar, alcance del alcalde), radicar con correo, borrador sin correo, hallazgo sin
+  referencias internas, obtener con una sola lectura, token cortado al desactivar o cambiar alcance, rector
+  con alcance numérico.
+
+**Frontend** (`docs/diseno/mockup_v6.html`):
+- Transporte: tiempo límite de 60 s, descarta respuestas cuyo `accion` no coincide, cierra la sesión con
+  aviso si el servidor dice «Sesión inválida o vencida».
+- Sesión en `sessionStorage` (decisión del usuario): F5 vuelve a la misma pantalla; «Salir» la borra.
+- `alert()`/`confirm()` → avisos flotantes y diálogo propio (0 usos restantes); errores del formulario
+  junto al campo; botones que esperan al servidor quedan deshabilitados con indicador.
+- Registrar: revisión antes de radicar y confirmación con número de radicado.
+- Ficha: resumen al instante con lo que trae `listarSedes`; cruce por capítulo que explica la
+  discrepancia cuando se declaró «sin afectación»; miniatura como `<img>` con respaldo (si Drive
+  devuelve 1×1 o falla, queda la extensión del archivo); línea de tiempo.
+- D-44: pantalla **Lotes** (crear con filtros y atajo «tipo 1 y 2», agregar, quitar, cerrar, exportar),
+  selector de lote en el encabezado de Tablero/Sedes/Municipio, columna Lote, Responsable de sede con
+  todo su alcance, Cargas premarca sin mirar lote. Ningún texto dice ya «lote 1».
+- Novedades: buscador de sedes (tolera tildes, teclado), días esperando concepto con semáforo (≤5, ≤10,
+  >10; constantes a ajustar con el jefe), exportar a Excel (CSV `;` con BOM verificado `EF BB BF`).
+- Visual dentro de `DISENO_01`: encabezado de vista sobre banda con curvas de nivel, riel fijo en
+  escritorio y panel lateral con «Menú» en celular, franja con regla de oro, barras apiladas por
+  estado, animaciones sobrias (apagadas con «reducir movimiento»), placeholders de carga.
+- Corregido además: la tabla de roles decía que el Verificador diligencia a mano (no puede, D-40).
+
+**Verificado con backend simulado** en `http://localhost:8778` (nuevo `.claude/launch.json`, sirve solo
+`docs/diseno` en 127.0.0.1): Tablero sin lotes (aviso) y por lote (37 + 6 = 43 cuadra), crear lote con
+atajo, Ficha al instante, línea de tiempo, fotos con respaldo, errores junto al campo, revisión y
+confirmación de radicado, concepto con diálogo, hallazgo resuelto, Responsable de sede (solo su alcance,
+sin lotes ni Verificar), CSV, buscador, 375 px sin desborde, menú de celular, sin errores de consola. **F5
+en real:** la sesión se restauró a la misma Ficha y, como el token era de prueba, el servidor real lo
+rechazó y el sistema cerró la sesión con el aviso correcto.
+
+**Falta:** desplegar el backend; en real, confirmar 9 pedidos simultáneos sin respuestas falsas, tiempo de
+la Ficha, correo de radicado recibido, crear y cerrar un lote de prueba, y una foto real de celular.
+
+## 2026-09-24 (tarde) — Prueba en real del backend D-44 y D-45 (un borrador no esconde un radicado)
+
+**Despliegue:** el usuario pegó los 9 `.gs`, corrió `crearHojas()` (8 pestañas: Sedes, Presupuestos,
+Items, Verificaciones, Usuarios, Hallazgos, Lotes, LotesSedes) y publicó nueva versión de la
+implementación existente.
+
+**Resultados en real (sesión de Administrador):**
+- Transporte: `accion` vuelve en cada respuesta. Google todavía devuelve a veces la respuesta de `doGet`
+  (1 de 18 en ráfaga directa); el reintento del frontend la absorbe.
+- F5: la sesión se restaura en la misma pantalla.
+- Ficha: el resumen aparece en ~4 ms; el detalle tarda 3-20 s, casi siempre 3-5 s. Un pedido mínimo al
+  servidor ya tarda 2,6-6,4 s: es la latencia propia de Apps Script, no de nuestras lecturas.
+- Lotes: L-1 «PRUEBA — tipo 1 y 2» con 37 sedes (el Tablero filtrado coincide con los 12 municipios del
+  censo); quitar sede, mover una sede de L-1 a L-2 (historial en `LotesSedes` con `vigente=FALSE`),
+  nombre repetido rechazado sin distinguir mayúsculas, DANE inválido rechazado, `ya_estaban` correcto.
+  Los dos lotes quedaron cerrados; «en seguimiento» = 3.
+- Buscador: correcto. `diasDesde` contaba horas en vez de días de calendario (algo radicado ayer salía
+  «hoy»); corregido y verificado.
+- Observado: tras quitar o mover una sede, la pantalla tarda ~20 s porque recarga las 975 sedes.
+
+**Defecto encontrado — un borrador escondía un radicado.** En Aguadas `217013000602` el usuario guardó,
+desde Registrar, un borrador v2 de $0 sobre la v1 radicada. `Presupuestos_guardar` apagaba siempre la
+versión anterior, así que el borrador pasó a ser la vigente: la v1 salió de la bandeja del arquitecto e
+Inicio mostró «—». Además los hallazgos automáticos se detectaban también en borrador.
+
+**Corrección (D-45), `backend/Presupuestos.gs`:**
+- Un BORRADOR guardado sobre una versión que no es borrador entra como versión nueva con
+  `vigente=FALSE` («en espera»); la radicada sigue vigente hasta que se radique. Borrador sobre borrador
+  (o sobre nada) se comporta como antes.
+- `Presupuestos_obtener` devuelve además `borrador` y `borrador_items` (el borrador en espera más
+  reciente, posterior a la vigente).
+- La respuesta de guardar trae `en_espera` y `version_vigente`.
+- Los hallazgos automáticos solo se detectan al radicar.
+- Nueva auxiliar `_vigenteYUltimaVersion` (vigente y versión máxima en una sola lectura); la versión nueva
+  es la máxima + 1, no la vigente + 1, para no repetir número cuando hay un borrador en espera.
+
+**Frontend (`mockup_v6.html`):** Registrar retoma el borrador en espera y explica que la radicada sigue
+vigente; el aviso al guardar lo dice; la Ficha marca en el historial «· vigente» y «· en espera», cambia
+el botón a «Retomar borrador vN» y lo explica en el pie.
+
+**Verificado sin desplegar:** arnés de Node, **43 de 43 casos** (8 nuevos: borrador en espera, solo v1
+vigente en la hoja, obtener con borrador aparte, radicar v3 apaga v1, sin borrador tras radicar, borrador
+sobre borrador reemplaza). `node --check` del script del mockup y de `Presupuestos.gs`.
+
+**Datos de prueba afectados:** Aguadas 602 queda con la v2 BORRADOR de $0 como vigente (se creó con el
+código anterior). El código nuevo no la repara sola; se corrige radicando de nuevo desde Registrar, y se
+borra junto con los demás datos de prueba antes de invitar municipios.
+
+**Falta:** desplegar `Presupuestos.gs`; en real, radicar la v nueva de `217050000060` y recibir el correo,
+hallazgo sin referencias internas, foto de celular, usuario temporal desactivado, recorrido de
+Verificación/Cargas/Hallazgos/Usuarios/Registrar, CSV y línea de tiempo.
+
+## 2026-09-24 (noche) — Cargas no funcionaba: cinco defectos corregidos, y guion del caso de éxito
+
+**Por qué:** el usuario reportó que Cargas no funcionaba bien y pidió un caso de uso de éxito que
+demuestre el sistema de punta a punta, sin seguir probando en círculos.
+
+**JSON de prueba:** los 4 lectores reales (`python tools/ingesta.py <M> --json`) regenerados hoy:
+Samaná 77 registros (DANE del archivo), Aranzazu 9, Aguadas 20 y Belalcázar 14 (todos con DANE
+propuesto por nombre). San José mandó un Excel pero no tiene lector: no se generó nada para él.
+
+**Defectos encontrados leyendo el código y comprobados con el JSON real:**
+1. **Municipio comparado literal.** El lector escribe `SAMANA` y `BELALCAZAR`; el catálogo, `SAMANÁ` y
+   `BELALCÁZAR` (D-11). En esos dos municipios **ninguna** fila cruzaba y no se podía volcar nada.
+   Ahora se compara sin tildes.
+2. **Un pedido por sede** (~4 s cada uno: 51 sedes eran 3-4 min), y una respuesta perdida dejaba la fila
+   como error aunque se hubiera guardado; al reintentar, se duplicaba la versión. Nueva acción
+   **`volcarCarga`** (`Presupuestos.gs`): hasta 15 sedes por pedido bajo un candado, **idempotente**
+   (si la vigente ya es una CARGA del mismo archivo con el mismo costo, informa `ya_estaba`), con el
+   nombre del Excel de origen por fila. El navegador manda tandas de 10 y la trata como reintentable.
+   `Presupuestos_guardar` y `volcarCarga` comparten el mismo núcleo (`_guardarPresupuesto`).
+3. **Filas en $0 premarcadas.** El lector dice «probablemente sin afectación, confirmar»; se habrían
+   radicado como presupuestos de $0. Ya no se premarcan ni se aceptan (tampoco en el backend).
+4. **Casillas corridas tras un volcado parcial:** se buscaba la fila por posición en el arreglo después
+   de filtrarlo. Ahora por su índice en el JSON; las filas volcadas se quedan en la lista con su estado.
+5. **«ya tiene vN» desactualizado tras volcar.** Ahora se recargan las sedes; `Sedes.gs` envía
+   `archivo_origen` en el resumen y la fila se muestra «Ya volcada desde este archivo».
+   También se bloquea el DANE repetido dentro del mismo archivo.
+
+**Verificado sin desplegar:**
+- Arnés de Node: **54 de 54** (11 nuevos: volcado con error por $0 y por DANE inexistente, archivo por
+  fila, hallazgo por DANE propuesto, idempotencia, Verificador sí, Responsable de sede no, tope de 15).
+- Navegador con backend simulado y el JSON real de Samaná y Belalcázar (copiados temporalmente al
+  servidor local y borrados al terminar): 77 leídas, 51 volcables (= análisis en Python), 18 sin valor,
+  7 fuera del catálogo (DANE de 14 dígitos), 1 repetida; una tanda fallida deja 20 volcadas y 31
+  marcadas para reintentar; el reintento completa 51; volver a subir el archivo da 51 «ya volcada» y 0
+  marcadas; en Belalcázar nada se premarca y las 2 confirmadas a mano viajan como `propuesto`.
+
+**Caso de uso de éxito:** `docs/GUION_CASO_DE_EXITO.md`, un recorrido fijo en real (registrar a mano y
+por Excel → verificar y hallazgos → seguir por lote, Tablero, Ficha y CSV → punto de partida de obra),
+que sirve de prueba de aceptación y de guion para el jefe.
+
+**Sexto defecto, reportado por el usuario** («me decía que había que seleccionar sedes y no me dejaba
+seleccionar ninguna»): si el JSON se sube antes de que llegue el catálogo de sedes, o si su carga falló,
+no hay contra qué cruzar y todas las casillas y desplegables quedaban vacíos o bloqueados sin explicación.
+Ahora Cargas espera el catálogo («Cargando el catálogo de sedes…») y, si no llega, lo dice y pide volver a
+subir el archivo. Verificado con el simulador: catálogo vacío → espera → 975 sedes → el desplegable ofrece
+las sedes del municipio y la casilla se habilita al elegir una.
+
+**Falta:** desplegar `Presupuestos.gs`, `Codigo.gs` y `Sedes.gs`; correr el guion en real.
+

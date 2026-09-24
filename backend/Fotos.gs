@@ -66,11 +66,23 @@ function Fotos_subir(body) {
   if (bytes.length > FOTOS_MAX_BYTES) {
     return { ok: false, error: 'La foto supera 8 MB — redúzcala antes de subir' };
   }
+  // D-42: antes solo se confiaba en `tipo_mime`, un campo que manda el propio
+  // navegador y que cualquiera con sesión válida puede falsear — permitiría
+  // guardar cualquier archivo disfrazado de foto en el Drive del sistema. Se
+  // revisan los primeros bytes reales contra las firmas de JPEG y PNG, los
+  // dos formatos que produce `accept="image/*"` en cámaras y capturas de
+  // pantalla comunes.
+  if (!_esImagenValida(bytes)) {
+    return { ok: false, error: 'El archivo no es una imagen JPEG o PNG válida' };
+  }
 
   var marca = Utilities.formatDate(new Date(), 'America/Bogota', 'yyyyMMdd_HHmmss');
   var blob = Utilities.newBlob(bytes, mime, marca + '_' + nombre);
   var carpeta = _carpetaFotosDeSede(daneSede, true);
   var archivo = carpeta.createFile(blob);
+  // D-42: 'cualquiera con el enlace, solo lectura' para poder mostrarla en la
+  // Ficha. Se hace una sola vez, al crearla (antes se hacía en cada listado).
+  archivo.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
   return {
     ok: true,
@@ -80,6 +92,18 @@ function Fotos_subir(body) {
     fecha: new Date(),
     subido_por: sesion.correo
   };
+}
+
+// Compara los primeros bytes reales del archivo contra las firmas conocidas
+// de JPEG (FF D8 FF) y PNG (89 50 4E 47) — Apps Script entrega los bytes como
+// enteros con signo (Java), por eso se normalizan con `& 0xFF` antes de comparar.
+function _esImagenValida(bytes) {
+  if (bytes.length < 4) return false;
+  var b = [];
+  for (var i = 0; i < 4; i++) b.push(bytes[i] & 0xFF);
+  var esJpeg = b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF;
+  var esPng = b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47;
+  return esJpeg || esPng;
 }
 
 function Fotos_listar(body) {
@@ -98,9 +122,18 @@ function Fotos_listar(body) {
   var it = carpeta.getFiles();
   while (it.hasNext()) {
     var f = it.next();
+    // Las fotos se comparten al subirlas (Fotos_subir). Acá solo se corrige
+    // la que todavía no lo esté (subidas antes del 2026-09-24): cambiar
+    // permisos es una escritura en Drive, y hacerla en cada apertura de Ficha
+    // era buena parte de su demora. Viajan `url` (ver completa) y
+    // `miniatura` (galería), nunca el contenido.
+    if (f.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK) {
+      f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    }
     fotos.push({
       id: f.getId(), nombre: f.getName(), tamano: f.getSize(),
-      fecha: f.getDateCreated()
+      fecha: f.getDateCreated(), url: f.getUrl(),
+      miniatura: 'https://drive.google.com/thumbnail?id=' + f.getId() + '&sz=w300'
     });
   }
   fotos.sort(function (a, b) { return new Date(b.fecha) - new Date(a.fecha); });
