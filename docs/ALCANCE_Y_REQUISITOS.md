@@ -74,6 +74,10 @@ nadie puede averiguar quién tiene cuenta probando correos al azar.
   escombros) — necesarios porque, medido sobre un presupuesto real, representan un 13,6 % del costo
   directo que de otro modo no tendría dónde clasificarse.
 
+> **Revisado 2026-09-24 (D-43):** el sistema ya no muestra `valor_referencia` en ninguna pantalla.
+> Solo lleva el control y seguimiento de lo que se registra en él. Lo de abajo queda como registro de
+> por qué existió esa cifra; la columna sigue en la hoja `Sedes`, sin mostrarse.
+
 **Dos cifras conviven por sede, y nunca se restan entre sí:**
 - `valor_referencia` — lo que el arquitecto estimó en la visita. Es el punto de partida, no un
   presupuesto, y se congela al importar: nunca se sobrescribe.
@@ -111,8 +115,9 @@ cifra.
   en Colombia (Colombia Compra Eficiente lo confirma), solo práctica de mercado.
 - **No cubre el seguimiento de obra/contratación** (módulo de Monitoreo) — aplazado hasta que existan
   datos del mecanismo de ejecución (número de contrato, contratista, actas).
-- **No es el canal para las 938 sedes fuera del lote 1** — llegará en una fase posterior, reutilizando
-  el mismo sistema, no uno paralelo.
+- ~~No es el canal para las 938 sedes fuera del lote 1~~ — **superado por D-44 (2026-09-24):** ya no hay
+  lote predefinido. El sistema cubre las 975 sedes; los alcaldes y rectores ven y registran todo su
+  alcance, y el Administrador organiza el seguimiento creando lotes (por ejemplo, tipo 1 y 2 del censo).
 
 ---
 

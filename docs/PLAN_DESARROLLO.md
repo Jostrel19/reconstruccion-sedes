@@ -27,13 +27,15 @@ dato salvo por la etiqueta de origen (`MAN` / `XLS`), que sí se conserva para t
 
 ## 2. Alcance por rol — confirmado
 
-| Rol | Alcance de sedes | Ve valor de referencia | Diligencia | Verifica | Pantallas |
+| Rol | Alcance de sedes | Lotes (D-44) | Diligencia | Verifica | Pantallas |
 |---|---|:--:|:--:|:--:|---|
-| **Administrador** | Todo el departamento | Sí | Sí | Sí | Todas |
-| **Verificador** (arquitecto) | **Todo el departamento**, sin restricción por municipio (D-25) | Sí | No | **Sí** | Tablero · Sedes · Ficha · Verificación · Cargas |
-| **Responsable de sede** — alcalde | **Todas las sedes de su municipio** (D-24) | **No** (D-6) | Sí | No | Sedes · Ficha · Registrar |
-| **Responsable de sede** — rector | **Las sedes de su I.E. según el catálogo**, de 1 a 18 (D-24) | **No** (D-6) | Sí | No | Sedes · Ficha · Registrar |
-| **Consulta** (directivo) | Todo el departamento, solo lectura | Sí | No | No | Tablero · Sedes · Ficha |
+| **Administrador** | Todo el departamento | Crea, agrega, quita, cierra | Sí | Sí | Todas |
+| **Verificador** (arquitecto) | **Todo el departamento**, sin restricción por municipio (D-25) | Filtra por lote | No (solo Cargas) | **Sí** | Tablero · Sedes · Ficha · Verificación · Cargas · Hallazgos |
+| **Responsable de sede** — alcalde | **Todas las sedes de su municipio** (D-24) | No los ve | Sí | No | Sedes · Ficha · Registrar |
+| **Responsable de sede** — rector | **Las sedes de su I.E. según el catálogo**, de 1 a 18 (D-24) | No los ve | Sí | No | Sedes · Ficha · Registrar |
+| **Consulta** (directivo) | Todo el departamento, solo lectura | Filtra por lote | No | No | Tablero · Sedes · Ficha |
+
+*Desde D-43 (2026-09-24) ningún rol ve `valor_referencia`; la columna que decía quién lo veía se reemplazó por la de lotes.*
 
 Dos precisiones que importan al programar:
 
@@ -338,12 +340,40 @@ Camelia Alta, La Meseta, Buenavista, San Rafael — los 5 errores que ya reporta
 volcar, tal como debía ser. Tras confirmar, la lista pendiente pasó de 9 a 7 filas.
 
 ### Paso 6 — Hallazgos y cierre
-19. Pantalla **Hallazgos** (Administrador y Verificador): lista de la pestaña `Hallazgos`,
-    filtro abierto/resuelto, botón de marcar resuelto con quién y cuándo. Reemplaza el panel de
-    solo lectura del mockup inicial — sin esto, "control total del sistema" (objetivo 4) es
-    incompleto: hoy los 19 hallazgos abiertos solo viven en un `.md`.
-20. PDF del formato oficial (se reusa `pdf.js`).
-21. Correo de confirmación con el radicado.
+19. ✅ **2026-09-23** — Pantalla **Hallazgos** (Administrador y Verificador) conectada a la pestaña
+    real, con «Marcar resuelto» (quién y cuándo). Los hallazgos se **detectan solos** al radicar o
+    cargar (D-42); ninguno se resuelve solo. Los 19 históricos de `CONFLICTOS_Y_HALLAZGOS.md` se
+    sembraron y luego el usuario pidió dejar solo los de prueba (borrado manual de las filas H-1..H-19).
+20. ✅ PDF del formato oficial, con registro fotográfico real (2026-09-23).
+21. ⏳ Correo de confirmación con el radicado — **código listo 2026-09-24** (`Presupuestos.gs`, solo al
+    radicar a mano), falta desplegar y verlo llegar.
+22. ✅ **2026-09-23** — Pantalla **Usuarios** conectada (listar, crear, activar/desactivar). Los 187
+    Responsables de sede del borrador D-24 quedaron **desactivados** (no borrados) hasta que alguien
+    confirme sus correos; activos solo los 6 usuarios internos.
+23. ✅ **2026-09-24** — Limpieza del mockup y D-43: fuera el marco de diseño (título, selectores de
+    pantalla y de rol, barra de navegador falsa, notas de simulación) y todos los datos de ejemplo del
+    HTML; sin sesión solo existe la pantalla de ingreso; Tablero, Sedes, Municipio y Ficha leen el
+    estado real de cada presupuesto; sale `valor_referencia` de todas las pantallas.
+24. ⏳ **2026-09-24** — Transporte robusto (Apps Script a veces responde lo de `doGet` a un POST: se
+    detecta y se reintenta; `accion` en cada respuesta; tiempo límite de 60 s), sesión que sobrevive a
+    F5 (`sessionStorage`) y que se corta si el usuario se desactiva o cambia de rol, Ficha que pinta el
+    resumen al instante, catálogo en caché y una sola lectura de `Presupuestos` por consulta. Código
+    listo y probado con simulación; falta desplegar y confirmarlo en real.
+25. ⏳ **2026-09-24** — **Lotes (D-44)**: pantalla del Administrador, selector de lote en Tablero, Sedes y
+    Municipio, Responsable de sede con todo su alcance. Código listo y probado con simulación; falta
+    desplegar `Lotes.gs` y correr `crearHojas()`.
+26b. ⏳ **2026-09-24** — **D-45**: un borrador guardado sobre un radicado queda en espera y no lo
+    reemplaza; hallazgos automáticos solo al radicar. Registrar retoma el borrador; la Ficha lo marca.
+    Probado con el arnés (43/43); falta desplegar `Presupuestos.gs`.
+26c. ⏳ **2026-09-24** — **Cargas corregida**: municipio comparado sin tildes (Samaná y Belalcázar no
+    cruzaban ninguna fila), volcado por tandas con `volcarCarga` (idempotente), filas en $0 y DANE
+    repetidos no se vuelcan, casillas estables tras un volcado parcial, «ya volcada desde este archivo».
+    Probado con arnés (54/54) y simulador con el JSON real de Samaná; falta desplegar y correr
+    `docs/GUION_CASO_DE_EXITO.md`.
+26. ✅ **2026-09-24** — Pulido visual y novedades (frontend): encabezado de vista, avisos y diálogos propios
+    (sin `alert`/`confirm`), revisión antes de radicar y confirmación con número de radicado, días en
+    espera con semáforo, línea de tiempo por sede, buscador de sedes, exportar a Excel (CSV), menú de
+    celular. Probado con backend simulado.
 
 ---
 
