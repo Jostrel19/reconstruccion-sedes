@@ -42,8 +42,7 @@ municipio). El detalle completo de objetivos, alcance por rol y capítulos de pr
 
 ```
 Frontend (GitHub Pages, sin build, sin dependencias)
-   docs/diseno/mockup_v6.html   ← diseño aprobado, HTML/CSS/JS autocontenido
-   (el frontend real se construye a partir de este archivo, ver Paso 2 del plan)
+   app/   ← HTML + CSS + un JS por pantalla, sin build (ver app/README.md)
         │  fetch — login por código de correo (D-20)
         ▼
 Backend — Google Apps Script (D-19), desplegado desde Gmail personal (D-19 precisada)
@@ -78,10 +77,11 @@ reconstruccion-sedes/
 │   ├── CONFLICTOS_Y_HALLAZGOS.md  19 discrepancias de datos abiertas
 │   ├── PRUEBA_DESPLIEGUE_APPS_SCRIPT.md
 │   ├── diseno/
-│   │   ├── mockup_v6.html           diseño vigente, ejecutable (ver «Probar el diseño»)
+│   │   ├── mockup_v6.SUPERADA_20260924.html  origen de app/, no se usa como fuente
 │   │   └── DISENO_00..05_*.md       diseño previo a D-26, parcialmente desactualizado
 │   └── (ANALISIS_*, AUTOMATIZACION_*, GUIA_SHAREPOINT_*, GUION_*, HANDOFF_*)
 │       — documentan el aplicativo anterior, cada uno con aviso de vigencia al inicio
+├── app/                          frontend (GitHub Pages) — ver app/README.md
 ├── backend/                      código fuente del backend Apps Script (D-19) — se pega a mano
 │   │                             en script.google.com, ver backend/README.md
 │   ├── Setup.gs                   crea las 6 pestañas (Paso 0)
@@ -144,15 +144,14 @@ municipio cuyo Excel no se ha visto (ver `docs/diseno/DISENO_04_MODULO_INGESTA.m
 para Samaná, Aguadas, Aranzazu y Belalcázar; el resultado imprime un informe con lo que se pudo leer
 y lo que quedó como hallazgo, nunca vuelca algo dudoso en silencio.
 
-### Probar el diseño vigente
+### Probar el frontend
 
 ```bash
-python tools/servir.py
+python -m http.server 8779 --bind 127.0.0.1 --directory app
 ```
 
-Abrir `docs/diseno/mockup_v6.html`. El selector **«Ver como»** cambia entre los cuatro roles: las
-pantallas fuera de alcance quedan tachadas y el valor de referencia desaparece para Responsable de
-sede (D-6).
+Abrir `http://localhost:8779` e ingresar con un correo registrado en `Usuarios`. Detalle en
+`app/README.md`.
 
 ---
 
@@ -161,7 +160,7 @@ sede (D-6).
 | Qué | Dónde | ¿En git? |
 |---|---|---|
 | Decisiones y reglas de negocio | `CLAUDE.md` | Sí |
-| Diseño aprobado | `docs/diseno/mockup_v6.html` | Sí |
+| Frontend | `app/` | Sí |
 | Catálogo de sedes generado | `data/generado/catalogo_sedes.json` | No — se regenera |
 | Fuentes institucionales (`fctMaestra`, `dimDaños`) | `data/insumos/` | No — datos oficiales |
 | Presupuestos reales de municipios | `data/entregas_excel/` | No — cifras institucionales, contactos |

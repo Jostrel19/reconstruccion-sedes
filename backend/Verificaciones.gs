@@ -104,6 +104,7 @@ function Verificaciones_emitir(body) {
   if (!lock.tryLock(10000)) {
     return { ok: false, error: 'El sistema está ocupado con otro concepto — intente de nuevo' };
   }
+  var emitido;
   try {
     var vigente = _presupuestoVigente(daneSede);
     if (!vigente) return { ok: false, error: 'Esta sede no tiene presupuesto vigente' };
@@ -131,11 +132,69 @@ function Verificaciones_emitir(body) {
     var encP = hojaP.getRange(1, 1, 1, hojaP.getLastColumn()).getValues()[0];
     var nuevoEstado = ESTADO_SEGUN_RESULTADO[resultado];
     hojaP.getRange(vigente.fila, encP.indexOf('estado') + 1).setValue(nuevoEstado);
-
-    return { ok: true, estado: nuevoEstado, resultado: resultado };
+    emitido = { presupuesto: vigente.datos, estado: nuevoEstado, fecha: valoresV.fecha_verificacion };
   } finally {
     lock.releaseLock();
   }
+
+  // Aviso por correo a quien radicó (hito 0, punto 7). Fuera del candado:
+  // enviar tarda y no hace falta bloquear a otros arquitectos mientras tanto.
+  // Igual que la confirmación de radicado, un fallo del correo nunca deshace
+  // el concepto, que ya quedó guardado.
+  var correoAviso = false;
+  try {
+    correoAviso = _avisarConcepto(emitido.presupuesto, daneSede, resultado, emitido.estado,
+      observaciones, sesion.correo, emitido.fecha);
+  } catch (e) {
+    Logger.log('No se pudo avisar el concepto de ' + idPresupuesto + ': ' + e);
+  }
+  return { ok: true, estado: emitido.estado, resultado: resultado, correo_aviso: correoAviso };
+}
+
+var RESULTADO_TEXTO = {
+  CORRESPONDE: 'Corresponde', CORRESPONDE_PARCIAL: 'Corresponde parcialmente', NO_CORRESPONDE: 'No corresponde'
+};
+
+// Correo a quien radicó el presupuesto, con el concepto y qué tiene que hacer.
+// No se envía (devuelve false):
+// - si el presupuesto entró por Cargas: lo subió el arquitecto con lo que el
+//   municipio mandó en Excel, así que quien lo radicó en el sistema es de la
+//   Secretaría, no el municipio;
+// - si quien radicó es quien emite el concepto (ya lo sabe);
+// - si quien radicó ya no está activo en Usuarios;
+// - si no queda cupo diario de correo (100 con cuenta personal, medido el 2026-09-25).
+// Texto plano y sin enlace, como la confirmación de radicado: el sistema
+// todavía no tiene dirección pública fija.
+function _avisarConcepto(p, daneSede, resultado, estado, observaciones, correoVerificador, fecha) {
+  if (p.origen === 'CARGA') return false;
+  var destino = _normalizarCorreo(p.creado_por);
+  if (!destino || destino === _normalizarCorreo(correoVerificador)) return false;
+  var usuario = _buscarUsuario(destino);
+  if (!usuario || !usuario.activo) return false;
+  if (MailApp.getRemainingDailyQuota() < 1) {
+    Logger.log('Cupo diario de correo agotado: no se avisó el concepto de ' + p.id_presupuesto);
+    return false;
+  }
+  var sede = _sedeDelCatalogo(daneSede);
+  var aprobado = estado === 'APROBADO';
+  var cuando = Utilities.formatDate(fecha, 'America/Bogota', 'yyyy-MM-dd HH:mm');
+  MailApp.sendEmail(destino,
+    (aprobado ? 'Presupuesto aprobado' : 'Presupuesto devuelto para ajuste') + ' - ' + p.id_presupuesto +
+      ' - Reconstrucción de sedes',
+    'La Secretaría de Educación emitió el concepto de verificación del presupuesto radicado de la sede:\n\n' +
+    '  ' + _nombreSede(daneSede) + '\n' +
+    '  DANE ' + daneSede + (sede ? ' · ' + sede.municipio : '') + '\n\n' +
+    'Número de radicado: ' + p.id_presupuesto + '\n' +
+    'Concepto: ' + RESULTADO_TEXTO[resultado] + '\n' +
+    'Estado del presupuesto: ' + (aprobado ? 'Aprobado' : 'Requiere ajuste') + '\n' +
+    'Emitido por: ' + correoVerificador + ', ' + cuando + '\n\n' +
+    (observaciones ? 'Observaciones del arquitecto:\n' + observaciones + '\n\n' : '') +
+    (aprobado
+      ? 'Qué sigue: el presupuesto quedó aprobado en el sistema. Puede consultarlo en la ficha de la sede.\n\n'
+      : 'Qué sigue: corrija lo indicado en las observaciones y radique una versión nueva desde la ficha de la sede. ' +
+        'Esta versión no se borra: queda como registro.\n\n') +
+    'Secretaría de Educación de Caldas — Reconstrucción de sedes');
+  return true;
 }
 
 // La Ficha (Presupuestos_obtener) la usa para la sección 5 en modo lectura

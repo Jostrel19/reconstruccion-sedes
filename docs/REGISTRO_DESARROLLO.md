@@ -1553,3 +1553,226 @@ las sedes del municipio y la casilla se habilita al elegir una.
 
 **Falta:** desplegar `Presupuestos.gs`, `Codigo.gs` y `Sedes.gs`; correr el guion en real.
 
+## 2026-09-25 — Hoja de ruta aprobada; el frontend pasa a `app/`, dividido en archivos
+
+**Hoja de ruta:** el usuario aprobó los hitos 1-4 y antepuso un hito 0 de alcance cerrado (8 puntos).
+Todo en `docs/PLAN_DESARROLLO.md` §3.c.
+
+**División (hito 0, punto 1).** `docs/diseno/mockup_v6.html` (4.397 líneas, 285 KB) pasó a `app/`:
+`index.html` (48 KB), `css/estilos.css`, los dos logos como archivos PNG (antes en base64) y el
+`<script>` en 19 archivos por pantalla o tema. Reglas de carga en `app/README.md`.
+
+**Verificado:**
+- El script de división reconstruye el original desde las piezas y da **idéntico carácter por
+  carácter** (283.345). Solo se movió código; no se cambió ninguna línea.
+- `node --check` de los 19 archivos.
+- Navegador (`app-local`, puerto 8779): todos los archivos cargan con 200 y no hay errores de consola.
+- Backend simulado: las 10 pantallas del Administrador y las de Verificador, Responsable de sede y
+  Consulta; crear un lote con el atajo tipo 1-2 (37 sedes), quitar una sede y cerrarlo; borrador en
+  Registrar; concepto emitido; hallazgo resuelto; Cargas con municipio sin tilde (1 marcada, 1 en $0
+  bloqueada, 1 con DANE propuesto sin marcar) y volcado; PDF; buscador; CSV; restaurar sesión; «Salir».
+  Cero errores.
+
+**Defecto encontrado (ya existía antes de dividir, no lo causó la división):** el riel muestra a
+Verificador y a Consulta pantallas que no les corresponden (Consulta ve Verificación, Cargas, Lotes,
+Hallazgos y Usuarios). `pintar()` oculta las que el rol no alcanza, pero `aplicarVisibilidadRol()`
+vuelve a mostrar todo lo marcado `data-sed` para cualquier rol interno. Al pulsarlas no se entra:
+`pintar()` redirige a la primera pantalla del rol, y el backend valida el rol en cada acción. Es
+un defecto de presentación, no de seguridad. Se corrige con la pantalla de Inicio, que reorganiza el riel.
+
+**`mockup_v6.html` → `mockup_v6.SUPERADA_20260924.html`**; rutas actualizadas en README, PLAN,
+RUNBOOK, backend/README, GUION y ALCANCE. `.claude/launch.json`: `app-local` reemplaza a `diseno-local`.
+
+## 2026-09-25 (continuación) — Backend confirmado, cupo de correo medido, D-46: Sedes con las 975 e Inicio
+
+**Backend:** el usuario confirmó que `Presupuestos.gs`, `Codigo.gs` y `Sedes.gs` del 2026-09-24 ya están
+publicados. Comprobado sin sesión ni datos: el `/exec` responde «Sesión inválida» a `volcarCarga` y
+«Acción desconocida» a una acción inventada, así que la versión publicada ya la tiene.
+
+**Cupo de correo medido:** `MailApp.getRemainingDailyQuota()` = **100** (2026-09-25, 8:35, sin envíos ese
+día). Cada ingreso, radicación y concepto gasta uno. Anotado en `PLAN_DESARROLLO.md` §3.c para el hito 2.
+
+**D-46 (hito 0, puntos 2 y 3).** Decisión del usuario tras navegar el sistema: no entendía por qué no se
+veían las 975 sedes y pidió una pantalla de inicio más clara.
+- `nucleo.js`: `universoSel` ('todas' | 'dano' | id de lote) reemplaza a `loteFiltro` y a
+  `enSeguimiento`; `conDano` (tipos 1-4); `descripcionUniverso` dice siempre el criterio; la vista
+  `inicio` pasa a ser Inicio y la de Sedes se llama `sedes`.
+- `inicio.js` (nuevo), `sedes.js` y `tablero.js` reescritos; `cabecera.js` con el selector «Contar
+  sobre»; `index.html` con la sección Inicio, el riel reordenado (Inicio · Sedes · Tablero …) y `?v=2`.
+- **Defecto del riel corregido:** `aplicarVisibilidadRol()` ya no toca el riel; `pintarRiel()` muestra
+  solo lo que está en `ROLES[rol].ve` y oculta el rótulo de un grupo sin entradas.
+
+**Verificado con el backend simulado:** Inicio de los 4 roles (Administrador: 4 tareas con antigüedad
+de 24 días y hallazgos 1 que bloquea / 1 informativo; Verificador: 4; Consulta: sin tareas, solo cifras;
+Responsable de sede: 4 tareas, 12 sedes pendientes en orden de urgencia y «Corregir» lleva a Registrar
+de esa sede); riel por rol (Consulta: Inicio, Sedes, Tablero; Verificador: sin Lotes ni Usuarios);
+Sedes con 975 en 14 municipios; «Con daño reportado» = 411 en el simulador; filtros del municipio (70 →
+30 con daño y sin presupuesto); lote en el selector y Tablero recalculado sobre él; sin desborde
+horizontal a 590 px en Inicio, Sedes, Municipio y Tablero (se corrigió uno que causaba el texto `.sr`);
+cero errores de consola; `node --check` de los 20 scripts.
+
+## 2026-09-25 (continuación) — Hito 0, punto 4: lista de tareas en Registrar
+
+**Qué:** panel «Antes de radicar» encima de los botones de Registrar (`app/index.html`,
+`#reg-panel-radicar`). `registrar.js::requisitosRegistro()` arma la lista con **las mismas reglas que ya
+exigen** `guardarRegistroPresupuesto` y `Presupuestos_guardar` — no agrega ninguna regla que bloquee:
+- **Falta (bloquea):** descripción de los daños ≥ 60 caracteres (o justificación ≥ 40 si declara sin
+  afectación) y al menos un ítem cuando declara afectación. Dice cuántos caracteres lleva.
+- **Recomendado (no bloquea, el servidor tampoco lo exige):** ítems sin trabajo descrito, sin cantidad o
+  sin valor unitario; A > 12 % o U > 8 % (los umbrales sin aval, Q-3); plazo sin especificar; sin fotos.
+- Se repinta con cada cambio (descripción, ítems, A/U, plazo, fotos, tipo de declaración). Cada pendiente
+  es un botón que lleva a su sección. El botón «Radicar» sigue activo: al pulsarlo con algo pendiente
+  muestra el error junto al campo, como antes.
+- Estilos `.lista-rad` al final de `estilos.css`. Se evitó el nombre `.aviso`, que ya usan los avisos
+  flotantes (el primer intento lo heredaba y pintaba las filas como tarjetas).
+
+**Verificado con el backend simulado (Responsable de sede):** sede vacía → «Faltan 2» (descripción 0 de
+60, sin ítems) más plazo y fotos como recomendados; con descripción y un ítem vacío → «Listo para
+radicar» y aviso de ítem incompleto; completando el ítem, A 25 % y plazo 60 → queda el aviso de A/U y
+el de fotos; «No presenta afectación» → solo justificación y fotos; el pendiente lleva a la sección 2;
+«Radicar» con 16 caracteres muestra el error junto al campo y **no llama al backend**; sin desborde
+horizontal; cero errores de consola; `node --check` de los 20 scripts. Respaldo previo en el scratchpad
+de la sesión (`backup/app_20260925_antes_lista_registrar/`). `?v=` no se subió: se sube una sola vez en
+el despliegue del cierre del hito 0.
+
+## 2026-09-25 (continuación) — Hito 0, punto 5: precarga de la Ficha
+
+**Qué:** el detalle de la Ficha (`obtenerPresupuesto` y `listarFotos`, varios segundos cada uno en Apps
+Script) queda en memoria por DANE y se pide por adelantado.
+- `ficha.js`: `pedirDetalleFicha(accion, dane)` devuelve la respuesta en memoria o la pide; una respuesta
+  con error no se guarda. `precargarFicha(dane)` pide lo que falte, **solo si la sede tiene presupuesto**
+  (una vacía no tiene detalle) y **con máximo 2 pedidos de precarga a la vez** (`PRECARGA_MAX`); si ya
+  hay 2 en curso se omite y la Ficha carga normal al abrirse. `cargarPresupuestoDeFicha` y
+  `cargarFotosDeFicha` usan la memoria.
+- **Cuándo deja de valer la memoria:** (1) la del presupuesto guarda la «firma» del resumen que trae
+  `listarSedes` (id de la versión vigente, estado y fecha del concepto): si otra persona radica o emite
+  concepto, la siguiente carga de sedes la invalida sola; (2) vence a los 5 min (`FICHA_MEMORIA_MS`);
+  (3) se borra al escribir desde esta sesión — guardar o radicar (`registrar.js`), subir foto, emitir
+  concepto (`verificacion.js`), volcar carga (`cargas.js`) —, con «Actualizar» (`cabecera.js`) y al salir.
+- `arranque.js`: `pointerover` delegado en el documento — si el cursor se queda 250 ms sobre un elemento
+  con `data-dane`/`data-ficha`, precarga; `focusin` precarga de una vez (teclado). `sedes.js`: las filas
+  de la tabla del municipio ahora llevan `data-dane` (Inicio, buscador, migas y Lotes ya lo tenían).
+
+**Verificado con el backend simulado y 1,5 s de demora artificial en esas dos acciones:** cursor sobre
+una fila → 2 pedidos; al abrir esa Ficha, **0 pedidos nuevos** y a los 50 ms ya muestra «2 ítems» y el
+historial (sin precarga, a los 50 ms dice «Cargando…»); sede sin presupuesto → 0 pedidos; con 2 en
+curso, la precarga de otra sede se omite; volver a pasar por una sede en memoria → 0 pedidos; cambiar
+el estado del resumen → vuelve a pedir el presupuesto; `olvidarFicha()` → vuelve a pedir; una respuesta
+con error no queda en memoria; al salir la memoria queda vacía; `focusin` precarga (probado con el
+evento enviado a mano: el panel de pruebas no tenía el foco de la ventana). Cero errores de consola;
+`node --check` de los 20 scripts. **No medido en real:** cuánto baja el tiempo de apertura con el backend
+publicado — queda para el hito 1.
+
+## 2026-09-25 (continuación) — Hito 0, punto 6: Lotes más rápida, y un defecto de D-46 corregido
+
+**Qué:** `lotes.js` ya no llama `cargarSedes()` (las 975, lo que tarda `listarSedes`) después de cada
+operación. Aplica el cambio en memoria con `ponerSedesEnLote()`: crear agrega el lote a `LOTES`; crear y
+agregar ponen cada DANE enviado en el lote (las que estaban en otro se mueven, D-44); quitar deja
+`s.lote = null`; cerrar apaga `activo` del lote y de sus sedes, que se conservan como registro. Es exacto
+porque `Lotes.gs` es todo o nada (un DANE inválido rechaza la operación entera) y devuelve el `id_lote`.
+Lo que cambie otra persona llega con el refresco normal de sedes. **Backend sin cambios.**
+
+**Defecto corregido (bloqueaba):** en D-46 se borró por error `enLoteActivo()` junto con `enSeguimiento`,
+y `lotes.js` la sigue usando: al marcar una sede en el editor de lotes, o al usar el filtro «con/sin
+lote», saltaba un error y el editor dejaba de pintar. La verificación de D-46 no lo vio porque no marcó
+ninguna sede en el editor. Restaurada en `nucleo.js` junto a `conDano`. Se revisaron los 20 scripts
+buscando otras funciones llamadas y no definidas: ninguna.
+
+**Verificado con el backend simulado:** crear «Prueba A» con 3 sedes (≈260 ms, sin `listarSedes`), fila en
+la tabla y detalle abierto; crear «Prueba B» moviendo 1 sede de A (el editor dice «1 ya está en otro lote
+y se moverá»; quedan A 2 y B 2); agregar a B (3), quitar de B (2), cerrar A (inactivo, conserva sus 2
+sedes); filtros del editor «con lote» 2 / «sin lote» 973. **Ninguna operación pidió `listarSedes`**; al
+recargar las sedes a propósito, lotes y pertenencias quedaron idénticos a lo que había en memoria.
+Cero errores de consola; `node --check` de los 20 scripts.
+
+## 2026-09-25 (continuación) — Hito 0, punto 7: correo al emitir el concepto
+
+**Qué:** `backend/Verificaciones.gs`. `Verificaciones_emitir` guarda el concepto como antes y, **ya fuera
+del candado**, llama `_avisarConcepto`, que escribe a quien radicó (`creado_por` de la versión vigente):
+asunto «Presupuesto aprobado» o «Presupuesto devuelto para ajuste» con el radicado; cuerpo con sede, DANE
+y municipio, concepto, estado, quién lo emitió y cuándo, las observaciones (si hay) y qué sigue. Texto
+plano y sin enlace, igual que la confirmación de radicado (todavía no hay dirección pública). La respuesta
+trae `correo_aviso` (true/false) y el aviso de la pantalla de Verificación lo menciona
+(`app/js/verificacion.js`).
+
+**No se envía** si el presupuesto entró por Cargas (quien lo radicó en el sistema es de la Secretaría,
+no el municipio), si quien radicó es quien emite, si quien radicó ya no está activo en Usuarios o si no
+queda cupo diario (100). **Un fallo del correo nunca deshace el concepto.** Cada concepto enviado gasta
+uno de los 100 correos diarios, que ya estaba contado en `PLAN_DESARROLLO.md` §3.c.
+
+**Verificado en el arnés** (`harness_gs.js`, 21 comprobaciones nuevas, todas las anteriores siguen en
+verde): devolver → correo a quien radicó con observaciones y «radique una versión nueva»; aprobar →
+correo de aprobado sin sección de observaciones vacía; Carga → no; mismo usuario → no; usuario inactivo →
+no; sin cupo → no, y el concepto queda guardado; `sendEmail` que falla → el concepto queda emitido.
+**Pendiente:** pegar `Verificaciones.gs` y publicar nueva versión de la implementación existente — se hace
+en el despliegue único del cierre del hito 0 —, y verlo llegar a Outlook en el hito 1.
+
+## 2026-09-25 (continuación) — Hito 0, punto 8: accesibilidad WCAG 2.1 AA y GOV.CO. Cierre del hito 0
+
+**`Verificaciones.gs` desplegado** por el usuario (nueva versión de la implementación existente): el punto 7
+ya está publicado; falta verlo llegar a Outlook en el hito 1.
+
+**Fuente oficial consultada** (búsquedas autorizadas por el usuario, solo documentos públicos, sin datos del
+proyecto): Resolución MinTIC 1519 de 2020 y su Anexo 1 «Directrices de accesibilidad web» (WCAG 2.1 AA,
+criterios CC1–CC32), y el Anexo 2 de la Resolución 2893 de 2020 (integración de sedes electrónicas a GOV.CO).
+
+**Cómo se revisó:** un script en el navegador de pruebas (backend simulado, rol Administrador) mide en las
+12 pantallas el contraste real de cada texto visible contra su fondo, los controles sin nombre, los campos
+sin etiqueta, las imágenes sin `alt`, lo clicable sin teclado y el desborde horizontal; más pruebas a mano de
+teclado, diálogo y 320 px.
+
+**Hallado y corregido:**
+- **Contraste (CC5, 1.4.3):** separador «›» de las migas, «×» de quitar ítem, «+» de agregar foto y «○» de
+  la matriz de permisos usaban `--borde-f` (2,0:1) → `--tx-sec`.
+- **Foco visible (CC17, 1.4.11):** el contorno oro daba 2,1:1 → `--oro-osc` (4,0:1); se agregan `select` y
+  `textarea` a la regla general.
+- **Bordes de campos (1.4.11):** 2,0:1 → `--gris` (4,4:1).
+- **Campos sin etiqueta (CC24, 1.3.1):** 14 en Registrar — `for` en descripción, A, U y plazo, y
+  `aria-label` en cada celda editable de la tabla de ítems («Cantidad del ítem 2»…); la descripción queda
+  unida a su mensaje de error con `aria-describedby`.
+- **Saltar bloques (CC10, 2.4.1):** «Saltar al contenido» como primer elemento del armazón (antes del riel,
+  para que en escritorio no haya que recorrer sus 9 enlaces) y `#contenido` con `role="main"` (CC8).
+- **Título por pantalla (CC23, 2.4.2):** «Registrar presupuesto — Reconstrucción de sedes», etc.
+- **Diálogo (2.4.3):** Tab y Mayús+Tab ya no salen a la página de atrás.
+- Riel con `aria-current="page"`; error del ingreso con `role="alert"`.
+
+**Revisado y conforme:** `lang="es"` y UTF-8 (CC27, CC31); `alt` en los dos logos (CC1); encabezados h1–h2
+por pantalla (CC8); tablas con `th` (CC9); errores junto al campo con `role="alert"` (CC28); avisos con
+`role="status"`/`alert` (4.1.3); los de éxito se van a los 4 s y los de error se quedan (CC19); las
+animaciones respetan `prefers-reduced-motion`, también el conteo de cifras (CC20); sin audio (CC18); nada
+cambia al recibir el foco (CC22 — la precarga de la Ficha no cambia nada visible); la bandeja de
+Verificación se opera con el botón de cada fila; **sin desborde a 320 px** en las 11 pantallas (1.4.10).
+**Sin corregir, a propósito:** el código de ingreso vence a los 10 min — es un límite de seguridad y la
+pantalla lo advierte antes (CC19).
+
+**Verificado después de corregir:** 0 fallas en las 12 pantallas; foco con teclado real (el primer Tab en
+escritorio es «Saltar al contenido», Enter lleva el foco a `#contenido` sin cambiar la URL); diálogo: Tab
+desde el último vuelve al primero y Mayús+Tab al revés, Esc cierra; `node --check` de los 20 scripts.
+Durante la prueba el navegador sirvió `avisos.js` viejo desde caché: es exactamente lo que evita `?v=`,
+que **se sube a `?v=3`** en las 21 referencias de `index.html` como cierre del hito 0.
+
+**GOV.CO — decisión pendiente del usuario (ver `PLAN_DESARROLLO.md` §3.c, punto 8).** No se aplicó nada.
+
+**Cierre del hito 0:** los 8 puntos hechos. Backend publicado al día (el único `.gs` cambiado,
+`Verificaciones.gs`, ya está desplegado). El frontend no se publica hasta el hito 3.
+
+## 2026-09-25 (continuación) — Hito 1: guion actualizado
+
+`docs/GUION_CASO_DE_EXITO.md` reescrito para la corrida en real con lo del hito 0. Cambios frente a la
+versión del 2026-09-24:
+- **Paso 0 nuevo (Administrador):** Inicio por rol, alta del Responsable de sede de prueba, Sedes con las
+  975 y su criterio, selector «Contar sobre».
+- **Registrar:** el Responsable entra por Inicio (menú solo con Inicio y Sedes); se mira el panel «Antes
+  de radicar» antes y después de diligenciar.
+- **Controlar:** vuelta completa **devolver → correo → «Corregir» desde Inicio → radicar → aprobar →
+  correo de aprobado**, más un concepto sobre una sede de Cargas para comprobar que **no** envía correo.
+- **Seguir:** Lotes sin recarga, precarga de la Ficha y filtros del municipio; la bitácora se mira en
+  Inicio (ya no está en el Tablero).
+- **Accesibilidad:** comprobación rápida (saltar al contenido, Tab, diálogo, 200 %).
+- Pasos cronometrados (⏱: volcado, lotes, apertura de la Ficha) con columna de tiempo en el resultado;
+  correos que gasta la corrida (≈ 8 de 100); aviso de que escribe datos reales.
+- **El correo del Responsable de prueba no se escribe en el guion:** el repositorio es público.
+
+Nombres de tarjetas, tablas y mensajes cotejados contra el código (`inicio.js`, `index.html`,
+`transporte.js`). Falta: correrlo en real.
+

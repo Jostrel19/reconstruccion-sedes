@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reconstrucción de sedes — SED Caldas</title>
+<link rel="stylesheet" href="css/estilos.css?v=3">
+</head>
+<body>
+
+<div class="device">
+
+      <!-- ════ ENTRAR ════ -->
+      <section class="view on" id="v-login">
+        <div class="login">
+          <div class="mast">
+            <svg viewBox="0 0 420 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <defs><linearGradient id="fd" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#fff" stop-opacity=".13"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+              </linearGradient></defs>
+              <g fill="none" stroke="#fff" stroke-width="1.1">
+                <path d="M-40 690 C 60 640, 130 660, 210 620 S 360 585, 470 610" stroke-opacity=".20"/>
+                <path d="M-40 655 C 55 603, 126 625, 205 583 S 356 549, 470 574" stroke-opacity=".18"/>
+                <path d="M-40 620 C 50 566, 122 590, 200 546 S 352 513, 470 538" stroke-opacity=".16"/>
+                <path d="M-40 585 C 45 529, 118 555, 195 509 S 348 477, 470 502" stroke-opacity=".14"/>
+                <path d="M-40 550 C 40 492, 114 520, 190 472 S 344 441, 470 466" stroke-opacity=".12"/>
+                <path d="M-40 515 C 35 455, 110 485, 185 435 S 340 405, 470 430" stroke-opacity=".10"/>
+                <path d="M-40 480 C 30 418, 106 450, 180 398 S 336 369, 470 394" stroke-opacity=".085"/>
+                <path d="M-40 445 C 25 381, 102 415, 175 361 S 332 333, 470 358" stroke-opacity=".07"/>
+                <path d="M-40 410 C 20 344, 98 380, 170 324 S 328 297, 470 322" stroke-opacity=".055"/>
+                <path d="M-40 375 C 15 307, 94 345, 165 287 S 324 261, 470 286" stroke-opacity=".04"/>
+              </g>
+              <path d="M-40 700 L-40 690 C 60 640, 130 660, 210 620 S 360 585, 470 610 L470 700 Z" fill="url(#fd)"/>
+            </svg>
+            <div class="z">
+              <div class="eyebrow">Gobierno de Caldas · Secretaría de Educación</div>
+              <h1>Reconstrucción de sedes</h1>
+              <div class="fecha">
+                Infraestructura educativa afectada por el sismo del 10 de agosto de 2026
+              </div>
+            </div>
+            <div class="contacto">
+              <div>
+                <b>Gobernación de Caldas — sede principal</b>
+                Carrera 21 entre Calles 22 y 23, Manizales, Caldas · C.P. 170001<br>
+                Conmutador +57 68 98 24 44 ·
+                <a href="mailto:atencionalciudadano@caldas.gov.co">atencionalciudadano@caldas.gov.co</a>
+              </div>
+              <div>
+                <b>Secretaría de Educación</b>
+                Cl. 14 #2-58, pisos -1 y 2 · Parque Tecnológico, Villamaría, Caldas<br>
+                Lunes a jueves 8:00–12:00 y 14:00–18:00 · viernes 7:00–15:00 jornada continua
+              </div>
+              <div class="redes"><span>@GobernaciondeCaldas</span><span>@GoberCaldas</span><span>@gobercaldas</span></div>
+            </div>
+          </div>
+          <div class="acceso">
+            <div class="form">
+              <img src="img/logo-ingreso.png" alt="Gobierno de Caldas — Secretaría de Educación">
+              <h2>Ingresar</h2>
+              <div class="sub" id="login-sub">Escriba su correo institucional.</div>
+
+              <div id="login-p1">
+                <div class="campo"><label for="u">Correo institucional</label>
+                  <input id="u" type="email" placeholder="nombre@sedcaldas.edu.co" autocomplete="username"></div>
+                <button class="b" type="button" id="btn-enviar" onclick="loginEnviarCodigo()">Enviar código</button>
+              </div>
+
+              <div id="login-p2" class="oculto">
+                <div class="campo"><label for="cod">Código de 6 dígitos</label>
+                  <input id="cod" type="text" inputmode="numeric" maxlength="6" placeholder="000000"></div>
+                <button class="b" type="button" id="btn-entrar" onclick="loginEntrar()">Entrar</button>
+                <button class="b sec mini" type="button" style="margin-top:.5rem" onclick="loginVolver()">Cambiar correo</button>
+              </div>
+
+              <div id="login-error" class="oculto" role="alert" style="color:#b3261e;font-size:.85rem;margin:.5rem 0"></div>
+
+              <div class="pie2">
+                Sin contraseña: se entra con el correo institucional y un código de un solo uso,
+                válido 10 minutos. Si el correo no está registrado como usuario, no se envía nada.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ ARMAZÓN ════ -->
+      <div class="view" id="v-shell">
+        <div class="shell">
+          <a class="saltar" href="#contenido">Saltar al contenido</a>
+          <nav class="riel" id="riel" aria-label="Navegación principal">
+            <div class="marca"><img src="img/logo-riel.png" alt="Gobierno de Caldas — Secretaría de Educación"></div>
+            <a href="#" data-mod="inicio" class="sel">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 14V6.2L8 2l6 4.2V14"/><path d="M2 14h12"/><path d="M6.2 14V9.5h3.6V14"/></svg>Inicio</a>
+            <div class="grupo">Seguimiento</div>
+            <a href="#" data-mod="sedes">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 14.2V4.5h6v9.7"/><path d="M8.5 7.5h5v6.7"/><path d="M1.5 14.2h13"/><path d="M4.4 7h2.2M4.4 9.5h2.2M4.4 12h2.2M10.4 10h1.2M10.4 12.2h1.2"/></svg>Sedes</a>
+            <a href="#" data-mod="tablero" data-sed>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1"/><rect x="9" y="1.5" width="5.5" height="3" rx="1"/><rect x="9" y="6" width="5.5" height="8.5" rx="1"/><rect x="1.5" y="8.5" width="5.5" height="6" rx="1"/></svg>Tablero</a>
+            <a href="#" data-mod="verif" data-sed>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 2.6h10v10.8H3z"/><path d="M5.4 8.2 7.1 9.9l3.5-3.6"/></svg>Verificación<span class="cand oculto" id="riel-cand-verif" style="font-size:.7rem;font-weight:700;background:var(--oro);color:#2C3334;border-radius:9px;padding:0 .35rem"></span></a>
+            <a href="#" data-mod="cargas" data-sed>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 1.8v7.4"/><path d="M5 6.3 8 9.3l3-3"/><path d="M2 10.6v2.2a1.4 1.4 0 0 0 1.4 1.4h9.2a1.4 1.4 0 0 0 1.4-1.4v-2.2"/></svg>Cargas</a>
+            <div class="grupo" data-sed>Administración</div>
+            <a href="#" data-mod="lotes" data-sed>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 1.8 14.2 5 8 8.2 1.8 5Z"/><path d="M1.8 8 8 11.2 14.2 8"/><path d="M1.8 11 8 14.2 14.2 11"/></svg>Lotes</a>
+            <a href="#" data-mod="hallazgos" data-sed>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 1.5 14.5 13.5H1.5Z"/><path d="M8 6.2v3.4"/><circle cx="8" cy="11.6" r=".6" fill="currentColor" stroke="none"/></svg>Hallazgos<span class="cand oculto" id="riel-cand-hallazgos" style="font-size:.7rem;font-weight:700;background:var(--err);color:#fff;border-radius:9px;padding:0 .35rem"></span></a>
+            <a href="#" data-mod="usuarios" data-sed>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="5.4" r="2.8"/><path d="M2.6 14c0-2.7 2.4-4.4 5.4-4.4s5.4 1.7 5.4 4.4"/></svg>Usuarios</a>
+            <div class="base" id="riel-base"></div>
+          </nav>
+
+          <div class="col">
+            <div class="top">
+              <button class="b sec mini menu-movil" type="button" id="btn-menu" aria-controls="riel" aria-expanded="false">Menú</button>
+              <div class="migas" id="migas"></div>
+              <span class="flex"></span>
+              <div class="buscador" id="buscador">
+                <input id="busca" type="search" placeholder="Buscar sede o DANE" autocomplete="off"
+                       aria-label="Buscar sede por nombre o código DANE" aria-controls="busca-res" aria-expanded="false">
+                <div class="busca-res oculto" id="busca-res" role="listbox"></div>
+              </div>
+              <div class="yo"><span class="av" id="av"></span><span><b id="nomTx"></b><span class="rol" id="rolTx"></span></span></div>
+              <button class="b sec mini" type="button" onclick="cerrarSesion()">Salir</button>
+            </div>
+
+            <div class="lienzo" id="contenido" role="main" tabindex="-1">
+
+              <div class="cab-vista" id="cab-vista">
+                <div class="cab-tx"><h1 id="cab-titulo"></h1><p id="cab-contexto"></p></div>
+                <div class="cab-acc">
+                  <label class="sel-lote oculto" id="cab-lote-caja"><span>Contar sobre</span><select id="cab-lote" aria-label="Sobre qué sedes se calculan las cifras"></select></label>
+                  <button class="b sec mini oculto" type="button" id="cab-exportar">Exportar a Excel</button>
+                  <button class="b sec mini oculto" type="button" id="cab-actualizar" title="Volver a consultar los datos">Actualizar</button>
+                </div>
+              </div>
+
+              <!-- ─── TABLERO (solo SED) ─── -->
+              <section class="view" id="s-tablero">
+                <div class="franja" id="tab-franja"></div>
+
+                <div class="lat">
+                  <div>
+                    <div class="p">
+                      <header><h2>Avance</h2></header>
+                      <div class="cuerpo"><div class="emb" id="tab-avance"></div></div>
+                      <div class="pie" id="tab-avance-pie"></div>
+                    </div>
+
+                    <div class="p soporte">
+                      <header><h2>Valor radicado por municipio</h2><span class="flex"></span>
+                        <div class="leyenda"><span><i style="background:var(--oro)"></i>En trámite</span><span><i style="background:var(--ok)"></i>Aprobado</span></div></header>
+                      <div class="cuerpo" id="tab-valor"></div>
+                      <div class="pie" id="tab-valor-pie"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="p soporte">
+                      <header><h2>Tipo de afectación</h2><span class="flex"></span><span class="eyebrow">Censo de daños</span></header>
+                      <div class="cuerpo" id="tab-afectacion"></div>
+                      <div class="pie" id="tab-afectacion-pie"></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ─── INICIO (D-46) ─── -->
+              <section class="view on" id="s-inicio">
+                <div class="p" id="ini-tareas-caja">
+                  <header><h2>Requiere su atención</h2></header>
+                  <div class="cuerpo"><div class="tareas" id="ini-tareas"></div></div>
+                </div>
+
+                <div class="p oculto" id="ini-pend-caja">
+                  <header><h2>Sedes que requieren su acción</h2><span class="flex"></span><span class="eyebrow" id="ini-pend-eyebrow"></span></header>
+                  <div class="cuerpo ras">
+                    <div class="scroll">
+                      <table>
+                        <thead><tr><th>Sede</th><th>Municipio</th><th>Tipo</th><th>Estado</th><th>Qué sigue</th><th><span class="sr">Acción</span></th></tr></thead>
+                        <tbody id="ini-pend-tbody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="pie" id="ini-pend-pie"></div>
+                </div>
+
+                <div class="sub-cab"><h2>Cómo vamos</h2><span class="flex"></span>
+                  <button class="b sec mini" type="button" id="ini-tablero">Ver el Tablero</button></div>
+                <div class="franja" id="ini-franja"></div>
+                <p class="nota-franja" id="ini-franja-pie"></p>
+
+                <div class="p oculto" id="ini-como">
+                  <header><h2>Cómo funciona</h2></header>
+                  <div class="cuerpo">
+                    <ol class="pasos">
+                      <li><b>Registre el presupuesto</b> de la sede: los trabajos a ejecutar con cantidad y valor unitario, la administración y la utilidad, el plazo y al menos una fotografía del daño. Puede guardarlo como borrador y seguir después.</li>
+                      <li><b>Radíquelo.</b> Recibe un correo con el número de radicado y el presupuesto pasa a la Secretaría.</li>
+                      <li><b>Un arquitecto lo verifica</b> contra el daño que reportó el censo.</li>
+                      <li><b>Resultado:</b> queda aprobado para obra, o vuelve a usted para ajuste con las observaciones del arquitecto. En ese caso, corríjalo y radíquelo de nuevo.</li>
+                    </ol>
+                  </div>
+                </div>
+
+                <div class="p">
+                  <header><h2 id="ini-bitacora-tit">Últimos movimientos</h2></header>
+                  <div class="cuerpo" id="ini-bitacora"></div>
+                </div>
+              </section>
+
+              <!-- ─── SEDES ─── -->
+              <section class="view" id="s-sedes">
+                <div class="p">
+                  <header><h2 id="tituloSedes">Municipios</h2><span class="flex"></span>
+                    <div class="leyenda">
+                      <span><i style="background:var(--borde-f)"></i>Sin presupuesto</span>
+                      <span><i style="background:var(--oro)"></i>En trámite</span>
+                      <span><i style="background:var(--ok)"></i>Aprobado</span>
+                    </div>
+                  </header>
+                  <div class="cuerpo ras">
+                    <div class="scroll">
+                      <table>
+                        <thead><tr><th>Municipio</th><th class="n">Sedes</th><th class="n">Con daño</th><th class="n">Con presupuesto</th><th>Avance</th><th class="n">Valor radicado</th><th>Última actividad</th></tr></thead>
+                        <tbody id="sedes-tbody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="pie" id="sedes-pie"></div>
+                </div>
+              </section>
+
+              <!-- ─── MUNICIPIO ─── -->
+              <section class="view" id="s-muni">
+                <div class="p">
+                  <header><h2 id="muni-titulo">—</h2></header>
+                  <div class="cuerpo">
+                    <div class="cifras" id="muni-cifras"></div>
+                  </div>
+                </div>
+                <div class="p">
+                  <header><h2>Sedes</h2><span class="flex"></span><span class="eyebrow" id="muni-eyebrow"></span></header>
+                  <div class="chips" id="muni-filtros" role="group" aria-label="Filtrar las sedes del municipio"></div>
+                  <div class="cuerpo ras">
+                    <div class="scroll">
+                      <table>
+                        <thead><tr><th>Sede</th><th>DANE</th><th>Tipo</th><th data-sed>Lote</th><th class="n">Total presupuesto</th><th>Origen</th><th>Versión</th><th>Estado</th></tr></thead>
+                        <tbody id="muni-tbody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="pie" id="muni-pie"></div>
+                </div>
+              </section>
+
+              <!-- ─── FICHA ─── -->
+              <section class="view" id="s-ficha">
+                <div class="p" id="ficha-ident">
+                  <header><h2 id="ficha-nombre">—</h2><span class="est e-pend" id="ficha-badge">—</span><span class="flex"></span>
+                    <button class="b mini" type="button" data-edita id="ficha-btn-editar"
+                            onclick="irRegistrar()">Registrar presupuesto</button>
+                    <button class="b sec mini oculto" type="button" id="ficha-btn-verificar"
+                            onclick="irVerificacionSede(daneActual)">Verificar</button>
+                    <button class="b sec mini oculto" type="button" id="ficha-btn-pdf" onclick="generarPdfFicha()">Descargar PDF</button>
+                  </header>
+                  <div class="cuerpo">
+                    <dl class="kv" id="ficha-kv"></dl>
+                  </div>
+                </div>
+
+                <div class="rejilla">
+                  <div class="p" id="ficha-resumen">
+                    <header><h2>Presupuesto vigente</h2></header>
+                    <div class="cuerpo" id="ficha-resumen-cuerpo"></div>
+                  </div>
+
+                  <div class="p" id="ficha-historial">
+                    <header><h2>Historial</h2><span class="flex"></span><span class="eyebrow">Manda la más reciente</span></header>
+                    <div class="cuerpo ras">
+                      <table>
+                        <thead><tr><th>Ver.</th><th>Estado</th><th>Origen</th><th class="n">Total</th><th>Fecha</th></tr></thead>
+                        <tbody id="ficha-historial-tbody"></tbody>
+                      </table>
+                    </div>
+                    <div class="pie" id="ficha-historial-pie"></div>
+                  </div>
+                </div>
+
+                <div class="p" id="ficha-caps">
+                  <header><h2>Daño registrado y presupuestado</h2><span class="flex"></span>
+                    <span class="eyebrow">Cruce por capítulo</span></header>
+                  <div class="cuerpo" id="ficha-caps-cuerpo"></div>
+                  <div class="pie" id="ficha-caps-pie"></div>
+                </div>
+
+                <div class="p" id="ficha-detalle">
+                  <header><h2>Presupuesto a detalle</h2><span class="flex"></span>
+                    <span class="eyebrow" id="ficha-detalle-eyebrow"></span></header>
+                  <div class="cuerpo ras" id="ficha-detalle-items"></div>
+                  <div class="cuerpo oculto" id="ficha-detalle-totales" style="border-top:1px solid var(--borde)"></div>
+                  <div class="pie">
+                    A y U por separado, sin Imprevistos, con IVA 19 % sobre la utilidad (Decreto 1372 de
+                    1992, art. 3). No hay tope legal de AIU: el sistema <b>alerta</b> si
+                    A&nbsp;&gt;&nbsp;12&nbsp;% o U&nbsp;&gt;&nbsp;8&nbsp;%, no bloquea. Los valores
+                    nunca se digitan: salen de cantidad × valor unitario.
+                  </div>
+                </div>
+
+                <div class="p" id="ficha-formato">
+                  <header><h2>Formato oficial</h2><span class="flex"></span><span class="eyebrow" id="ficha-formato-eyebrow"></span></header>
+                  <div class="cuerpo ras">
+                    <div class="paso-sec"><span class="no">1</span><span class="flex">Identificación de la sede</span><span class="est e-pend">—</span></div>
+                    <div class="paso-sec"><span class="no">2</span><span class="flex">Descripción de la afectación</span><span class="est e-pend">—</span></div>
+                    <div class="paso-sec"><span class="no">3</span><span class="flex">Presupuesto y cálculo A/U/IVA</span><span class="est e-pend">—</span></div>
+                    <div class="paso-sec"><span class="no">4</span><span class="flex">Registro fotográfico</span><span class="est e-pend">—</span></div>
+                    <div class="paso-sec"><span class="no">5</span><span class="flex">Verificación de la Secretaría</span><span class="est e-pend">—</span></div>
+                  </div>
+                  <div class="pie">La sección 5 la emite el arquitecto desde <b>Verificación</b>; aquí solo se lee el concepto ya emitido.</div>
+                </div>
+                <!-- Concepto del arquitecto (D-30): solo visible si ya existe una fila en
+                     Verificaciones para el id_presupuesto vigente. -->
+                <div class="p oculto" id="ficha-concepto">
+                  <header><h2>Concepto del arquitecto</h2><span class="flex"></span>
+                    <span class="est e-pend" id="ficha-concepto-badge">—</span></header>
+                  <div class="cuerpo">
+                    <dl class="kv">
+                      <dt>Verificado por</dt><dd id="ficha-concepto-quien">—</dd>
+                      <dt>Fecha</dt><dd id="ficha-concepto-fecha">—</dd>
+                    </dl>
+                    <div class="campo-v" style="margin:.9rem 0 0">
+                      <label>Observaciones</label>
+                      <p id="ficha-concepto-obs" style="margin:0;font-size:.86rem;line-height:1.55;color:var(--tx)"></p>
+                    </div>
+                  </div>
+                  <div class="pie">Este concepto es el registro de auditoría de la sesión real que lo emitió — no una firma escaneada.</div>
+                </div>
+
+                <!-- Galería de fotos (D-29 sección 4, en modo lectura): antes las fotos se
+                     subían y se contaban en el checklist, pero nunca se veían en la Ficha —
+                     solo en Registrar, y solo mientras esa sede estaba abierta ahí. -->
+                <div class="p oculto" id="ficha-fotos">
+                  <header><h2>Fotografías</h2><span class="flex"></span>
+                    <span class="eyebrow" id="ficha-fotos-eyebrow"></span></header>
+                  <div class="cuerpo">
+                    <div class="fotos" id="ficha-fotos-lista"></div>
+                  </div>
+                  <div class="pie">Subidas desde Registrar (sección 4) — se guardan en Drive, nunca en el navegador.</div>
+                </div>
+
+                <div class="p oculto" id="ficha-linea">
+                  <header><h2>Línea de tiempo</h2><span class="flex"></span><span class="eyebrow">Lo que ha pasado con esta sede</span></header>
+                  <div class="cuerpo" id="ficha-linea-cuerpo"></div>
+                </div>
+              </section>
+
+              <!-- ─── REGISTRAR PRESUPUESTO (diligenciamiento manual) ─── -->
+              <section class="view" id="s-registrar">
+                <div class="p">
+                  <header><h2 id="reg-h2">Presupuesto</h2>
+                    <span class="est e-pend" id="reg-badge">Sin diligenciar</span><span class="flex"></span>
+                    <span class="eyebrow" id="reg-eyebrow-estado"></span></header>
+                  <div class="cuerpo">
+                    <nav class="pasos-f" id="reg-stepper" aria-label="Secciones del formato de presupuesto">
+                      <button type="button" class="pf" data-goto="reg-panel-1"><span class="no">1</span>Identificación</button>
+                      <button type="button" class="pf" data-goto="reg-panel-2"><span class="no">2</span>Afectación</button>
+                      <button type="button" class="pf" data-goto="reg-panel-3"><span class="no">3</span>Presupuesto</button>
+                      <button type="button" class="pf" data-goto="reg-panel-4"><span class="no">4</span>Fotografías</button>
+                    </nav>
+                    <div class="aviso-foto oculto" id="reg-error" style="margin-top:.9rem"></div>
+                  </div>
+                </div>
+
+                <!-- 1. IDENTIFICACIÓN (solo lectura — viene del catálogo, D-26; nunca se digita) -->
+                <div class="p" id="reg-panel-1">
+                  <header><h2>1 · Identificación de la sede</h2><span class="flex"></span>
+                    <span class="eyebrow">Del catálogo — no se edita aquí</span></header>
+                  <div class="cuerpo">
+                    <dl class="kv" id="reg-ident-kv">
+                      <dt>DANE sede</dt><dd>—</dd>
+                    </dl>
+                  </div>
+                  <div class="pie">Esta información sale del catálogo oficial de sedes y del censo de daños.
+                    Si algo está mal acá, se corrige en la fuente — nunca a mano en este formulario.</div>
+                </div>
+
+                <!-- 2. AFECTACIÓN -->
+                <div class="p" id="reg-panel-2">
+                  <header><h2>2 · Descripción de la afectación</h2></header>
+                  <div class="cuerpo">
+                    <div class="campo-v">
+                      <label>¿La sede resultó afectada por el sismo?</label>
+                      <div class="ayuda" id="reg-ayuda-tipo">El censo la clasificó según el tipo de afectación registrado.
+                        Si usted declara algo distinto, el sistema le pedirá justificarlo
+                        y lo marcará como discrepancia para que un arquitecto lo revise.</div>
+                      <label class="op"><input type="radio" name="af" id="reg-af-si" checked>
+                        <span><b>Sí, presento presupuesto</b><small>Coincide con el censo</small></span></label>
+                      <label class="op"><input type="radio" name="af" id="reg-af-no">
+                        <span><b>No presenta afectación</b><small>Discrepa del censo — exige
+                        justificación de mínimo 40 caracteres</small></span></label>
+                    </div>
+                    <div class="campo-v" style="margin-bottom:0">
+                      <label id="reg-label-desc" for="reg-descripcion">Descripción de los daños</label>
+                      <div class="ayuda">Mínimo 60 caracteres. Describa <b>qué se dañó</b>; el trabajo
+                        a ejecutar va en la tabla de abajo.</div>
+                      <textarea id="reg-descripcion" aria-describedby="reg-err-desc"></textarea>
+                      <div class="err-campo oculto" id="reg-err-desc" role="alert"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. PRESUPUESTO EDITABLE -->
+                <div class="p" id="reg-panel-3">
+                  <header><h2>3 · Presupuesto a detalle</h2><span class="flex"></span>
+                    <span class="eyebrow" id="reg-eyebrow-items">0 ítems</span>
+                    <button class="b mini" type="button" id="btn-agregar-item">+ Agregar ítem</button></header>
+                  <div class="cuerpo ras">
+                    <div class="scroll"><table class="edit">
+                      <thead><tr><th style="width:2rem">#</th><th style="min-width:150px">Capítulo de daño</th>
+                        <th style="min-width:230px">Trabajo a ejecutar</th><th style="width:88px">Unidad</th>
+                        <th class="n" style="width:86px">Cantidad</th><th class="n" style="width:112px">Vr. unitario</th>
+                        <th class="n" style="width:112px">Valor total</th><th style="width:2rem"></th></tr></thead>
+                      <tbody></tbody>
+                    </table></div>
+                    <div class="err-campo oculto" id="reg-err-items" role="alert" style="margin:.6rem 1.1rem"></div>
+                  </div>
+                  <div class="pie">
+                    <b>Los 14 capítulos.</b> Del 1 al 11 son los del censo — <b>dónde</b> está el
+                    daño. Del 12 al 14 son transversales: preliminares, demoliciones y
+                    escombros. No son un lugar con daño, son trabajo que toda reconstrucción
+                    necesita, y sin ellos <b>el 13,6 % de un presupuesto real no tiene dónde ir</b>
+                    — medido sobre el presupuesto de Belalcázar.
+                    <br><br>
+                    <b>Dos formas de presupuestar:</b> lo <b>medible</b> va con su unidad y cantidad
+                    (28 m² × $75.550); lo que no se puede desglosar va como <b>global</b> — unidad
+                    <b>gl</b>, cantidad 1, y el valor completo en «Vr. unitario».
+                    Se escribe <b>1.500.000</b> o <b>$ 1.200.000</b> indistintamente: el sistema lo
+                    entiende y lo reformatea al salir del campo, para que usted confirme que se
+                    entendió lo mismo. <b>La columna «Valor total» no se digita</b>, se calcula.
+                  </div>
+                </div>
+
+                <!-- 3.1 A / U / IVA -->
+                <div class="p">
+                  <header><h2>3.1 · Administración, utilidad e IVA</h2></header>
+                  <div class="cuerpo">
+                    <div class="au">
+                      <div class="campo-v" style="margin:0">
+                        <label for="reg-admin">Administración (%)</label>
+                        <div class="ayuda">Dirección de obra, pólizas, ensayos, servicios públicos
+                          de la obra, personal administrativo.</div>
+                        <input id="reg-admin" value="10" inputmode="decimal">
+                      </div>
+                      <div class="campo-v" style="margin:0">
+                        <label for="reg-utilidad">Utilidad (%)</label>
+                        <div class="ayuda">La ganancia del constructor. Sobre ella se liquida el IVA.</div>
+                        <input id="reg-utilidad" value="5" inputmode="decimal">
+                      </div>
+                      <div class="campo-v" style="margin:0">
+                        <label for="reg-plazo">Plazo de ejecución (días)</label>
+                        <div class="ayuda">Días de obra <b>una vez contratada</b>. No incluye el
+                          tiempo del proceso de contratación.</div>
+                        <input id="reg-plazo" value="" inputmode="decimal">
+                      </div>
+                    </div>
+
+                    <div class="alerta-au" id="reg-alerta-au">
+                      <b>Referencia de mercado, no tope legal</b>
+                      En Colombia <b>no existe tope de AIU por ley</b> — cada entidad es autónoma
+                      (Colombia Compra Eficiente). La práctica usual sin Imprevistos es
+                      <b>A 10 % + U 5 %</b>. El sistema <b>avisa</b> si A&nbsp;&gt;&nbsp;12&nbsp;% o
+                      U&nbsp;&gt;&nbsp;8&nbsp;%, pero <b>no bloquea</b>: si su caso lo justifica,
+                      radíquelo y susténtelo.
+                    </div>
+
+                    <dl class="tot" id="reg-tot">
+                      <dt>Costo directo</dt><dd class="n">$ 0</dd>
+                      <dt>Administración <span class="pct">10 %</span></dt><dd class="n">$ 0</dd>
+                      <dt>Utilidad <span class="pct">5 %</span></dt><dd class="n">$ 0</dd>
+                      <dt>IVA 19 % sobre la utilidad</dt><dd class="n">$ 0</dd>
+                      <dt class="gt">Total del presupuesto</dt><dd class="n gt">$ 0</dd>
+                    </dl>
+                  </div>
+                  <div class="pie">
+                    A y U por separado, <b>sin Imprevistos</b> (en lo público no se maneja la I), con
+                    IVA sobre la utilidad — Decreto 1372 de 1992, art. 3.
+                  </div>
+                </div>
+
+                <!-- 4. FOTOS (D-29 sección 4 — Drive, D-19) -->
+                <div class="p" id="reg-panel-4">
+                  <header><h2>4 · Registro fotográfico</h2><span class="flex"></span>
+                    <span class="eyebrow" id="reg-fotos-eyebrow">0 fotos</span></header>
+                  <div class="cuerpo">
+                    <div class="fotos" id="reg-fotos-lista">
+                      <div class="foto add" id="reg-foto-agregar"><span class="mas">+</span><b>Agregar</b><small>jpg, png · máx 8 MB</small></div>
+                    </div>
+                    <input type="file" id="reg-foto-input" accept="image/*" multiple style="display:none">
+                    <div class="pie" style="padding-top:.6rem">Se suben directo a Drive al elegirlas o al
+                      arrastrarlas aquí — no dependen del navegador. Si cierra y vuelve a esta sede más
+                      tarde, las va a encontrar ya cargadas.</div>
+                  </div>
+                </div>
+
+                <div class="p" id="reg-panel-radicar">
+                  <header><h2>Antes de radicar</h2><span class="flex"></span>
+                    <span class="est e-pend" id="reg-lista-resumen">—</span></header>
+                  <div class="cuerpo">
+                    <ul class="lista-rad" id="reg-lista" aria-live="polite"></ul>
+                    <div class="acciones-v">
+                      <button class="b sec" type="button" id="btn-guardar-borrador">Guardar borrador</button>
+                      <span class="flex"></span>
+                      <span style="font-size:.79rem;color:var(--tx-sec)" id="reg-msg">Al radicar ya no
+                        podrá editarlo con esta misma versión; si necesita corregir, se genera una
+                        <b>versión nueva</b> y la anterior queda como evidencia.</span>
+                      <button class="b" type="button" id="btn-radicar">Radicar presupuesto</button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ─── VERIFICACIÓN (solo SED) ─── -->
+              <section class="view" id="s-verif">
+                <div class="franja" id="verif-franja">
+                  <div class="c al"><b class="n">—</b><span>Esperando concepto</span></div>
+                  <div class="c"><b class="n">—</b><span>Presupuestos radicados</span></div>
+                  <div class="c ok"><b class="n">—</b><span>Aprobadas para obra</span></div>
+                  <div class="c er"><b class="n">—</b><span>Devueltas al municipio</span></div>
+                  <div class="c"><b class="n">—</b><span>Radicado sin verificar</span></div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Bandeja de verificación</h2><span class="flex"></span>
+                    <span class="eyebrow">Todo el departamento</span></header>
+                  <div class="cuerpo ras">
+                    <div class="scroll"><table>
+                      <thead><tr><th>Sede</th><th>Municipio</th><th>Tipo</th><th class="n">Daños</th>
+                        <th class="n">Radicado</th><th>Origen</th>
+                        <th>Versión</th><th>Espera</th><th></th></tr></thead>
+                      <tbody id="verif-bandeja-tbody">
+                        <tr><td colspan="9" style="text-align:center;color:var(--tx-sec);padding:1rem">Cargando…</td></tr>
+                      </tbody>
+                    </table></div>
+                  </div>
+                  <div class="pie">
+                    Aparece aquí todo presupuesto radicado del departamento que espera concepto,
+                    más los que ya lo tienen (aprobados o devueltos al municipio). «Espera» son los días
+                    desde la radicación sin concepto: verde hasta 5, oro hasta 10, rojo después.
+                  </div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Emitir concepto</h2>
+                    <span class="est e-pend" id="verif-c-badge">—</span><span class="flex"></span>
+                    <span class="eyebrow" id="verif-c-eyebrow">Seleccione una fila de la bandeja</span></header>
+                  <div class="cuerpo" id="verif-c-cuerpo">
+                    <p style="color:var(--tx-sec);font-size:.85rem;margin:0">Haga clic en una fila de la bandeja (o en "Verificar"/"Abrir") para ver su detalle acá.</p>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ─── CARGAS (solo SED) ─── -->
+              <section class="view" id="s-cargas">
+                <div class="p soltar" id="cargas-dropzone" style="margin-bottom:1rem">
+                  <div class="vacio">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1.8v7.4"/><path d="M5 6.3 8 9.3l3-3"/><path d="M2 10.6v2.2a1.4 1.4 0 0 0 1.4 1.4h9.2a1.4 1.4 0 0 0 1.4-1.4v-2.2"/></svg>
+                    <h3>Suba el JSON del lector</h3>
+                    <p>Corra <code>python tools/ingesta.py &lt;MUNICIPIO&gt; --json</code> en su equipo y
+                      suba acá el archivo que produce (o arrástrelo a esta zona), o
+                      <a href="#" id="cargas-elegir">selecciónelo del equipo</a>. El Excel original
+                      <b>no</b> se sube a esta pantalla — ya lo leyó el lector, en su computador.</p>
+                  </div>
+                  <input type="file" id="cargas-input" accept=".json,application/json" style="display:none">
+                </div>
+
+                <div id="cargas-contenido">
+                  <div class="p"><div class="cuerpo"><p style="color:var(--tx-sec);font-size:.85rem;margin:0">Todavía no se ha subido ningún archivo.</p></div></div>
+                </div>
+              </section>
+
+              <!-- ─── LOTES (solo Administrador, D-44) ─── -->
+              <section class="view" id="s-lotes">
+                <div class="p">
+                  <header><h2>Lotes de trabajo</h2><span class="flex"></span>
+                    <button class="b mini" type="button" id="lotes-btn-crear">+ Crear lote</button></header>
+                  <div class="cuerpo ras"><div class="scroll"><table>
+                    <thead><tr><th>Lote</th><th class="n">Sedes</th><th class="n">Radicadas</th><th class="n">Aprobadas</th>
+                      <th class="n">Valor radicado</th><th>Creado</th><th>Estado</th></tr></thead>
+                    <tbody id="lotes-tbody"></tbody>
+                  </table></div></div>
+                  <div class="pie">Un lote agrupa sedes para trabajarlas por fases; Tablero, Sedes y Municipio se
+                    pueden filtrar por lote. Una sede está en un solo lote a la vez: moverla o quitarla no borra
+                    el registro de en qué lote estuvo.</div>
+                </div>
+
+                <div class="p oculto" id="lote-detalle">
+                  <header><h2 id="lote-det-nombre">—</h2><span class="est e-pend" id="lote-det-estado">—</span><span class="flex"></span>
+                    <button class="b mini" type="button" id="lote-btn-agregar">+ Agregar sedes</button>
+                    <button class="b sec mini" type="button" id="lote-btn-exportar">Exportar a Excel</button>
+                    <button class="b sec mini peligro-tx" type="button" id="lote-btn-cerrar">Cerrar lote</button></header>
+                  <div class="cuerpo"><p class="lote-desc" id="lote-det-desc"></p><div class="cifras" id="lote-det-cifras"></div></div>
+                  <div class="cuerpo ras"><div class="scroll"><table>
+                    <thead><tr><th>Sede</th><th>Municipio</th><th>Tipo</th><th class="n">Total</th><th>Estado</th><th></th></tr></thead>
+                    <tbody id="lote-det-tbody"></tbody>
+                  </table></div></div>
+                  <div class="pie" id="lote-det-pie"></div>
+                </div>
+
+                <div class="p oculto" id="lote-editor">
+                  <header><h2 id="lote-ed-titulo">Crear lote</h2></header>
+                  <div class="cuerpo">
+                    <div class="lote-datos" id="lote-ed-datos">
+                      <div class="campo"><label for="lote-ed-nombre">Nombre del lote</label>
+                        <input id="lote-ed-nombre" type="text" maxlength="80" placeholder="Ej.: Fase 1 — colapso y riesgo inminente"></div>
+                      <div class="campo"><label for="lote-ed-desc">Descripción (opcional)</label>
+                        <input id="lote-ed-desc" type="text" maxlength="500" placeholder="Criterio con que se armó el lote"></div>
+                    </div>
+                    <div class="filtros">
+                      <label><span>Municipio</span><select id="lote-f-muni"></select></label>
+                      <label><span>Tipo de afectación</span><select id="lote-f-tipo">
+                        <option value="">Todos</option><option value="12">1 y 2 (colapso y riesgo)</option>
+                        <option value="1">1 · Colapso</option><option value="2">2 · Riesgo inminente</option>
+                        <option value="3">3 · Estructurales parciales</option><option value="4">4 · Menores</option>
+                        <option value="5">5 · Sin afectación</option><option value="6">6 · No determinable</option>
+                        <option value="7">7 · Sin revisar</option></select></label>
+                      <label><span>Presupuesto</span><select id="lote-f-pres">
+                        <option value="">Con y sin</option><option value="con">Con presupuesto</option><option value="sin">Sin presupuesto</option></select></label>
+                      <label><span>Lote actual</span><select id="lote-f-lote">
+                        <option value="">Cualquiera</option><option value="sin">Sin lote</option><option value="con">En otro lote</option></select></label>
+                      <label class="f-texto"><span>Buscar</span><input id="lote-f-texto" type="search" placeholder="Nombre o DANE"></label>
+                    </div>
+                    <div class="filtros-acc">
+                      <button class="b sec mini" type="button" id="lote-f-atajo">Atajo: tipo 1 y 2 del censo</button>
+                      <button class="b sec mini" type="button" id="lote-f-todas">Seleccionar las filtradas</button>
+                      <button class="b sec mini" type="button" id="lote-f-limpiar">Quitar selección</button>
+                      <span class="flex"></span><span class="hace" id="lote-ed-conteo"></span>
+                    </div>
+                  </div>
+                  <div class="cuerpo ras"><div class="scroll" style="max-height:420px;overflow-y:auto"><table>
+                    <thead><tr><th></th><th>Sede</th><th>DANE</th><th>Municipio</th><th>Tipo</th><th>Lote actual</th><th>Estado</th></tr></thead>
+                    <tbody id="lote-ed-tbody"></tbody>
+                  </table></div></div>
+                  <div class="pie" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">
+                    <span id="lote-ed-resumen"></span><span class="flex"></span>
+                    <button class="b sec mini" type="button" id="lote-ed-cancelar">Cancelar</button>
+                    <button class="b mini" type="button" id="lote-ed-guardar">Crear lote</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ─── HALLAZGOS (solo SED) ─── -->
+              <section class="view" id="s-hallazgos">
+                <div class="franja" id="hallazgos-franja">
+                  <div class="c er"><b class="n" id="hallazgos-n-abiertos">—</b><span>Abiertos</span></div>
+                  <div class="c"><b class="n" id="hallazgos-n-error">—</b><span>Bloquean un cruce</span></div>
+                  <div class="c"><b class="n" id="hallazgos-n-advertencia">—</b><span>Informativos</span></div>
+                  <div class="c ok"><b class="n" id="hallazgos-n-resueltos">—</b><span>Resueltos</span></div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Hallazgos</h2></header>
+                  <div class="cuerpo ras" id="hallazgos-lista">
+                    <p style="color:var(--tx-sec);font-size:.85rem;margin:0">Cargando…</p>
+                  </div>
+                  <div class="pie">El sistema los registra solo al radicar o cargar un presupuesto con una
+                    inconsistencia (AIU sobre el umbral, costo en $0, declaración que contradice el censo,
+                    DANE confirmado a mano). Ninguno se resuelve solo: alguien confirma el dato real y lo marca.</div>
+                </div>
+              </section>
+
+              <!-- ─── USUARIOS (solo SED) ─── -->
+              <section class="view" id="s-usuarios">
+                <div class="p">
+                  <header><h2>Usuarios</h2><span class="flex"></span>
+                    <button class="b mini" type="button" onclick="mostrarFormularioUsuario()">+ Agregar usuario</button></header>
+
+                  <div class="cuerpo ras oculto" id="usuario-form">
+                    <div class="campo"><label for="uf-correo">Correo institucional</label>
+                      <input id="uf-correo" type="email" placeholder="nombre@sedcaldas.edu.co"></div>
+                    <div class="campo"><label for="uf-nombre">Nombre</label>
+                      <input id="uf-nombre" type="text"></div>
+                    <div class="campo"><label for="uf-rol">Rol</label>
+                      <select id="uf-rol" onchange="actualizarCamposUsuarioForm()">
+                        <option value="ADMINISTRADOR">Administrador</option>
+                        <option value="VERIFICADOR">Verificador</option>
+                        <option value="RESPONSABLE_SEDE">Responsable de sede</option>
+                        <option value="CONSULTA">Consulta</option>
+                      </select></div>
+                    <div class="campo oculto" id="uf-campo-tipo"><label for="uf-tipo">Tipo</label>
+                      <select id="uf-tipo">
+                        <option value="alcalde">Alcalde</option>
+                        <option value="rector">Rector</option>
+                      </select></div>
+                    <div class="campo oculto" id="uf-campo-alcance"><label for="uf-alcance" id="uf-alcance-label">Alcance</label>
+                      <input id="uf-alcance" type="text" placeholder="Nombre del municipio, o DANE1|DANE2|..."></div>
+                    <button class="b" type="button" id="uf-btn-crear" onclick="crearUsuarioUI()">Crear usuario</button>
+                    <button class="b sec mini" type="button" style="margin-left:.4rem" onclick="document.getElementById('usuario-form').classList.add('oculto')">Cancelar</button>
+                    <div id="uf-error" class="oculto" style="color:#b3261e;font-size:.85rem;margin-top:.5rem"></div>
+                  </div>
+
+                  <div class="cuerpo ras">
+                    <div class="scroll">
+                      <table>
+                        <thead><tr><th>Persona</th><th>Rol</th><th>Ámbito</th><th>Estado</th><th></th></tr></thead>
+                        <tbody id="usuarios-tbody">
+                          <tr><td colspan="5" style="color:var(--tx-sec);font-size:.85rem">Cargando…</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="pie">Solo Administrador ve y toca esta pantalla. Crear un usuario no envía nada — la persona entra sola, con su correo, la primera vez que inicie sesión.</div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Qué puede hacer cada rol</h2></header>
+                  <div class="cuerpo ras">
+                    <div class="scroll">
+                      <table>
+                        <thead><tr><th>Acción</th><th style="text-align:center">Admin</th><th style="text-align:center">Responsable</th><th style="text-align:center">Verificador</th><th style="text-align:center">Consulta</th></tr></thead>
+                        <tbody>
+                          <tr><td>Ver el tablero</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm si">●</td><td class="perm si">●</td></tr>
+                    <tr><td>Emitir concepto de verificación</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm si">●</td><td class="perm no">○</td></tr>
+                          <tr><td>Diligenciar a mano</td><td class="perm si">●</td><td class="perm lim">su ámbito</td><td class="perm no">○</td><td class="perm no">○</td></tr>
+                          <tr><td>Crear y cerrar lotes</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm no">○</td><td class="perm no">○</td></tr>
+                          <tr><td>Cargar Excel de alcaldía</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm si">●</td><td class="perm no">○</td></tr>
+                          <tr><td>Verificar y aprobar</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm si">●</td><td class="perm no">○</td></tr>
+                          <tr><td>Reabrir algo ya cerrado</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm no">○</td><td class="perm no">○</td></tr>
+                          <tr><td>Gestionar usuarios</td><td class="perm si">●</td><td class="perm no">○</td><td class="perm no">○</td><td class="perm no">○</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="pie">
+                    <b>Consulta</b> son directivos de la Secretaría: ven todo, no tocan nada.
+                    <b>Responsable de sede</b> (alcalde o rector) es externo a la Secretaría: solo ve y
+                    diligencia las sedes de su alcance, y no ve el tablero departamental.
+                  </div>
+                </div>
+              </section>
+
+            </div>
+
+            <footer class="pie-inst">
+              <span class="sello">Gobernación de Caldas · Secretaría de Educación</span>
+              <span>Cl. 14 #2-58, Parque Tecnológico, Villamaría</span>
+              <span>Conmutador +57 68 98 24 44</span>
+              <a href="mailto:atencionalciudadano@caldas.gov.co">atencionalciudadano@caldas.gov.co</a>
+              <span class="flex"></span>
+              <span class="hace">Uso interno — no distribuir fuera de la Secretaría</span>
+            </footer>
+          </div>
+        </div>
+      </div>
+
+      <div class="avisos" id="avisos" aria-live="polite"></div>
+      <div class="dlg-fondo oculto" id="dlg">
+        <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlg-tit">
+          <h3 id="dlg-tit"></h3>
+          <div class="dlg-cuerpo" id="dlg-cuerpo"></div>
+          <div class="dlg-acc" id="dlg-acc"></div>
+        </div>
+      </div>
+
+    </div>
+
+<script src="js/nucleo.js?v=3"></script>
+<script src="js/transporte.js?v=3"></script>
+<script src="js/sesion.js?v=3"></script>
+<script src="js/avisos.js?v=3"></script>
+<script src="js/login.js?v=3"></script>
+<script src="js/registrar.js?v=3"></script>
+<script src="js/ficha.js?v=3"></script>
+<script src="js/pdf.js?v=3"></script>
+<script src="js/verificacion.js?v=3"></script>
+<script src="js/hallazgos.js?v=3"></script>
+<script src="js/usuarios.js?v=3"></script>
+<script src="js/cargas.js?v=3"></script>
+<script src="js/tablero.js?v=3"></script>
+<script src="js/inicio.js?v=3"></script>
+<script src="js/sedes.js?v=3"></script>
+<script src="js/lotes.js?v=3"></script>
+<script src="js/exportar.js?v=3"></script>
+<script src="js/cabecera.js?v=3"></script>
+<script src="js/buscador.js?v=3"></script>
+<script src="js/arranque.js?v=3"></script>
+
+</body></html>

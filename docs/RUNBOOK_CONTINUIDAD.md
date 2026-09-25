@@ -21,7 +21,7 @@ etc.) — un runbook desactualizado es tan malo como no tener ninguno.
 | Despliegue Web App (URL `/exec` que usa el frontend) | Parte del proyecto de Apps Script | Misma cuenta |
 | Secreto de firma de tokens (`TOKEN_SECRET`) | Propiedades del script (no visible en ningún archivo) | Misma cuenta |
 | Código fuente de todo lo anterior, versionado | `backend/` en este repositorio de GitHub | Cuenta de GitHub del practicante (`Jostrel19`), repo público |
-| Frontend (mockup / app real) | `docs/diseno/mockup_v6.html` en este mismo repositorio | Mismo repo |
+| Frontend | `app/` en este mismo repositorio (ver `app/README.md`) | Mismo repo |
 | Respaldos diarios del Sheet | Carpeta de Drive `Respaldos - Reconstruccion de sedes` | Misma cuenta de Gmail |
 
 **Lo único que NO depende de la cuenta personal:** el código fuente, porque está en GitHub. Si la
@@ -57,8 +57,8 @@ Es el camino simple: la cuenta saliente sigue activa un rato más.
    copia desde la hoja).
 3. Repetir el despliegue (`Implementar > Nueva implementación`) desde la copia — esto **sí genera
    una URL `/exec` nueva**, porque es un proyecto distinto, aunque el código sea idéntico.
-4. Actualizar `BACKEND_URL` en `docs/diseno/mockup_v6.html` (y en cualquier frontend real que exista
-   para entonces) con la URL nueva, y volver a publicar el frontend.
+4. Actualizar `BACKEND_URL` en `app/js/nucleo.js` con la URL nueva, subir el `?v=` de `app/index.html`
+   y volver a publicar el frontend.
 5. Confirmar que el secreto de firma de tokens se regeneró solo (`_secreto()` lo hace automáticamente
    la primera vez que se ejecuta en el proyecto nuevo) — es normal y esperado que sea distinto al de
    antes; solo invalida las sesiones activas en ese momento, nadie pierde datos por esto.
