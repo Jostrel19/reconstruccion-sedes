@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "diseno-local",
+      "name": "app-local",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8778", "--bind", "127.0.0.1", "--directory", "docs/diseno"],
-      "port": 8778
+      "runtimeArgs": ["-m", "http.server", "8779", "--bind", "127.0.0.1", "--directory", "app"],
+      "port": 8779
     }
   ]
 }

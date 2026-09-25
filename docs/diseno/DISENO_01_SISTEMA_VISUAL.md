@@ -254,3 +254,38 @@ volver al "dashboard SaaS" que §2.4 descartó.
 
 **Movimiento:** entrada de vista (220 ms), barras que crecen, conteo ascendente de la franja la primera
 vez, curvas del ingreso que se desplazan en 40 s. Todo se apaga con `prefers-reduced-motion`.
+
+## 8. Componentes añadidos el 2026-09-25 (en `app/`, D-46)
+
+Mismos tokens; ningún color nuevo. Estilos al final de `app/css/estilos.css`.
+
+- **Tarjeta de tarea** (`.tarea`, en Inicio): cifra en serif, título, una línea de qué significa y un
+  botón secundario con la acción. La **franja lateral** dice la urgencia, igual que los estados (§3.3):
+  gris = informativo, oro = conviene atender, rojo = bloquea o lleva demasiado tiempo. La antigüedad
+  usa los mismos umbrales del semáforo de días en espera (`ESPERA_OK_DIAS`, `ESPERA_ALERTA_DIAS`).
+- **Filtros en píldora** (`.chip` con `aria-pressed`, en Municipio): el filtro activo va en gris oscuro
+  con texto blanco; cada píldora lleva su conteo.
+- **Encabezado suelto** (`.sub-cab`) sobre la franja de «Cómo vamos», con la nota de criterio debajo
+  (`.nota-franja`): toda cifra dice sobre qué conjunto se calculó.
+- **Pasos del proceso** (`.pasos`, lista numerada): solo para el Responsable de sede; el número sí es
+  información porque es una secuencia real.
+- **Texto para lectores de pantalla** (`.sr`): en el flujo, no absoluto, para que dentro de una tabla
+  con scroll no ensanche la página en celular.
+- **Lista «Antes de radicar»** (`.lista-rad`, en Registrar): una fila por requisito con una marca redonda
+  — verde ✓ hecho, rojo ! falta (bloquea la radicación), oro · recomendado (no bloquea). Las filas
+  pendientes son botones que llevan a su sección; la marca va con su palabra en `.sr` para lectores de
+  pantalla. El encabezado resume «Faltan N para radicar» o «Listo para radicar».
+
+## 9. Ajustes de accesibilidad (2026-09-25, WCAG 2.1 AA)
+
+Medidos, no estimados (razón de contraste calculada sobre los tokens):
+
+| Uso | Antes | Ahora |
+|---|---|---|
+| Contorno de foco | `--oro` · 2,1:1 sobre blanco, 1,9:1 sobre papel | `--oro-osc` · 4,0:1 y 3,6:1 (en el riel oscuro sigue `--oro`, 6,1:1) |
+| Borde de campos (input, select, textarea) | `--borde-f` / `--borde` · 2,0:1 o menos | `--gris` · 4,4:1 |
+| Separador «›» de migas, «×» de quitar, «+» de agregar foto, «○» de permisos | `--borde-f` · 2,0:1 | `--tx-sec` · 5,9:1 sobre papel |
+
+El oro claro **sigue siendo el acento** (franjas, regla superior, ítem activo del riel); solo deja de usarse
+donde tiene que ser legible o marcar un estado. Nuevo componente: **«Saltar al contenido»** (`.saltar`),
+invisible hasta recibir el foco con teclado.

@@ -162,7 +162,7 @@ Para el detalle paso a paso, `docs/PLAN_DESARROLLO.md` §3-4. Snapshot a la fech
 
 | Frente | Estado |
 |---|---|
-| Diseño visual de las 10 pantallas, 4 roles | ✅ Cerrado (`docs/diseno/mockup_v6.html`) |
+| Diseño visual de las 10 pantallas, 4 roles | ✅ Cerrado (`docs/diseno/mockup_v6.html`, hoy `app/`) |
 | Catálogo de las 975 sedes con censo de daños | ✅ Construido y verificado |
 | 4 lectores de Excel real (ingesta) | ✅ Construidos y probados contra archivos reales |
 | Backend: Sheet + 6 pestañas + protección | ✅ Desplegado en producción |

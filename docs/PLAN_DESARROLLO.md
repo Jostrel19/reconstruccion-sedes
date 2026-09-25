@@ -30,10 +30,10 @@ dato salvo por la etiqueta de origen (`MAN` / `XLS`), que sí se conserva para t
 | Rol | Alcance de sedes | Lotes (D-44) | Diligencia | Verifica | Pantallas |
 |---|---|:--:|:--:|:--:|---|
 | **Administrador** | Todo el departamento | Crea, agrega, quita, cierra | Sí | Sí | Todas |
-| **Verificador** (arquitecto) | **Todo el departamento**, sin restricción por municipio (D-25) | Filtra por lote | No (solo Cargas) | **Sí** | Tablero · Sedes · Ficha · Verificación · Cargas · Hallazgos |
-| **Responsable de sede** — alcalde | **Todas las sedes de su municipio** (D-24) | No los ve | Sí | No | Sedes · Ficha · Registrar |
-| **Responsable de sede** — rector | **Las sedes de su I.E. según el catálogo**, de 1 a 18 (D-24) | No los ve | Sí | No | Sedes · Ficha · Registrar |
-| **Consulta** (directivo) | Todo el departamento, solo lectura | Filtra por lote | No | No | Tablero · Sedes · Ficha |
+| **Verificador** (arquitecto) | **Todo el departamento**, sin restricción por municipio (D-25) | Filtra por lote | No (solo Cargas) | **Sí** | Inicio · Sedes · Tablero · Ficha · Verificación · Cargas · Hallazgos |
+| **Responsable de sede** — alcalde | **Todas las sedes de su municipio** (D-24) | No los ve | Sí | No | Inicio · Sedes · Ficha · Registrar |
+| **Responsable de sede** — rector | **Las sedes de su I.E. según el catálogo**, de 1 a 18 (D-24) | No los ve | Sí | No | Inicio · Sedes · Ficha · Registrar |
+| **Consulta** (directivo) | Todo el departamento, solo lectura | Filtra por lote | No | No | Inicio · Sedes · Tablero · Ficha |
 
 *Desde D-43 (2026-09-24) ningún rol ve `valor_referencia`; la columna que decía quién lo veía se reemplazó por la de lotes.*
 
@@ -364,16 +364,81 @@ volcar, tal como debía ser. Tras confirmar, la lista pendiente pasó de 9 a 7 f
     desplegar `Lotes.gs` y correr `crearHojas()`.
 26b. ⏳ **2026-09-24** — **D-45**: un borrador guardado sobre un radicado queda en espera y no lo
     reemplaza; hallazgos automáticos solo al radicar. Registrar retoma el borrador; la Ficha lo marca.
-    Probado con el arnés (43/43); falta desplegar `Presupuestos.gs`.
+    Probado con el arnés (43/43); desplegado (confirmado 2026-09-25), falta probarlo en real.
 26c. ⏳ **2026-09-24** — **Cargas corregida**: municipio comparado sin tildes (Samaná y Belalcázar no
     cruzaban ninguna fila), volcado por tandas con `volcarCarga` (idempotente), filas en $0 y DANE
     repetidos no se vuelcan, casillas estables tras un volcado parcial, «ya volcada desde este archivo».
-    Probado con arnés (54/54) y simulador con el JSON real de Samaná; falta desplegar y correr
-    `docs/GUION_CASO_DE_EXITO.md`.
+    Probado con arnés (54/54) y simulador con el JSON real de Samaná; desplegado (confirmado
+    2026-09-25), falta correr `docs/GUION_CASO_DE_EXITO.md`.
 26. ✅ **2026-09-24** — Pulido visual y novedades (frontend): encabezado de vista, avisos y diálogos propios
     (sin `alert`/`confirm`), revisión antes de radicar y confirmación con número de radicado, días en
     espera con semáforo, línea de tiempo por sede, buscador de sedes, exportar a Excel (CSV), menú de
     celular. Probado con backend simulado.
+
+---
+
+## 3.c Hoja de ruta a producción — aprobada 2026-09-25
+
+Aprobada por el usuario el 2026-09-25 («Me convence el plan, déjalo»). Cambia la pregunta de «¿qué
+más le falta?» por «¿qué hace falta para pasar a la siguiente etapa?»: cada hito tiene **una sola
+condición de salida verificable** y, cuando se cumple, se pasa al siguiente aunque queden detalles.
+
+**Reglas que la sostienen:**
+1. Fuera de la lista cerrada del hito 0, no se agrega nada nuevo hasta terminar el piloto. Las ideas
+   van a «Después del piloto» (abajo) y se priorizan con evidencia de uso.
+2. Cada sesión cierra un paso concreto del hito en curso, o deja escrito qué lo bloquea.
+3. Claude no propone mejoras por su cuenta: solo reporta lo que bloquea el hito en curso.
+4. Un defecto se corrige solo si bloquea. Un texto mejorable o una pantalla lenta que funciona no bloquean.
+
+| Hito | Pregunta que responde | Condición de salida |
+|---|---|---|
+| 0 | ¿Está completo lo que el usuario quiere mostrar? | Los 8 puntos de abajo hechos, verificados con simulador y arnés, y documentados |
+| 1 | ¿Funciona de punta a punta? | `docs/GUION_CASO_DE_EXITO.md` en verde, en real |
+| 2 | ¿Es lo que la Secretaría necesita? | Decisiones del jefe **por escrito** (Q-3, Q-7, Q-14, municipio y arquitecto piloto, publicar y borrar datos de prueba, D-19) |
+| 3 | ¿Le sirve a quien lo usa? | Presupuestos reales radicados por un municipio y verificados por un arquitecto dentro del sistema, en 2 semanas |
+| 4 | ¿Cubre la obra? | Una sede con contrato y avance registrados, con los campos que defina el jefe (Q-14) |
+
+**Límite medido que condiciona el hito 3 y la extensión a los 26 municipios:** el cupo de correo de la
+cuenta que despliega el backend es de **100 al día** (`MailApp.getRemainingDailyQuota()` = 100, medido
+el 2026-09-25 a las 8:35 sin correos enviados ese día). Cada ingreso gasta uno (código de un solo uso),
+igual que cada radicación y cada concepto. Alcanza para un piloto de un municipio; para los 26
+municipios con sus rectores activos no alcanza en un día de mucho uso. Se lleva a la reunión del hito 2.
+
+### Hito 0 — lista cerrada, pedida por el usuario el 2026-09-25
+
+Todo se prueba con simulador y arnés; se despliega **una sola vez** al final, y el hito 1 prueba en
+real la versión final. (`Presupuestos.gs`, `Codigo.gs` y `Sedes.gs` del 2026-09-24 ya están
+desplegados: el usuario lo confirmó el 2026-09-25 y el `/exec` publicado reconoce `volcarCarga`.) Orden:
+
+1. ✅ **2026-09-25** — **Dividir el `<script>`** del mockup en archivos (hecho: `app/`, ver `app/README.md`) (`index.html`, CSS y un JS por pantalla, scripts
+   clásicos sin módulos ni dependencias, porque los `onclick` usan funciones globales). Movimiento
+   mecánico, sin cambiar comportamiento; verificación: los archivos concatenados en orden deben ser
+   idénticos al `<script>` original. Va primero porque todo lo demás edita ese código.
+2. ✅ **2026-09-25** — **Sedes con las 975** y filtros explícitos (D-46).
+3. ✅ **2026-09-25** — **Pantalla de Inicio** por rol (D-46); corrige además el riel que mostraba pantallas de más a Verificador y Consulta.
+4. ✅ **2026-09-25** — **Lista de tareas en Registrar:** panel «Antes de radicar» junto al botón, con lo que falta (bloquea) y lo recomendado (no bloquea); cada pendiente lleva a su sección.
+5. ✅ **2026-09-25** — **Precargar el detalle de la Ficha:** memoria por sede y carga anticipada al pasar sobre una fila (máximo 2 pedidos de precarga a la vez).
+6. ✅ **2026-09-25** — **Lotes más rápida:** crear, agregar, quitar y cerrar actualizan la memoria del navegador en vez de volver a pedir las 975 sedes (antes, ~20 s por operación).
+7. ✅ **2026-09-25** (desplegado ese día) — **Correo al emitir concepto** (`Verificaciones.gs::_avisarConcepto`), con las observaciones cuando se devuelve para ajuste. No se envía si el presupuesto entró por Cargas, si quien radicó es quien emite, si ya no está activo o si no queda cupo.
+8. ✅ **2026-09-25** — **Revisión WCAG 2.1 AA y lineamientos GOV.CO.** Accesibilidad revisada contra el
+   Anexo 1 de la Resolución MinTIC 1519 de 2020 (CC1–CC32) y corregida; detalle en `REGISTRO_DESARROLLO.md`.
+   **GOV.CO (Resolución 2893 de 2020, Anexo 2) queda como decisión del usuario:** según su propio alcance
+   aplica a la *sede electrónica* de la entidad (su portal oficial, con los menús Transparencia · Servicios
+   a la Ciudadanía · Participa y la barra superior GOV.CO); este sistema es una aplicación interna con inicio
+   de sesión, no la sede electrónica de la Gobernación ni un trámite ciudadano. Si el jefe decide que debe
+   llevar la barra GOV.CO, choca con `DISENO_01` (azul institucional de GOV.CO frente a la paleta del logo).
+
+**Hito 0 cerrado el 2026-09-25.** Hito 1: `docs/GUION_CASO_DE_EXITO.md` actualizado ese día (Inicio, «Contar
+sobre», «Antes de radicar», precarga, Lotes, correo del concepto con una vuelta devolver → corregir →
+aprobar, comprobación rápida de accesibilidad, pasos cronometrados); **falta correrlo en real**.
+
+### Después del piloto (anotado, no se hace antes)
+
+Seguimiento de obra (hito 4, Q-14) · tamizaje de las 975 (D-3/D-4) · lector de San José · texto
+obsoleto de `Setup.gs::crearHojas` · datos personales en el historial público del repositorio (decisión
+del usuario, `docs/HANDOFF_2026-09-24.md` punto 8) · **política CSP estricta** para `app/` (anotado
+2026-09-25): el token de sesión vive en `sessionStorage` y hoy lo protege `esc()` en todo dato que se
+pinta; una CSP sin `unsafe-inline` exige antes cambiar los `onclick="…"` del HTML por `addEventListener`.
 
 ---
 
@@ -498,7 +563,7 @@ resolver. No se agregan sin que alguien los pida.
 `docs/diseno/DISENO_01` a `DISENO_05` describen el diseño **anterior a D-26**. Siguen sirviendo para
 los tokens visuales y el razonamiento anti-genérico, pero contienen referencias al modelo
 paramétrico, al contraste y a la desviación, que ya no existen. **La fuente de verdad del diseño es
-`docs/diseno/mockup_v6.html`**, que sí está al día y es ejecutable.
+`app/`** (desde 2026-09-25; antes `docs/diseno/mockup_v6.html`), que sí está al día y es ejecutable.
 
 No se reescriben ahora: no bloquean el desarrollo y reescribirlos antes de construir es trabajo que
 se repite. Se actualizan cuando el módulo correspondiente esté construido y se sepa qué quedó.
@@ -507,12 +572,8 @@ se repite. Se actualizan cuando el módulo correspondiente esté construido y se
 
 ## 6. Cómo se prueba el diseño
 
-```bash
-python tools/servir.py
-```
+Ver `app/README.md`: servidor local en el puerto 8779, `node --check` de cada script y backend
+simulado para recorrer las pantallas sin tocar datos reales.
 
-Y abrir `docs/diseno/mockup_v6.html`. El selector **«Ver como»** cambia entre los cuatro roles: las
-pantallas fuera de alcance quedan tachadas y el valor de referencia desaparece para el Responsable
-de sede.
-
-Verificado el 2026-09-16: 9 pantallas × 4 roles, sin errores de consola.
+Verificado el 2026-09-25, tras dividir el archivo: 10 pantallas × 4 roles y las acciones de cada una
+(lotes, borrador, concepto, hallazgo, Cargas, PDF, buscador, CSV, sesión), sin errores de consola.
