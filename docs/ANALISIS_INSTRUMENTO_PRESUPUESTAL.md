@@ -434,7 +434,7 @@ topes de A % y U % (no existen por ley — ver §3.1, se propone alerta parametr
 
 | # | Pendiente | Por qué importa |
 |---|---|---|
-| **Q-1** | **Confirmar que la cuenta `[cuenta Administrador]` tiene licencia Power Automate Premium.** El disparador «Cuando se recibe una solicitud HTTP» es premium; la consola de Power Automate se ve igual con y sin licencia. | Bloqueante. Sin Premium hay que cambiar de backend |
+| **Q-1** | **Confirmar que la cuenta `correo del administrador` tiene licencia Power Automate Premium.** El disparador «Cuando se recibe una solicitud HTTP» es premium; la consola de Power Automate se ve igual con y sin licencia. | Bloqueante. Sin Premium hay que cambiar de backend |
 | **Q-2** | ¿Existe el sitio de SharePoint destino o hay que solicitarlo? ¿Quién lo administra? | Bloqueante. Es donde viven las listas |
 | **Q-3** | Aval de Planeación a los umbrales de alerta A > 12 % y U > 8 % | Criterio de negocio, no técnico |
 | **Q-4** | ¿Se agregan los campos que el formato no pide (profesional que elabora, obra en curso, cofinanciación)? | Modifica el formato oficial; requiere aval de Planeación |

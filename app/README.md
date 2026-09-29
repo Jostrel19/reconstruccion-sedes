@@ -102,6 +102,7 @@ Revisada el 2026-09-25. Al tocar la interfaz, mantener:
 
 `nucleo.js::CAMPANA_CONFIRMACION` enciende la campaña: el alcalde (usuario `RESPONSABLE_SEDE` de tipo `alcalde`)
 entra directo a «Confirmación de sedes» y no ve nada más, y Administrador, Verificador y Consulta ven
-«Confirmación de alcaldes» en el riel. En `false`, el alcalde vuelve a ser un Responsable de sede como los demás.
+«Confirmación de alcaldes» en el riel. En `false`, el alcalde vuelve a ser un Responsable de sede como los demás. Esto solo decide la pantalla: el servidor aplica la misma regla por su cuenta (D-49,
+`Codigo.gs::_bloqueoCampana`, propiedad del script `CAMPANA_CONFIRMACION`). Al terminar la campaña hay que apagar las dos.
 Ahí mismo están el plazo (`CONFIRMACION_PLAZO`) y la fecha del oficio que cita el certificado
 (`CONFIRMACION_FECHA_OFICIO`, hallazgo H-27). Los permisos reales los revisa el servidor en cada acción.

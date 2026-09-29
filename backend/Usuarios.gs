@@ -126,6 +126,9 @@ function Usuarios_actualizar(body) {
   // Auth.gs: desactivar o cambiar rol/alcance corta la sesión abierta de esa
   // persona desde la siguiente petición, sin esperar a que venza el token.
   _olvidarUsuariosActivos();
+  // D-49: cualquier cambio del Administrador sobre el usuario le libera el tope
+  // de códigos (salida para quien quedó sin poder pedir uno).
+  _liberarTopeCodigos(correo);
 
   return { ok: true, correo: correo };
 }

@@ -29,7 +29,7 @@ const APP_CONFIG = {
    * OJO: debe ser el VÍNCULO DE USO COMPARTIDO (el que produce «Copiar
    * vínculo», de la forma /:f:/g/personal/...), no la dirección /my?id=... que
    * ve el dueño en su propio OneDrive: esa última no le abre a un invitado. */
-  URL_CARPETA_ENTREGA: 'https://sedcaldas1-my.sharepoint.com/my?id=%2Fpersonal%2Fdata%5Fsedcaldas%5Fedu%5Fco%2FDocuments%2F0%20UNIDAD%20DE%20PLANEACION%2FEntrega%20Presupuesto%20Sismo%202026',
+  URL_CARPETA_ENTREGA: '' /* retirada 2026-09-29: sistema viejo (D-18), la ruta era de una cuenta institucional */,
 
   /* --- ACCESO ---------------------------------------------------------------
    * El enlace lleva municipio y token: index.html?m=RIOSUCIO&t=<token>

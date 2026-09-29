@@ -18,7 +18,7 @@
     const soltar = ocupar(document.getElementById('btn-enviar'), 'Enviando…');
     try {
       const r = await backend('solicitarCodigo', { correo: correoActual });
-      if (r.ok) pasoCodigo('Le enviamos un código a su correo — vence en 10 minutos, un solo uso.');
+      if (r.ok) pasoCodigo('Revise su correo: el código vence en 10 minutos y es de un solo uso. Si pidió varios, use el último que le llegó.');
       else if (r.sinConfirmar) pasoCodigo(AVISO_SIN_CONFIRMAR);
       else errorLogin(r.error || 'No se pudo enviar el código. Intente de nuevo.');
     } catch (err) {
