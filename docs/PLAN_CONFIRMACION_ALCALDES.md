@@ -3,7 +3,7 @@
 **2026-09-29.** Visto bueno del usuario para desarrollar: «Sí, arranca con el desarrollo del módulo. Realiza un
 plan para hacer el desarrollo por fases y que se haga todo completo.» La definición está cerrada en **D-48**
 (`CLAUDE.md` §2) y el texto del certificado, en `docs/PROPUESTA para jefatura - Certificado de alcaldes y ajustes
-al oficio v2.docx`. **Plazo de los alcaldes: viernes 2026-10-02.**
+al oficio v2.docx`. **Plazo de los alcaldes: martes 2026-10-06** (era el viernes 2026-10-02; lo cambió la jefatura el 2026-09-29).
 
 **Objetivo:** que cada uno de los 26 alcaldes entre con su correo, responda por cada sede oficial de su
 municipio si tiene una intervención terminada o en proceso (quién, nombre y estado), genere la certificación,
@@ -233,3 +233,8 @@ usa la confirmación) y el envío de códigos tiene tope (3 sin usar por correo 
 68/68 y 71/71). **Falta desplegar** `Codigo.gs`, `Auth.gs` y `Usuarios.gs` (nueva versión de la implementación) y
 comprobarlo en real con «Jose Prueba», **antes de activar a los 26 alcaldes**. Detalle: `CLAUDE.md` D-49 y
 `docs/REGISTRO_DESARROLLO.md`.
+
+**H-27 resuelto (2026-09-29):** el oficio sale hoy. `CONFIRMACION_FECHA_OFICIO` = «29 de septiembre de 2026» (el
+certificado dice «…en atención a su oficio del 29 de septiembre de 2026»; comprobado generando uno de prueba) y el oficio
+dice «Manizales, 29 de septiembre de 2026», ya sin el resaltado de pendiente (respaldo previo
+`…BACKUP-20260929-112634.docx`). En el oficio quedan pendientes, resaltados: el enlace, el código QR, el firmante y el cargo.

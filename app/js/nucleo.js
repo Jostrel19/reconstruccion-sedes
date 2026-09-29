@@ -27,10 +27,10 @@
      «Confirmación de alcaldes» en el riel. Apagada, el alcalde vuelve a ser un
      Responsable de sede como los demás. */
   const CAMPANA_CONFIRMACION = true;
-  const CONFIRMACION_PLAZO = 'viernes 2 de octubre de 2026';
+  const CONFIRMACION_PLAZO = 'martes 6 de octubre de 2026'; // antes viernes 2; lo cambió la jefatura el 2026-09-29
   // Fecha del oficio de la jefatura que cita el certificado (texto aprobado).
   // Si el oficio sale con otra fecha, se cambia aquí.
-  const CONFIRMACION_FECHA_OFICIO = '28 de septiembre de 2026';
+  const CONFIRMACION_FECHA_OFICIO = '29 de septiembre de 2026'; // fecha de envío del oficio (H-27, resuelto 2026-09-29)
   const VE_CAMPANA = CAMPANA_CONFIRMACION ? ['confirmaciones'] : [];
 
   /* Los 4 roles del sistema (D-20). `ve` es la lista blanca de pantallas y la

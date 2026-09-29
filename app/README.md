@@ -105,4 +105,4 @@ entra directo a «Confirmación de sedes» y no ve nada más, y Administrador, V
 «Confirmación de alcaldes» en el riel. En `false`, el alcalde vuelve a ser un Responsable de sede como los demás. Esto solo decide la pantalla: el servidor aplica la misma regla por su cuenta (D-49,
 `Codigo.gs::_bloqueoCampana`, propiedad del script `CAMPANA_CONFIRMACION`). Al terminar la campaña hay que apagar las dos.
 Ahí mismo están el plazo (`CONFIRMACION_PLAZO`) y la fecha del oficio que cita el certificado
-(`CONFIRMACION_FECHA_OFICIO`, hallazgo H-27). Los permisos reales los revisa el servidor en cada acción.
+(`CONFIRMACION_FECHA_OFICIO`, hoy «29 de septiembre de 2026»: H-27, resuelto). Los permisos reales los revisa el servidor en cada acción.
