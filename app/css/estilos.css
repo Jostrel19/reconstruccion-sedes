@@ -611,3 +611,88 @@
     border:2px solid var(--oro-osc); border-radius:var(--r); padding:.45rem .8rem; font-weight:700; text-decoration:none; }
   .saltar:focus{ top:.6rem; }
   .lienzo:focus{ outline:none; }
+
+  /* ─── Confirmación de sedes por los alcaldes (D-48) ─── */
+  .e-err{ --s:var(--err); --sbg:var(--err-bg); --stx:var(--err); }
+  .device .mono{ font-family:var(--f-mono); font-size:.94em; }
+  .tenue{ color:var(--tx-sec); }
+  @media (min-width:921px){ .franja.conf-franja{ grid-template-columns:repeat(5,1fr); } }
+
+  /* Los tres pasos del reporte: el orden es información; el que sigue va resaltado. */
+  .conf-pasos{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; }
+  @media (max-width:1100px){ .conf-pasos{ grid-template-columns:1fr; } }
+  .cp{ display:flex; gap:.75rem; border:1px solid var(--borde); border-left-width:3px; border-radius:var(--r); padding:.85rem .95rem; background:var(--panel); }
+  .cp.act{ border-color:var(--oro); background:#FFFCF3; }
+  .cp.hecho{ border-color:#AFD3C1; border-left-color:var(--ok); background:var(--ok-bg); }
+  .cp-n{ flex:none; width:1.6rem; height:1.6rem; border-radius:50%; display:grid; place-items:center; font-family:var(--f-mono);
+    font-weight:800; font-size:.8rem; background:var(--neutro-bg); color:var(--tx-sec); }
+  .cp.act .cp-n{ background:var(--oro); color:#3B2F05; }
+  .cp.hecho .cp-n{ background:var(--ok); color:#fff; }
+  .cp-tx{ min-width:0; }
+  .cp-tx h3{ font-size:.95rem; margin:0 0 .3rem; color:var(--gris-osc); }
+  .cp:not(.act):not(.hecho) .cp-tx h3{ color:var(--tx-sec); }
+  .cp-tx p{ margin:0 0 .55rem; font-size:.82rem; color:var(--tx-sec); line-height:1.55; }
+  .cp-tx p b{ color:var(--tx); }
+  .cp-tx .hace{ display:block; margin-top:.35rem; }
+  .conf-soltar{ padding:.7rem; display:flex; flex-direction:column; gap:.45rem; align-items:flex-start; }
+  .aviso-conf{ border:1px solid #E7C2BE; border-left:3px solid var(--err); background:var(--err-bg); border-radius:0 3px 3px 0;
+    padding:.6rem .8rem; margin:0 0 .8rem; font-size:.84rem; line-height:1.5; }
+  .conf-hist{ margin-top:.9rem; font-size:.84rem; }
+  .conf-hist summary{ cursor:pointer; font-weight:700; color:var(--gris-osc); }
+  .conf-hist table{ margin-top:.5rem; }
+
+  /* Cómo responder: siempre a la vista, en pasos (el orden es el de la fila) y con ejemplos. */
+  .conf-ayuda{ border-bottom:1px solid var(--borde); padding:.9rem 1.1rem 1rem; font-size:.86rem; line-height:1.55;
+    display:grid; grid-template-columns:minmax(0,1fr) minmax(220px,300px); gap:.6rem 1.6rem; align-items:start; }
+  .conf-ayuda h3{ grid-column:1 / -1; margin:0; font-family:var(--f-tit); font-size:1.02rem; color:var(--gris-osc); }
+  .conf-ayuda ol.ca-pasos{ margin:0; padding:0; list-style:none; counter-reset:ca; display:grid; gap:.55rem; }
+  .conf-ayuda ol.ca-pasos > li{ counter-increment:ca; position:relative; padding-left:2rem; color:var(--tx-sec); }
+  .conf-ayuda ol.ca-pasos > li::before{ content:counter(ca); position:absolute; left:0; top:.05rem; width:1.4rem; height:1.4rem;
+    border-radius:50%; background:var(--verde); color:var(--tx-inv); font-weight:700; font-size:.78rem;
+    display:flex; align-items:center; justify-content:center; }
+  .conf-ayuda li b{ color:var(--tx); }
+  .conf-ayuda ul{ margin:.3rem 0 .3rem; padding-left:1.1rem; display:grid; gap:.2rem; }
+  .ca-ejemplos{ background:var(--ok-bg); border:1px solid #C9E0D2; border-radius:var(--r); padding:.7rem .85rem; color:var(--tx-sec); }
+  .ca-ejemplos > b{ display:block; color:var(--verde); margin-bottom:.2rem; }
+  .ca-ejemplos ul{ padding-left:1rem; }
+  @media (max-width:900px){ .conf-ayuda{ grid-template-columns:1fr; } }
+
+  /* Tabla de respuestas. */
+  .conf-tabla td{ vertical-align:middle; }
+  .conf-sede{ min-width:190px; }
+  .conf-sede b{ display:block; font-weight:600; }
+  .conf-sede .hace{ display:block; }
+  .conf-nivel{ min-width:150px; font-size:.8rem; color:var(--tx-sec); }
+  table.conf-tabla select{ min-width:165px; }
+  table.conf-tabla .conf-quien input[type="text"]{ display:block; min-width:165px; margin-top:.35rem; }
+  .conf-tabla th:nth-child(4){ white-space:normal; min-width:120px; }
+  .conf-tabla tr.sucia td{ background:#FFFCF3; }
+  .th-sub{ display:block; font-weight:400; text-transform:none; letter-spacing:0; }
+  .sino{ display:inline-flex; border:1px solid var(--gris); border-radius:4px; overflow:hidden; }
+  .sino label{ position:relative; display:block; }
+  table.edit .sino input{ position:absolute; inset:0; width:100%; height:100%; opacity:0; margin:0; padding:0; cursor:pointer; }
+  .sino span{ display:block; padding:.32rem .85rem; font-size:.82rem; font-weight:600; color:var(--gris-osc); background:var(--panel); }
+  .sino label + label span{ border-left:1px solid var(--gris); }
+  .sino input:checked + span{ background:var(--gris-osc); color:#fff; }
+  .sino input:focus-visible + span{ outline:3px solid var(--oro-osc); outline-offset:-3px; }
+  .fila-est{ display:inline-block; font-size:.74rem; font-weight:700; padding:.12rem .5rem; border-radius:999px; white-space:nowrap; }
+  .fila-est.ok{ background:var(--ok-bg); color:var(--ok); }
+  .fila-est.al{ background:var(--alerta-bg); color:var(--alerta); }
+  .fila-est.er{ background:var(--err-bg); color:var(--err); white-space:normal; }
+  .fila-est.na{ background:var(--neutro-bg); color:var(--tx-sec); }
+
+  /* Barra de cambios sin guardar: queda a la vista al bajar por la tabla. */
+  .conf-barra{ position:sticky; bottom:0; z-index:5; display:flex; align-items:center; gap:.6rem; flex-wrap:wrap;
+    padding:.7rem 1.1rem; background:var(--rail); color:#fff; font-size:.84rem; border-radius:0 0 var(--r) var(--r); }
+  .conf-barra .b.sec{ background:transparent; color:#fff; border-color:rgba(255,255,255,.45); }
+  .conf-barra .b.sec:hover{ background:var(--rail-alto); }
+  .conf-barra .b:focus-visible{ outline-color:var(--oro); }
+
+  /* Panel de la Secretaría. */
+  .av-barra{ width:110px; height:6px; background:var(--neutro-bg); border-radius:3px; overflow:hidden; display:inline-block;
+    vertical-align:middle; margin-right:.5rem; }
+  .av-barra i{ display:block; height:100%; background:var(--verde); }
+  .av-cert{ white-space:nowrap; }
+  .av-cert .hace{ margin-left:.45rem; }
+  .av-info{ margin-top:.9rem; font-size:.84rem; line-height:1.55; }
+  .av-info p{ margin:0 0 .6rem; }

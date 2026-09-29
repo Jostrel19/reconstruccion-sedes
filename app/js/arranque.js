@@ -30,12 +30,18 @@
     base.textContent = !SEDES ? '' : (R.interno
       ? `${SEDES.length} sedes · ${conP} con presupuesto · ${lotesActivos().length} lote${lotesActivos().length === 1 ? '' : 's'} activo${lotesActivos().length === 1 ? '' : 's'}`
       : `${SEDES.length} sedes en su alcance · ${conP} con presupuesto`);
+    // D-48: el alcalde solo tiene su pantalla; el buscador abre fichas que no ve.
+    if (rol === 'alcalde') base.textContent = CONF && CONF.municipios[0] ? `${CONF.municipios[0].municipio} · ${CONF.municipios[0].n_sedes} sedes oficiales` : '';
+    document.getElementById('buscador').classList.toggle('oculto', rol === 'alcalde');
 
     let migasHtml = migas;
     if (vista === 'muni' && muniActual)
       migasHtml = `<a href="#" data-nav="sedes">Caldas</a><span class="sep">›</span><span class="hoy">${esc(muniActual)}</span>`;
     if (vista === 'ficha' && daneActual) migasHtml = migasSede(daneActual);
     if (vista === 'registrar' && daneActual) migasHtml = migasSede(daneActual, 'Presupuesto');
+    if (vista === 'confirmaciones') migasHtml = '<span>Seguimiento</span><span class="sep">›</span>' + (avMuni
+      ? `<a href="#" data-nav="avance">Confirmación de alcaldes</a><span class="sep">›</span><span class="hoy">${esc(avMuni)}</span>`
+      : '<span class="hoy">Confirmación de alcaldes</span>');
     document.getElementById('migas').innerHTML = migasHtml;
 
     pintarCabecera();
@@ -51,10 +57,34 @@
     if (vista === 'verif') { pintarVerificacionReal(); cargarBandejaVerificacion(); }
     if (vista === 'hallazgos') cargarHallazgos();
     if (vista === 'usuarios') cargarUsuarios();
+    if (vista === 'confirmacion') { pintarConfirmacion(); refrescarConfSiHaceFalta(); }
+    if (vista === 'confirmaciones') { pintarAvance(); refrescarConfSiHaceFalta(); }
 
     // Las tablas que se acaban de pintar crearon elementos [data-sed]/[data-edita]
     // nuevos que la pasada de arriba no vio — se reaplica el filtro de rol.
     aplicarVisibilidadRol(R);
+  }
+
+  /* D-48: las respuestas de la confirmación se piden al entrar a la pantalla y
+     otra vez si pasaron 5 minutos, pero nunca con cambios sin guardar en
+     pantalla (repintar la tabla le quitaría el foco a quien está escribiendo). */
+  const REFRESCO_CONF_MS = 5 * 60 * 1000;
+  function refrescarConfSiHaceFalta(){
+    if (!sesion || promesaConf) return;
+    if (CONF && (Date.now() - confCargadoEn < REFRESCO_CONF_MS || confHayCambios())) return;
+    const antes = vista;
+    cargarConfirmaciones().then(() => { if (vista === antes) pintar(); });
+  }
+
+  // «Salir» con cambios sin guardar en la confirmación pregunta antes.
+  async function salir(){
+    if (confHayCambios()){
+      const ok = await confirmar({ titulo: 'Tiene cambios sin guardar',
+        html: `<p>Si sale ahora se pierden los cambios de ${confPendientesDeGuardar().length} sede(s) que no ha guardado.</p>`,
+        aceptar: 'Salir sin guardar', peligro: true });
+      if (!ok) return;
+    }
+    cerrarSesion();
   }
 
   /* Riel: solo las entradas que alcanza el rol (ROLES[rol].ve), y el rótulo
@@ -83,6 +113,7 @@
     muniActual = null; daneActual = null;
     CARGA = null; cargaFilas = [];
     LOTES = []; universoSel = 'todas'; HALLAZGOS = null; hallazgosLeidosEn = 0; muniFiltro = 'todas'; loteSel = null; loteEd = null; cifrasAnimadas = false;
+    olvidarConfirmaciones(); avMuni = null;
     document.getElementById('cod').value = '';
     loginVolver();
     vista = 'login';
@@ -107,7 +138,66 @@
     if (a.dataset.nav === 'sedes') irSedes();
     else if (a.dataset.nav === 'muni') irMuni(a.dataset.muni);
     else if (a.dataset.nav === 'ficha') irFicha(a.dataset.dane);
+    else if (a.dataset.nav === 'avance') cerrarAvanceMunicipio();
   });
+
+  // ─── Confirmación de sedes (D-48): pantalla del alcalde ───
+  const confTbody = document.getElementById('conf-tbody');
+  // Sí/No y listas: se repinta la fila (aparecen o se ocultan campos). Texto: solo
+  // se anota, sin repintar, para no quitarle el foco a quien escribe.
+  confTbody.addEventListener('change', e => {
+    const el = e.target.closest('[data-campo]');
+    if (el && el.type !== 'text') cambioConf(el, true);
+  });
+  confTbody.addEventListener('input', e => {
+    const el = e.target.closest('input[type="text"][data-campo]');
+    if (el) cambioConf(el, false);
+  });
+  document.getElementById('conf-filtros').addEventListener('click', e => {
+    const b = e.target.closest('[data-filtro]');
+    if (!b) return;
+    confFiltro = b.dataset.filtro;
+    pintarConfirmacion();
+  });
+  document.getElementById('conf-btn-guardar').addEventListener('click', guardarConfirmacionesUI);
+  document.getElementById('conf-btn-deshacer').addEventListener('click', deshacerConfUI);
+  const confPasos = document.getElementById('conf-pasos');
+  confPasos.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.id === 'conf-btn-generar') generarCertificadoUI(b);
+    else if (b.id === 'conf-btn-imprimir') reimprimirCertificadoUI(b);
+    else if (b.id === 'conf-btn-elegir') document.getElementById('conf-pdf').click();
+    else if (b.dataset.descargar) descargarCertificadoUI(b.dataset.descargar, b);
+  });
+  confPasos.addEventListener('change', e => {
+    if (e.target.id !== 'conf-pdf') return;
+    const archivo = e.target.files[0];
+    e.target.value = '';
+    cargarCertificadoUI(archivo);
+  });
+  confPasos.addEventListener('dragover', e => { if (e.target.closest('#conf-soltar')) e.preventDefault(); });
+  confPasos.addEventListener('drop', e => {
+    if (!e.target.closest('#conf-soltar')) return;
+    e.preventDefault();
+    if (e.dataTransfer.files[0]) cargarCertificadoUI(e.dataTransfer.files[0]);
+  });
+  // Cerrar o recargar la pestaña con cambios sin guardar: el navegador pregunta.
+  window.addEventListener('beforeunload', e => { if (confHayCambios()){ e.preventDefault(); e.returnValue = ''; } });
+
+  // ─── Confirmación de alcaldes (D-48): panel de la Secretaría ───
+  const avPantalla = document.getElementById('s-confirmaciones');
+  avPantalla.addEventListener('click', e => {
+    const d = e.target.closest('[data-descargar]');
+    if (d){ e.stopPropagation(); descargarCertificadoUI(d.dataset.descargar, d); return; }
+    const tr = e.target.closest('tr[data-av-muni]');
+    if (tr) abrirAvanceMunicipio(tr.dataset.avMuni);
+  });
+  avPantalla.addEventListener('keydown', e => {
+    const tr = e.target.closest('tr[data-av-muni]');
+    if (tr && e.key === 'Enter' && e.target === tr) abrirAvanceMunicipio(tr.dataset.avMuni);
+  });
+  document.getElementById('av-volver').addEventListener('click', cerrarAvanceMunicipio);
 
   // Registrar presupuesto (Paso 3): estos elementos son estáticos (no se
   // regeneran en cada pintada, a diferencia de las filas de ítems), así que

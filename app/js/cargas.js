@@ -210,6 +210,9 @@
     const marcadas = cargaFilas.filter(f => f.incluir && !bloqueoFilaCarga(f));
     const valor = marcadas.reduce((a, f) => a + (Number(f.r.costo_directo) || 0), 0);
     const propuestas = cargaFilas.filter(f => !f.esDeArchivo && !f.incluir && !(f.resultado && f.resultado.ok)).length;
+    // H1-7 (hito 1): con 0 marcadas el botón no hace nada; se ve desactivado.
+    const btn = document.getElementById('cargas-volcar');
+    if (btn) btn.disabled = !marcadas.length;
     el.textContent = `${marcadas.length} marcadas para volcar · ${cop(valor)} de costo directo` +
       (propuestas ? ` · ${propuestas} con DANE propuesto sin confirmar` : '');
   }

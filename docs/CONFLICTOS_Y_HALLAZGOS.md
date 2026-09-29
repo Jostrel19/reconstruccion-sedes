@@ -42,6 +42,35 @@ El paquete de Belalcázar no es un archivo sino tres, separados por nivel de afe
 | H-18 | `4 INST- AFECTACION GRAVE/PPTOS COLEGIOS...xlsm`, hoja `Presupuesto`, y `presupuesto cubierta manuela beltran.xlsx` | **Los presupuestos de afectación grave son por INSTITUCIÓN, no por sede** (El Águila $600.782.132, El Madroño $73.976.609, San Isidro $45.914.334, Manuela Beltrán $207.198.086 de costo directo). El lector propone la sede principal de cada institución en el catálogo porque las sedes rurales de esas mismas instituciones ya están cubiertas por el lote de afectación intermedia y la matrícula es del orden correcto, pero es una inferencia, no un dato del archivo | Abierto — requiere que infraestructura confirme que el alcance de cada presupuesto es la sede principal completa y no varias sedes a la vez |
 | H-19 | `presupuesto cubierta manuela beltran.xlsx`, hoja `Table 1` | El archivo llama «INSTITUCIÓN EDUCATIVA MANUELA BELTRÁN» a lo que en `fctMaestra`/catálogo es una **sede** («CENTRO DOCENTE MANUELA BELTRAN») de la I.E. Cristo Rey. Cruza igual por nombre de sede, pero conviene que quien mandó el archivo sepa que institucionalmente no es una I.E. aparte | Abierto — informativo, no bloquea el cruce |
 
+### Hallazgo de la corrida del hito 1 — 2026-09-25
+
+| # | Fuente | Hallazgo | Estado |
+|---|---|---|---|
+| H-20 | `SAMANA/PRESUPUESTO ESTIMADO I.E.xlsx F.xlsx` vs. `dimDañosInfraestructura.xlsx` | **Samaná presupuesta 20 sedes en las que el censo no reporta daño:** de las 51 volcadas, **17 son tipo 5 «sin afectación»** ($29.403.200) y **3 tipo 6 «no es posible determinar»** ($5.005.800) — $34,4 M de los $103,0 M del municipio. Además, 40 de las 51 traen exactamente el mismo valor ($1.688.600 o $1.658.600): parece un paquete estándar de materiales por sede más que un levantamiento de cada una (el archivo es una lista de ferretería, ver `CLAUDE.md` §3). O el censo está desactualizado para esas sedes, o el municipio presupuesta sin daño verificado. El sistema hoy solo detecta el caso contrario (declarar «sin afectación» sobre una sede con daño). Las 20 sedes: tipo 5 — `217662000191` `217662000921` `217662000387` `217662000760` `217662000336` `217662000743` `217662001995` `217662000093` `217662002738` `217662000158` `217662000417` `217662002045` `217662000280` `217662000085` `217662002550` `217662000344` `217662000352`; tipo 6 — `217662000603` `217662001987` `217662000298` | Abierto — con el censo del 2026-09-28, las 17 tipo 5 siguen igual y las 3 tipo 6 pasaron a tipo 4. Lo decide el arquitecto en la verificación o el jefe; si el sistema debe marcarlo solo, es decisión del hito 2 |
+### Oficio a municipios para la confirmación de sedes — 2026-09-28
+
+Contradicciones del «OFICIO A MUNICIPIOS 24_09_2026» (versión del 28-09) frente al censo y al sistema. La
+jefatura las decidió el mismo día (D-48); siguen abiertas hasta que el texto del oficio se corrija. Texto aprobado en
+`docs/PROPUESTA para jefatura - Certificado de alcaldes y ajustes al oficio v2.docx`.
+
+| # | Fuente | Hallazgo | Estado |
+|---|---|---|---|
+| H-21 | Oficio vs. `dimDañosInfraestructura.xlsx` | El oficio lista 5 niveles de afectación; el censo tiene además «7. Sin revisar» (13 sedes en el censo del 2026-09-28) y los tipos 1 y 2 llevan «(PRIORITARIO)». El oficio dice que el nivel está «validado por la Unidad de Planeación», que no aplica a una sede sin revisar | Decidido 2026-09-28: se incluyen «7. Sin revisar» y «(PRIORITARIO)», y «registrado» en vez de «validado». El nivel no se responde ni se certifica. Falta corregir el oficio |
+| H-22 | Oficio (interno) y `dimDaños` | «¿Hay reparaciones en curso?» («actualmente se adelantan obras») no cuadra con los estados Planeación y Contratación, en los que la obra no ha empezado; y no hay estado para obras terminadas, aunque el censo trae en `OBSERVACIONES PRESUPUESTO` «YA SE REALIZO LA REPARACION» (6 sedes) y «LA RECTORA REALIZO REPARACIONES MINIMAS» (2) | Decidido 2026-09-28: la pregunta pasa a «¿La sede tiene una intervención terminada o en proceso?» y se agrega el estado «4. Terminada». Falta corregir el oficio |
+| H-23 | Oficio vs. sistema | El paso 1 dice «seleccione su municipio», pero el municipio sale del usuario, y el oficio no dice con qué correo se entra; va con copia a secretarios municipales que no tienen usuario | Decidido 2026-09-28: se entra con el correo del alcalde; se reescriben el paso 1 y el acceso. Falta corregir el oficio |
+| H-24 | Oficio | «2. Gobernación» marcada en rojo en «Quién interviene» | Decidido 2026-09-28: se retira; las 9 opciones van sin numeración. Falta corregir el oficio |
+| H-27 | Certificado (texto aprobado) vs. oficio final | El certificado aprobado dice «en atención a su oficio del 28 de septiembre de 2026», pero el oficio final lleva la fecha pendiente («[fecha de envío]», resaltada) y el archivo de la jefatura se llama «24_09_2026». Si el oficio sale con otra fecha, el certificado citaría un oficio con fecha distinta | Abierto — se usa la del texto aprobado. Cuando se defina la fecha de envío, se cambia en `app/js/nucleo.js::CONFIRMACION_FECHA_OFICIO` (una línea) antes de enviar el enlace |
+
+### Actualización del censo — 2026-09-28
+
+Al cruzar «BASE DE DATOS ACTUALIZADA 28_09_2026.xlsx» contra el censo del 2026-09-16 por DANE (975 de 975; 185
+cambios de tipo). Se reporta lo que no se explica solo con «los arquitectos visitaron la sede».
+
+| # | Fuente | Hallazgo | Estado |
+|---|---|---|---|
+| H-25 | Censo 28-09 vs. 16-09 | `217541001033` CENTRO EDUCATIVO PATIO BONITO (Pensilvania) pasó de «4. Afectaciones menores» a **«7. Sin revisar»**: una sede ya clasificada volvió a sin revisar, y su observación habla de controlar áreas afectadas mientras se hacen reparaciones, o sea que sí fue vista | **Resuelto 2026-09-28, decisión del usuario:** queda en «4. Afectaciones menores». Corregido en la copia de trabajo `dimDañosInfraestructura.xlsx` (respaldo `BACKUP-20260928-154644`); el archivo recibido no se toca. Si el próximo censo lo vuelve a traer como 7, hay que corregirlo otra vez: conviene que se corrija en la base de origen |
+| H-26 | Censo 28-09 vs. 16-09 | Tres sedes dejan de ser tipo 2 y pasan a tipo 3: `217013000602` I.E. ENCIMADAS - SEDE PRINCIPAL (Aguadas), `217050000221` ESCUELA RURAL ANTONIA SANTOS y `217050000043` ESCUELA RURAL LA FLORESTA (Aranzazu). Entran 11 al tipo 1-2 (de 37 a 45). Si alguna estaba en un lote por ser tipo 1-2, sigue en él: los lotes no dependen del tipo (D-44) | Informativo |
+
 ## Resueltos
 
 *(ninguno todavía)*

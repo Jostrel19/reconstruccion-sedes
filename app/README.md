@@ -30,7 +30,7 @@ for f in app/js/*.js; do node --check "$f"; done
 app/
 ├── index.html        marcado de todas las pantallas; carga el CSS y los JS en orden
 ├── css/estilos.css   tokens y estilos (DISENO_01)
-├── img/              logos de la pantalla de ingreso y del riel
+├── img/              logos de la pantalla de ingreso y del riel, y el del certificado (membrete institucional)
 └── js/               un archivo por pantalla o tema, en este orden de carga:
     nucleo.js         configuración (BACKEND_URL, roles, rutas), estado global, formatos, navegación
     transporte.js     backend(): el ÚNICO que llama a fetch
@@ -49,6 +49,9 @@ app/
     sedes.js          Sedes (las 975, por municipio) y vista de municipio con filtros
     lotes.js          Lotes
     exportar.js       CSV para Excel
+    confirmacion.js   confirmación de sedes (D-48): pantalla del alcalde y lo que comparte con avance.js
+    certificado.js    certificación que firma el alcalde (iframe + imprimir, como pdf.js)
+    avance.js         «Confirmación de alcaldes»: avance de los 26 que ve la Secretaría
     cabecera.js       encabezado de cada vista
     buscador.js       buscador de sedes y migas
     arranque.js       pintar(), eventos de la página y arranque — SIEMPRE el último
@@ -74,9 +77,12 @@ app/
 
 ## Publicación
 
-Pendiente: se publica en GitHub Pages en el hito 3 (`docs/PLAN_DESARROLLO.md` §3.c), con la
-autorización del jefe. El sitio no contiene datos: todo lo que muestra llega del backend después de
-iniciar sesión.
+Se publica en GitHub Pages desde el 2026-09-29, adelantado por la campaña de los alcaldes (D-48, fase 5).
+El flujo `.github/workflows/pages.yml` sube **solo esta carpeta** cada vez que llega a `master` un cambio en
+`app/`; se puede correr a mano desde la pestaña Actions («Run workflow»). Requisito único, en GitHub:
+Settings › Pages › Source = «GitHub Actions». El sitio no contiene datos: todo lo que muestra llega del
+backend después de iniciar sesión. Un cambio en `app/` solo llega a los usuarios con commit y push, y
+subiendo el `?v=N`.
 
 ## Accesibilidad (WCAG 2.1 AA — Resolución MinTIC 1519 de 2020, Anexo 1)
 
@@ -91,3 +97,11 @@ Revisada el 2026-09-25. Al tocar la interfaz, mantener:
 - **Estructura**: «Saltar al contenido» es lo primero del armazón; el área principal es `#contenido`
   (`role="main"`); el título de la pestaña dice la pantalla (`cabecera.js`).
 - Probar a **320 px de ancho** (equivale a 400 % de ampliación): ninguna pantalla debe desbordar.
+
+## Campaña de confirmación (D-48)
+
+`nucleo.js::CAMPANA_CONFIRMACION` enciende la campaña: el alcalde (usuario `RESPONSABLE_SEDE` de tipo `alcalde`)
+entra directo a «Confirmación de sedes» y no ve nada más, y Administrador, Verificador y Consulta ven
+«Confirmación de alcaldes» en el riel. En `false`, el alcalde vuelve a ser un Responsable de sede como los demás.
+Ahí mismo están el plazo (`CONFIRMACION_PLAZO`) y la fecha del oficio que cita el certificado
+(`CONFIRMACION_FECHA_OFICIO`, hallazgo H-27). Los permisos reales los revisa el servidor en cada acción.

@@ -4,7 +4,8 @@
 
   /* ─── Encabezado de vista: título, contexto, selector de lote y acciones ─── */
   const TITULO_VISTA = { inicio: 'Inicio', tablero: 'Tablero', verif: 'Verificación técnica', cargas: 'Cargas', lotes: 'Lotes',
-    hallazgos: 'Hallazgos', usuarios: 'Usuarios y roles', registrar: 'Registrar presupuesto', ficha: 'Ficha de sede' };
+    hallazgos: 'Hallazgos', usuarios: 'Usuarios y roles', registrar: 'Registrar presupuesto', ficha: 'Ficha de sede',
+    confirmacion: 'Confirmación de sedes', confirmaciones: 'Confirmación de alcaldes' };
   const CONTEXTO_VISTA = {
     verif: 'Presupuestos radicados de todo el departamento, esperando o con concepto.',
     cargas: 'Suba el resultado del lector de Excel de una alcaldía y confirme qué se vuelca.',
@@ -44,6 +45,14 @@
       titulo = nombre ? `Hola, ${nombre.charAt(0)}${nombre.slice(1).toLowerCase()}` : 'Inicio';
       contexto = !SEDES ? 'Consultando el servidor…' : `${R.rot} · datos de ${hace(sedesCargadasEn ? new Date(sedesCargadasEn) : null)}`;
     }
+    if (vista === 'confirmacion'){
+      const muni = (CONF && CONF.alcalde && CONF.alcalde.municipio) || (sesion && sesion.alcance) || '';
+      contexto = `Municipio de ${muni} · responda cada sede y cargue la certificación firmada a más tardar el ${CONFIRMACION_PLAZO}.`;
+    }
+    if (vista === 'confirmaciones'){
+      titulo = avMuni ? `Confirmación de ${avMuni}` : titulo;
+      contexto = !CONF ? 'Consultando el servidor…' : `Respuestas y certificaciones de los alcaldes · plazo: ${CONFIRMACION_PLAZO} · datos de ${hace(new Date(confCargadoEn))}`;
+    }
     const s = (vista === 'ficha' || vista === 'registrar') && SEDES && SEDES.find(x => String(x.dane_sede) === String(daneActual));
     if (s) contexto = `${s.municipio} · DANE ${s.dane_sede}`;
     if (conSedes){
@@ -56,15 +65,17 @@
     document.getElementById('cab-contexto').textContent = contexto;
     document.getElementById('cab-lote-caja').classList.toggle('oculto', !conSedes);
     if (conSedes) pintarSelectorUniverso();
-    document.getElementById('cab-exportar').classList.toggle('oculto', !((conSedes && SEDES) || (vista === 'verif' && VERIF && VERIF.length)));
+    document.getElementById('cab-exportar').classList.toggle('oculto', !((conSedes && SEDES) || (vista === 'verif' && VERIF && VERIF.length) ||
+      (vista === 'confirmaciones' && CONF)));
     document.getElementById('cab-actualizar').classList.toggle('oculto',
-      !(conSedes || ['inicio', 'verif', 'hallazgos', 'usuarios', 'lotes', 'ficha'].includes(vista)));
+      !(conSedes || ['inicio', 'verif', 'hallazgos', 'usuarios', 'lotes', 'ficha', 'confirmacion', 'confirmaciones'].includes(vista)));
   }
 
   async function actualizarVista(){
     const soltar = ocupar(document.getElementById('cab-actualizar'), 'Actualizando…');
     try {
       if (vista === 'verif') await cargarBandejaVerificacion();
+      else if (vista === 'confirmacion' || vista === 'confirmaciones') { await cargarConfirmaciones(); pintar(); }
       else if (vista === 'hallazgos') await cargarHallazgos();
       else if (vista === 'usuarios') await cargarUsuarios();
       else {

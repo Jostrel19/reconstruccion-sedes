@@ -73,12 +73,16 @@
 
   // Deshabilita un botón mientras espera al servidor (evita dobles clics) y
   // devuelve la función que lo deja como estaba.
+  // Si el servidor tarda (medido el 2026-09-29: de 10 a 60 s en horas pico de
+  // Google), avisa que siga esperando, para que nadie recargue a mitad de un guardado.
+  const OCUPAR_AVISO_MS = 12 * 1000;
   function ocupar(btn, texto){
     if (!btn) return () => {};
     const antes = btn.innerHTML;
     btn.disabled = true;
     btn.classList.add('cargando');
     btn.textContent = texto;
-    return () => { btn.disabled = false; btn.classList.remove('cargando'); btn.innerHTML = antes; };
+    const lento = setTimeout(() => avisar('El servidor está tardando más de lo normal. No cierre ni recargue la página: la solicitud sigue en curso.', 'info'), OCUPAR_AVISO_MS);
+    return () => { clearTimeout(lento); btn.disabled = false; btn.classList.remove('cargando'); btn.innerHTML = antes; };
   }
 

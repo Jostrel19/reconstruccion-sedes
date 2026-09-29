@@ -45,7 +45,8 @@
       n: esperan.length, titulo: 'Esperando concepto',
       detalle: esperan.length ? `La más antigua lleva ${diasTxt(d)} sin concepto.` : 'No hay presupuestos radicados esperando concepto.',
       tono: tonoEspera(d), accion: 'Abrir Verificación', ir: irVerificacion };
-    const abiertos = HALLAZGOS ? HALLAZGOS.filter(h => h.estado === 'ABIERTO') : null;
+    // H1-10: los de versiones ya reemplazadas no cuentan (hallazgos.js::hallazgosPendientes).
+    const abiertos = HALLAZGOS ? hallazgosPendientes(HALLAZGOS) : null;
     const tHallazgos = {
       n: abiertos ? abiertos.length : null, titulo: 'Hallazgos abiertos',
       detalle: !abiertos ? 'Consultando…' : (abiertos.length

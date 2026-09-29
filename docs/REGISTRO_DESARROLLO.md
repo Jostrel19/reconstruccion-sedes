@@ -1776,3 +1776,297 @@ versión del 2026-09-24:
 Nombres de tarjetas, tablas y mensajes cotejados contra el código (`inicio.js`, `index.html`,
 `transporte.js`). Falta: correrlo en real.
 
+## 2026-09-25 (continuación) — Hito 1: corrida del guion en real
+
+**Cómo se corrió:** el usuario operó dos sesiones (Administrador en ventana normal; Responsable de sede de
+prueba, tipo alcalde, alcance ARANZAZU, en ventana privada, con un buzón suyo que no se anota aquí porque el
+repositorio es público) contra el backend publicado, con `app/` en `localhost:8779`. Resultados paso a paso
+en la tabla de `docs/GUION_CASO_DE_EXITO.md`. **Los 8 pasos pasan.**
+
+**Lo que quedó probado en real por primera vez:** la vuelta completa radicar → devolver (correo) → Corregir
+desde Inicio → radicar de nuevo (correo) → aprobar (correo); que un concepto sobre una carga de Excel no
+envía correo; el cruce daño↔capítulo pasando a «✓ $» al corregir; la precarga de la Ficha (inmediata con
+el cursor encima, ~5 s sin ella; antes 6-18 s); Lotes sin recarga (crear 13 s); el volcado de 51 sedes en
+139 s (~2,7 s por sede, antes ~4 s); el corte de sesión de un usuario desactivado en el siguiente pedido de
+su ventana; y las comprobaciones de accesibilidad con teclado y al 200 %.
+
+**Datos que escribió la corrida** (quedan para la demostración, se quitan con los datos de prueba antes del
+piloto): Aranzazu `217050000060` v3 (borrador) · v4 (devuelta) · v5 (aprobada); 51 sedes de Samaná v1, una
+con «Corresponde parcialmente»; Belalcázar `217088000047` v1; lote «Fase 1 — demostración» (52 sedes,
+abierto); usuario de prueba desactivado; hallazgo `217050000060-v1-AIU` resuelto.
+
+**Hallazgos:**
+
+| # | Paso | Hallazgo | Qué se hace |
+|---|---|---|---|
+| H1-1 | 0.2 | Crear usuario mostró «No se pudo contactar el servidor» aunque el usuario sí se creó (la respuesta se perdió). Una escritura no se reintenta sola, pero el mensaje debe decir «revise la lista antes de reintentar» como Lotes | Corrección |
+| H1-2 | 0.2 | Usuarios necesita buscador por nombre o correo (con los 187 del borrador de D-24 no se encuentra a nadie) | Mejora antes del hito 3 |
+| H1-3 | 1.3 | Registrar dice «un presupuesto **requiere ajuste** (v2)»: falta «en estado» | Corrección de texto |
+| H1-4 | 1.4 | Si `listarFotos` falla, Registrar muestra «0 fotos» y «Sin fotografías» como si no hubiera (`registrar.js::cargarFotosRegistro` traga el error). Confirmado: al recargar volvieron las 2 | Corrección |
+| H1-5 | 1.6 | Justo después de radicar, la Ficha muestra unos 10 s el estado anterior (v2, Requiere ajuste) porque pinta primero el resumen de `SEDES`, que no se actualiza al radicar | Corrección |
+| H1-6 | 1.6 | La Ficha tarda ~10 s en completar el detalle sin precarga | Medido; límite de Apps Script, sin acción |
+| H1-7 | 2.3 | «Volcar marcadas» queda activo con 0 filas marcadas | Corrección |
+| H1-8 | 3.2 | Con 54 filas en la bandeja, «Verificar» parecía no hacer nada: el panel «Emitir concepto» queda debajo de la tabla, fuera de la vista | **Corregido en la corrida:** `verificacion.js::abrirConceptoVerif` desplaza hasta el panel (sin animación con `prefers-reduced-motion`). Probado en real. `?v=4` en `index.html` |
+| H1-9 | 3.3 | El servidor local (`app-local`) se detuvo solo durante la corrida | Solo afecta la prueba local; en GitHub Pages no aplica |
+| H1-10 | 3.9 | Los hallazgos de versiones reemplazadas siguen abiertos y se duplican por versión (4 de AIU para la sede 060). Opciones: (a) mostrarlos atenuados como «versión reemplazada», sin resolverlos — recomendada; (b) cerrarlos al radicar una versión nueva, que cambia D-42 | Decisión del usuario |
+| H1-11 | 3.9 | Al marcar un hallazgo resuelto, salta al final de la lista y parece que no pasó nada | Corrección |
+| H1-12 | 4.2 | Quitar una sede del lote tardó ~16 s y agregarla ~4 s; falta saber si es el servidor o el tiempo de confirmar el diálogo | Investigar |
+| H1-13 | 4.3 | Samaná presupuesta 17 sedes tipo 5 y 3 tipo 6 del censo | Hallazgo de datos → `CONFLICTOS_Y_HALLAZGOS.md` H-20 |
+
+**Cambio de código durante la corrida:** solo `app/js/verificacion.js` (H1-8) y `?v=4` en las referencias
+de `app/index.html`. Backend sin cambios.
+
+## 2026-09-25 (continuación) — Hito 1: las seis correcciones de la corrida
+
+Solo frontend; backend sin cambios. `?v=4` ya estaba subido.
+
+| # | Archivo | Cambio |
+|---|---|---|
+| H1-1 | `usuarios.js`, `transporte.js` | Si la respuesta de crear usuario (o activar/desactivar) se pierde: «No se pudo confirmar la respuesta del servidor. El usuario pudo haber quedado creado: pulse «Actualizar» y revise la lista antes de volver a intentarlo». El mensaje genérico de `backend()` para escrituras ya no habla de «la ficha de la sede» (no toda escritura es de una sede) |
+| H1-3 | `registrar.js` | «un presupuesto **en estado** Requiere ajuste (v2)» |
+| H1-4 | `registrar.js` | `fotosError`: si `listarFotos` falla, la sección 4 dice «No se pudieron consultar las fotos…» con **Volver a consultar**, el encabezado dice «Sin consultar» y la lista «Antes de radicar» lo explica, en vez de «0 fotos · Sin fotografías» |
+| H1-5 | `registrar.js` | `actualizarResumenSede`: cada lectura de `obtenerPresupuesto` en Registrar (también la que sigue a guardar o radicar) reemplaza el resumen de la sede en `SEDES` con los mismos campos de `Sedes.gs::_resumenVigentesPorDane`; la Ficha pinta la versión nueva desde el primer instante |
+| H1-7 | `cargas.js` | «Volcar marcadas» desactivado con 0 filas marcadas |
+| H1-11 | `hallazgos.js` | El orden se fija al cargar; al marcar resuelto, la fila cambia en su sitio («Resuelto por … · fecha») y el badge del riel se actualiza sin volver a pedir la lista. «Actualizar» ordena de nuevo (resueltos al final) |
+| — | `hallazgos.js`, `lotes.js` | Defecto hallado al probar H1-11: el objeto `sesion` no guarda el correo (vive en `correoActual`), así que `sesion.correo` daba vacío. Afectaba también a `lotes.js`: un lote recién creado quedaba sin «creado por» hasta recargar. Ambos usan `correoActual` |
+
+**Verificado con el simulador** (backend simulado, rol Administrador, `?v=4` cargado): Registrar con
+`listarFotos` fallando muestra el aviso y «Sin consultar», y «Volver a consultar» con el backend sano lo
+quita; una sede que pasa de REQUIERE_AJUSTE v1 a RADICADO v2 en el servidor queda como RADICADO v2 en
+`SEDES` al abrir Registrar, y la Ficha muestra «v2» antes de que llegue el detalle; Cargas con 0 filas deja
+el botón desactivado; resolver el primer hallazgo lo deja primero, con «Resuelto por demo@… · 25/9/2026», y
+el badge baja a 0; crear usuario con la respuesta perdida muestra el mensaje nuevo. `node --check` de los
+20 scripts. Copia del simulador borrada. **Falta verlo en real** (se hace en la próxima sesión con datos).
+
+## 2026-09-25 (continuación) — H1-10 decidido: hallazgos de versiones reemplazadas (D-47)
+
+**Decisión del usuario:** opción (a). Registrada como **D-47** en `CLAUDE.md` §2.
+
+**Qué cambia (solo frontend):**
+- `hallazgos.js::versionQueReemplaza(h)` lee la versión del `id_hallazgo` (`<dane>-v<n>-<tipo>`) y la compara
+  con la vigente de la sede en `SEDES`; devuelve la vigente si es mayor. `DANEPROP` nunca se considera
+  reemplazado. Sin `SEDES` cargadas no atenúa nada (se esperan al abrir Hallazgos).
+- `hallazgosPendientes()` = abiertos que no son de una versión reemplazada. La usan la franja de Hallazgos, el
+  badge del riel y la tarjeta «Hallazgos abiertos» de Inicio.
+- Orden: pendientes (graves primero) → reemplazados (↻, atenuados, con la nota «Versión reemplazada: la
+  vigente es la vN. No cuenta como abierto; márquelo resuelto si quiere dejar constancia») → resueltos.
+- Pie de la pantalla explica el ↻.
+
+**Verificado con el simulador:** una sede en v4 con AIU v1/v2/v4, CENSO v2 y DANEPROP v1, más un CENSO vigente
+de otra sede y uno resuelto → pendientes: CENSO vigente, AIU v4 y DANEPROP (3); atenuados: AIU v1, AIU v2 y
+CENSO v2 con la nota «v4»; resuelto al final. Franja 3 / 1 / 2 / 1, riel 1, Inicio «3 · 1 bloquea un cruce ·
+2 informativos». `node --check` de `hallazgos.js` e `inicio.js`. Copia del simulador borrada.
+
+**En real, lo esperado:** la sede 060 queda con solo el AIU de la v5 pendiente; los de v2 y v4 atenuados (el
+de v1 ya estaba resuelto).
+
+## 2026-09-28 — Censo actualizado y definición del módulo de confirmación (D-48)
+
+**Definición (sin código).** La jefatura respondió las contradicciones del oficio a municipios y el usuario
+aprobó el texto del certificado. Queda como **D-48** en `CLAUDE.md` §2; documento aprobado en
+`docs/PROPUESTA para jefatura - Certificado de alcaldes y ajustes al oficio v2.docx` (la v1, sin la marca de la jefatura, se marca `SUPERADA` cuando se cierre en Word).
+Contradicciones: `CONFLICTOS_Y_HALLAZGOS.md` H-21 a H-24.
+
+**Censo.** El usuario dejó «BASE DE DATOS ACTUALIZADA 28_09_2026.xlsx» en `data/insumos/`. Estructura: una hoja
+(`Hoja1`), 975 filas, 68 columnas; los encabezados del censo traen el prefijo `fctEstadoInfraestructura.` y el
+DANE está en `DANE SEDE`. El tipo está en la columna **AJ** (`A2. TIPO DE AFECTACIÓN`); no confundir con AK
+(`Afectación`: Leve/Moderado/Grave), que no se usa. Solo se leen las columnas que el catálogo ya usaba (tipo,
+11 capítulos, presupuesto aproximado, estado de la prestación, concepto técnico, certificación,
+observaciones, donante, observaciones de presupuesto); el resto (coordenadas, docentes, llamadas, etc.) no
+entra al sistema.
+
+Revisión antes de tocar nada: 975 DANE únicos de 12 dígitos, todos `OFICIAL`, **mismo conjunto que el
+catálogo** (0 sobrantes, 0 faltantes), municipio y DANE de la I.E. coinciden en las 975. Tipos: 12 / 33 / 231 /
+425 / 260 / — / 14 (el tipo 6 desaparece; «Sin revisar» sigue como 7; 1 y 2 con «(PRIORITARIO)»). 185 sedes
+cambian de tipo. Hallazgos H-25 (una sede pasó de 4 a «sin revisar») y H-26 (3 sedes dejan el tipo 2).
+
+**Cambios:**
+- Respaldos `*.BACKUP-20260928-153112.*` de `dimDañosInfraestructura.xlsx`, `catalogo_sedes.json`,
+  `backend_sedes.csv` y `backend_usuarios.csv`. El archivo recibido se conserva sin tocar; su copia pasa a
+  llamarse `dimDañosInfraestructura.xlsx`, así la ruta fija no cambia.
+- `tools/rutas.py`: `H_DIM_DANOS = "Hoja1"`, con nota del formato nuevo.
+- `tools/build_catalogo.py`: `_sin_prefijo()` quita el prefijo de los encabezados y el DANE se lee de
+  `CODIGO_DANE_SEDE` o `DANE SEDE`. Se sigue leyendo por nombre de columna, no por posición.
+- Regenerados `catalogo_sedes.json` y `backend_sedes.csv` (y `backend_usuarios.csv`, que no se reimporta).
+
+**Verificado:** `build_catalogo.py` cruza 975 de 975; `backend_sedes.csv` con el mismo encabezado, las mismas
+975 sedes y los tipos esperados; cambian `tipo_censo` (185), `priorizada` (14), `valor_referencia` (50),
+`concepto_tecnico` (46), `observaciones_censo` (41), `capitulos_dano` (29) y `estado_prestacion` (21).
+Frontend y backend leen el número del tipo (`nucleo.js::tipoNum`, `Hallazgos.gs` con `/^[12]\./`), así que
+«7. Sin revisar» y la ausencia del 6 no rompen nada; el filtro de Lotes conserva una opción «6» vacía.
+
+**Falta (usuario):** importar `backend_sedes.csv` en `Sedes` y correr `olvidarCatalogo()`. Esperado en la app:
+«Con daño reportado» = 12 + 33 + 231 + 425 = **701** (antes 624).
+
+## 2026-09-28 (continuación) — Patio Bonito, oficio final y logo
+
+**Patio Bonito (H-25), decisión del usuario:** `217541001033` queda en «4. Afectaciones menores». Respaldo
+`dimDañosInfraestructura.BACKUP-20260928-154644.xlsx`; se corrigió la celda AJ de la fila 919 en la copia de trabajo
+(el archivo recibido queda intacto) y se regeneraron `catalogo_sedes.json` y `backend_sedes.csv`. Tipos: 12 / 33 /
+231 / **426** / 260 / **13**. Esperado en la app tras importar: «Con daño reportado» = **702** (corrige el 701 de la
+entrada anterior).
+
+**Oficio a alcaldes, listo para el jefe:** `trabajo28.09_oficioAlcaldes/OFICIO A ALCALDES - Actualizacion informacion de sedes (para revision del jefe).docx`, generado por
+`trabajo28.09_oficioAlcaldes/tools/generar_oficio.py` desde el oficio de la jefatura (copia sin tocar en la misma
+carpeta) y el membrete institucional `MEMBRETE CARTA NUEVO (1).docx`: encabezado con el logo de la Gobernación y la
+Secretaría de Educación, pie institucional y márgenes del membrete. Aplica todos los cambios de la sección 4 del
+documento v2. Quedan resaltados en amarillo: fecha de envío, enlace, código QR, firmante y cargo. Verificado
+exportando a PDF: 4 páginas.
+
+**Logo en el certificado:** el borrador (v2) lleva en el encabezado el logo recortado del mismo membrete
+(`trabajo28.09_oficioAlcaldes/logo_sed_horizontal.png`, 784 × 107 px). Al desarrollar, ese archivo pasa a `app/img/`
+para que el certificado impreso por la aplicación lo muestre. Q-13 (logo en alta o vectorial) sigue abierto.
+
+## 2026-09-29 — Censo del 28-09 importado en el sistema
+
+El usuario importó `data/generado/backend_sedes.csv` en la pestaña `Sedes` y corrió `olvidarCatalogo()`
+(`backend/Presupuestos.gs`). **Verificado en la app con sesión de Administrador** (solo lectura, sobre lo que
+devuelve `listarSedes`):
+
+- 975 sedes, todas con DANE de 12 dígitos. Tipos: 1 → 12, 2 → 33, 3 → 231, 4 → 426, 5 → 260, 7 → 13; sin tipo 6.
+- «Con daño reportado» = **702** (antes 624).
+- Patio Bonito (`217541001033`, Pensilvania): «4. AFECTACIONES MENORES» (H-25).
+- `capitulos_dano` llegó como texto en las 975 (`1,2,3`), ninguno convertido a número.
+- Huella SHA-256 de `dane_sede | municipio | tipo_censo | capitulos_dano` de las 975, ordenadas: **idéntica** en la
+  app y en el CSV local (`9f689dc8…d178c5`).
+
+Con esto queda cerrado el paso 1 de «Lo que sigue» del módulo de confirmación (`PLAN_DESARROLLO.md`).
+
+## 2026-09-29 — Confirmación de sedes por los alcaldes (D-48): desarrollo, fases 1 a 3
+
+Visto bueno del usuario para desarrollar, con plan por fases en `docs/PLAN_CONFIRMACION_ALCALDES.md`.
+
+**Backend** (sin desplegar):
+- `backend/Confirmaciones.gs` — nuevo. `listarConfirmaciones`, `guardarConfirmaciones`, `generarCertificado`,
+  `subirCertificado`, `descargarCertificado`. Solo el usuario `RESPONSABLE_SEDE` de tipo `alcalde` escribe (su
+  municipio es su alcance); Administrador, Verificador y Consulta leen todo y descargan. Candado en las
+  escrituras; el PDF se guarda en Drive fuera del candado y se vuelve a revisar el estado dentro (si cambió, el
+  archivo va a la papelera). Código de verificación = SHA-256 de las respuestas del municipio, `XXXX-XXXX-XXXX`.
+- `Codigo.gs` — registra las 5 acciones. `Auth.gs` — `validarCodigo` devuelve `tipo`. `Setup.gs` — `crearHojas()`
+  crea `Confirmaciones` y `Certificaciones`.
+
+**Frontend** (`app/`, versión de caché `?v=5`):
+- `js/confirmacion.js` (pantalla del alcalde y lo compartido), `js/certificado.js` (certificado impreso, texto
+  aprobado), `js/avance.js` (panel «Confirmación de alcaldes»), `img/logo-certificado.png` (logo del membrete,
+  784 × 107).
+- `nucleo.js`: `CAMPANA_CONFIRMACION = true`, plazo, `CONFIRMACION_FECHA_OFICIO` (ver H-27), rol de pantalla
+  `alcalde` (en el servidor sigue siendo `RESPONSABLE_SEDE`), rutas nuevas; `cargarSedes` no se pide para el
+  alcalde. `sesion.js`: reconoce al alcalde por `tipo` o, en sesiones guardadas antes, por el alcance.
+  `transporte.js`: acciones nuevas y espera de 5 minutos para cargar el PDF (3 para descargarlo).
+  `arranque.js`: eventos, «Salir» y cierre de pestaña preguntan si hay cambios sin guardar. `cabecera.js`,
+  `exportar.js`, `index.html` (dos pantallas, entradas del riel, opción «6» retirada del filtro de Lotes),
+  `estilos.css`.
+
+**Verificado:** ver «Resultado de las fases 1 a 3» en `docs/PLAN_CONFIRMACION_ALCALDES.md` (arnés 71 + 68,
+simulador, certificado a PDF: Riosucio 6 páginas, Marulanda 2).
+
+**Falta (fase 4, usuario):** pegar `Confirmaciones.gs` (nuevo), `Codigo.gs`, `Auth.gs` y `Setup.gs`; correr
+`crearHojas()`; proteger `Confirmaciones` y `Certificaciones`; **nueva versión de la implementación existente**;
+prueba en real con un alcalde de prueba y retiro de sus filas. Pasos en `backend/README.md`.
+
+## 2026-09-29 (continuación) — Despliegue D-48 verificado
+
+El usuario pegó `Confirmaciones.gs`, `Codigo.gs`, `Auth.gs` y `Setup.gs`, corrió `crearHojas()` y publicó la versión.
+Verificado: el `/exec` reconoce las 5 acciones; `listarConfirmaciones` con sesión de Administrador devuelve 975 sedes y
+26 municipios (suma 975), todos «Sin empezar», sin respuestas ni certificaciones, en 3,7 s. En `Usuarios`: 26 alcaldes
+**inactivos**, 161 rectores inactivos, y un alcalde de prueba en Aranzazu («Jose Prueba», inactivo). Falta: confirmar la
+protección de las 2 hojas nuevas y la prueba en real con el alcalde de prueba (fase 4, paso 5).
+
+## 2026-09-29 (continuación) — Prueba en real de la confirmación (D-48)
+
+**Prueba en real con el alcalde de prueba — pasó (2026-09-29, ~1:30 a. m.).** El usuario activó «Jose Prueba»
+(Aranzazu), entró con su correo y código, respondió las 30 sedes, generó la certificación, la guardó en PDF desde la
+ventana de impresión de Chrome y la cargó. Verificado desde la sesión del Administrador (solo lectura):
+- Aranzazu en «Certificación cargada»: 30 de 30 respondidas, 4 con intervención (Planeación 1, Contratación 1, Ejecución 1,
+  Terminada 1), 26 sin; todas registradas por el correo del alcalde de prueba. Ningún otro municipio tiene datos.
+- `Certificaciones`: `C-1` GENERADO y `C-2` CARGADO, ambos con el código `F6E4-D621-F9A8` (el mismo que muestra la pantalla).
+- El PDF descargado desde el panel es el mismo que se cargó (SHA-256 idéntico): 206.824 bytes, `%PDF-1.4`, 3 páginas,
+  generado por Chrome, con el logo del certificado incrustado (imagen de 784 × 107).
+- Panel «Confirmación de alcaldes»: «1 de 26 municipios con la certificación cargada», «30 / 975 sedes respondidas».
+
+**Falta:** retirar la prueba (desactivar «Jose Prueba», borrar a mano las filas de `Confirmaciones` y `Certificaciones` y el
+PDF de Drive — solo el archivo, no las carpetas) y confirmar la protección de las dos hojas nuevas.
+
+**Decisión del usuario (2026-09-29):** los datos de la prueba y el usuario «Jose Prueba» **se dejan activos** para mostrarle el módulo al jefe el 2026-09-30 a primera hora. Se retiran después de la demostración y **antes de activar a los 26 alcaldes**: si no, el alcalde real de Aranzazu vería como propias las 30 respuestas y la certificación de prueba.
+
+**Prueba retirada y hojas protegidas (2026-09-29).** El usuario borró las filas de prueba de `Confirmaciones` y `Certificaciones` y el PDF de Drive, desactivó a «Jose Prueba» y protegió las dos hojas nuevas (esto último según el usuario; no se puede comprobar desde la aplicación). Verificado con `listarConfirmaciones`/`listarUsuarios`: 26 municipios en «Sin empezar», 0 respuestas, 0 certificaciones; 0 alcaldes y 0 rectores activos. **La fase 4 queda cerrada.** Si se vuelve a usar «Jose Prueba» para la demostración al jefe, hay que repetir esta limpieza antes de activar a los 26 alcaldes.
+
+**2026-09-29, cierre de la sesión:** el usuario confirma que también borró los PDF de prueba de Drive. La fase 5 (activar los 26 alcaldes, H-27, GitHub Pages, cupo de correo, oficio) queda pendiente para después de la demostración al jefe del 2026-09-30.
+
+## 2026-09-29 (mañana) — Ingreso tolerante a un Google lento
+
+Al empezar la demostración, el código de ingreso llegó al correo pero la pantalla se quedó en «Enviando…» y terminó en
+«No se pudo confirmar la respuesta del servidor». Medido con `curl` en ese momento: el `doGet` (que no hace nada) tardó
+21 a 107 s y dos veces terminó en una página HTML 404 de Google; `solicitarCodigo` con un correo no registrado, 9 a 87 s.
+El tablero de estado de Google no reportaba incidentes. **Causa: lentitud de la plataforma, no del código.**
+
+Cambio solo en el navegador (`?v=6`):
+- `transporte.js::backend()` marca `sinConfirmar` cuando una escritura recibe HTML en vez de JSON o se agota el tiempo
+  (la acción pudo haberse ejecutado).
+- `login.js`: si `solicitarCodigo` queda sin confirmar, igual muestra el campo del código con el aviso «Si le llegó el
+  código, escríbalo aquí…». No abre nada: el servidor valida el código. **No se reintenta el envío solo**, para no mandar
+  correos repetidos (cupo de 100 al día). Si `validarCodigo` queda sin confirmar, explica que se intente con el mismo
+  código y, si ya no sirve, se pida otro.
+- Probado en el navegador con el backend simulado: HTML, tiempo agotado, error real, respuesta normal y los dos casos de
+  `validarCodigo`.
+
+**Diagnóstico, 13:37–13:40 UTC (8:37 a. m. hora de Colombia):** `google.com` respondió en 0,15–0,67 s, así que la red del equipo
+está bien. Cinco `doGet` seguidos tardaron 1,8 · 54 · 58 (404) · 35 · 2,3 s, casi todo **antes** de la redirección. La
+hora que devuelve `doGet` muestra que la función empezó ~32 s después de enviado el pedido: la espera ocurre en Google, antes
+de que corra el código del proyecto. Revisado además que ningún `.gs` llama servicios fuera de una función (nada se ejecuta
+al arrancar) y que el único disparador es el respaldo de las 2 a. m. **Conclusión:** demora de la plataforma (cuenta
+personal de Gmail, sin garantía de tiempos), no del proyecto. Riesgo a tener en cuenta durante la campaña de los alcaldes.
+Mejora pendiente, no urgente: identificador por pedido en el backend para que cualquier escritura se pueda reintentar sin
+duplicar.
+
+**Segundo ajuste (`?v=7`):** en Usuarios apareció «No se pudo contactar el servidor»: la llamada no devolvió nada legible
+(error de red en el navegador, típico de una página de error de Google sin permiso CORS, o de más de 60 s de espera).
+`backend()` no reintentaba ese caso, solo las respuestas HTML. Ahora, ante un error de red, **una lectura (o acción
+idempotente) se reintenta** hasta 3 veces; una escritura no se reintenta y queda marcada `sinConfirmar` (el ingreso ya la
+trata así). Los 60 s de espera agotados siguen sin reintentarse, para no alargar la espera a varios minutos. Probado con
+`fetch` simulado: lectura que falla una vez → segundo intento correcto; lectura que falla siempre → error tras 3
+intentos; escritura → un intento y `sinConfirmar`. En la medición paralela (4 pedidos con `Origin`) todas las respuestas
+llegaron con `Access-Control-Allow-Origin: *` y 9 a 17 s; no salió ningún 404 para comprobar sus cabeceras.
+
+**Confirmado con el panel Ejecuciones de Apps Script (8:43–8:47 a. m.):** todas las ejecuciones de `doPost` y `doGet`
+figuran «Completada», con 0,56 a 3,5 s de duración, mientras el navegador esperaba 9 a 58 s o recibía error. La
+activación de «Jose Prueba» quedó hecha aunque la pantalla mostró error. **La demora y los errores ocurren fuera del
+código:** en la cola de Google antes de ejecutar y en la entrega de la respuesta (redirección a
+`script.googleusercontent.com`).
+
+## 2026-09-29 — Demostración al jefe (D-48)
+
+**Demostración al jefe (2026-09-29, mañana; se adelantó del 30) — correcta y con visto bueno.** El usuario reactivó a
+«Jose Prueba», hizo el ciclo completo en Aranzazu y lo mostró. Durante la preparación, Google Apps Script respondió muy
+lento (9 a 107 s por pedido, algunas respuestas perdidas; el panel Ejecuciones mostraba 0,5 a 3,5 s por ejecución): se
+ajustó el navegador para tolerarlo (`?v=7`, ver `docs/REGISTRO_DESARROLLO.md`). El servidor local lo detuvo la aplicación
+de Claude a las 9:42 a. m. y se volvió a encender. **Hay que volver a limpiar** antes de activar a los 26 alcaldes:
+desactivar «Jose Prueba», borrar las filas de `Confirmaciones` y `Certificaciones` hasta el final (Ctrl+Fin) y borrar solo
+el PDF de Drive, no las carpetas.
+
+## 2026-09-29 (mañana) — Ajustes tras la demostración, antes de publicar (`?v=8`)
+
+Pedidos del usuario al revisar el PDF de la demostración:
+1. **Logo roto en la certificación.** Causa: la certificación se generó a las 9:59 y el servidor local se había apagado
+   a las 9:42 (lo detuvo la aplicación de Claude); el logo se enlazaba y no cargó. Ahora `certificado.js` lo descarga una
+   vez al pintar la pantalla del alcalde (`precargarLogoCertificado`) y lo **incrusta como data URI** en el documento: no
+   depende del servidor al imprimir. Si no se pudo obtener, no imprime y avisa que se pulse «Imprimir de nuevo».
+   Verificado con Edge sin interfaz (Marulanda, logo visible) y con impresión simulada en el navegador (logo 784 px).
+2. **Nombre del archivo.** Chrome y Edge proponen como nombre del PDF el título de la página. Al imprimir, el título pasa a
+   «Confirmación de sedes — Reconstrucción de sedes <MUNICIPIO>» (igual en el documento impreso y en su encabezado) y
+   vuelve al anterior al cerrar el diálogo.
+3. **Instrucciones siempre visibles.** «Qué se responde en cada sede» era un bloque plegado; ahora es «Cómo responder cada
+   sede», abierto, en 4 pasos numerados (nivel de afectación → Sí/No → datos si es Sí → Guardar) y 3 ejemplos. Los
+   conceptos son los del oficio; los ejemplos son ilustrativos y no agregan campos.
+4. **Demoras.** No se pueden acortar desde el código (son de Google). Se agregó: aviso «El servidor está tardando más de
+   lo normal. No cierre ni recargue la página…» cuando un botón lleva 12 s esperando (`avisos.js::ocupar`), y texto de
+   espera mientras cargan las sedes del alcalde.
+5. **Correos de los alcaldes (no son @sedcaldas.edu.co).** Nada lo restringe: el ingreso busca el correo tal cual está en
+   `Usuarios`. Se cambió el texto de ejemplo del campo («El correo con el que está registrado») y se agregó «Si el código no
+   le llega en unos minutos, revise la carpeta de correo no deseado (spam)»: el código sale de una cuenta de Gmail y el
+   servidor de correo de una alcaldía puede filtrarlo.
+
+Publicación preparada: `.github/workflows/pages.yml` (sube solo `app/`) y `.gitignore` excluye las dos propuestas a la
+jefatura (traen un teléfono). Revisión de datos personales en lo que se sube: sin correos ni teléfonos nuevos; los
+correos que ya están en `docs/REGISTRO_DESARROLLO.md` y `docs/PLAN_DESARROLLO.md` ya estaban publicados en commits
+anteriores (pendiente aparte: datos personales en el historial).

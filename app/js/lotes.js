@@ -173,7 +173,7 @@
         (movidas ? `; ${movidas} se movieron desde otro lote.` : '.'), 'ok');
       if (crear){
         LOTES.push({ id_lote: r.id_lote, nombre: cuerpo.nombre, descripcion: cuerpo.descripcion,
-          creado_por: sesion.correo, fecha_creacion: new Date().toISOString(), activo: true });
+          creado_por: correoActual, fecha_creacion: new Date().toISOString(), activo: true });
       }
       const lote = LOTES.find(x => x.id_lote === r.id_lote);
       if (lote) ponerSedesEnLote(danes, lote);

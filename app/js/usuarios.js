@@ -81,7 +81,10 @@
       document.getElementById('uf-alcance').value = '';
       cargarUsuarios();
     } catch (e) {
-      err.textContent = 'No se pudo contactar el servidor.'; err.classList.remove('oculto');
+      // H1-1 (hito 1): la respuesta se puede perder aunque el usuario sí quede
+      // creado. Una escritura no se reintenta sola: se pide revisar antes.
+      err.textContent = 'No se pudo confirmar la respuesta del servidor. El usuario pudo haber quedado creado: pulse «Actualizar» y revise la lista antes de volver a intentarlo.';
+      err.classList.remove('oculto');
     } finally {
       soltar();
     }
@@ -101,7 +104,7 @@
       const r = await backend('actualizarUsuario', { token: sesion.token, correo, activo: nuevoActivo });
       if (!r.ok){ avisar(r.error || 'No se pudo actualizar.', 'error'); soltar(); return; }
       avisar(nuevoActivo ? `${correo} quedó activo.` : `${correo} quedó inactivo.`, 'ok');
-    } catch (e) { avisar('No se pudo contactar el servidor.', 'error'); soltar(); return; }
+    } catch (e) { avisar('No se pudo confirmar la respuesta del servidor. Pulse «Actualizar» y revise si el cambio quedó hecho antes de repetirlo.', 'error'); soltar(); return; }
     cargarUsuarios();
   }
 

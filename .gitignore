@@ -27,6 +27,9 @@ data/entregas/
 data/entregas_excel/
 data/insumos/
 
+# Propuestas a la jefatura (D-48): traen un teléfono de contacto. Viven solo en disco.
+docs/PROPUESTA para jefatura*.docx
+
 # Datos de demostración: no deben confundirse con radicaciones reales.
 docs/demo/
 web/demo/

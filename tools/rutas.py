@@ -60,8 +60,13 @@ F_FUNCIONARIOS = FUENTES / "trabajoInstrumentoControlReconstruccion" / "Base de 
 # Vive dentro del proyecto (data/insumos/) y no en FUENTES porque no es un
 # entregable cerrado de otra dirección: es un archivo que se actualiza a medida
 # que los arquitectos visitan sedes y que se vuelve a leer en cada build.
+#
+# Desde el 2026-09-28 llega como exportación de Power BI («BASE DE DATOS ACTUALIZADA
+# <fecha>.xlsx», hoja «Hoja1», 68 columnas con el prefijo «fctEstadoInfraestructura.»
+# y el DANE en «DANE SEDE»). Se copia con este nombre fijo y el original se conserva
+# tal como llegó; build_catalogo.py quita el prefijo y lee solo las columnas que usa.
 F_DIM_DANOS = DATA / "insumos" / "dimDañosInfraestructura.xlsx"
-H_DIM_DANOS = "EstadoInfraestructura"
+H_DIM_DANOS = "Hoja1"
 
 # --- Salida del consolidado --------------------------------------------------
 # Dónde quedan CONSOLIDADO.xlsx, los fechados y las fotografías extraídas. Por

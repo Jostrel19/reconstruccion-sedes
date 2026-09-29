@@ -92,6 +92,8 @@ Modelo de arquitectura: https://sedcaldas.github.io/circular122/ (lo hizo un fun
 | D-44 | **No hay lote predefinido: el Administrador crea los lotes y se trabaja por lotes** | **2026-09-24, decisión del usuario. Revisa D-31, D-32 y D-40; redefine «en seguimiento» de D-43.** «Quitemos lo del lote por ahora, estas personas tendrán todo a su alcance, y quiero que haya una funcionalidad por parte del administrador para crear un lote y a partir de esto trabajar por lotes pero no que exista desde antes.» **Qué cambia:** (1) el tipo 1-2 del censo **ya no define ningún lote**; se sigue mostrando como dato del censo (P1/P2) y la columna `priorizada` queda en `Sedes` solo como información. (2) Dos pestañas nuevas, mismo criterio de no sobrescribir de D-37: `Lotes` (`id_lote · nombre · descripcion · creado_por · fecha_creacion · activo`) y `LotesSedes` (`id_lote · dane_sede · agregado_por · fecha · vigente`). **Una sede está en un solo lote a la vez**: moverla apaga su fila anterior (`vigente`=FALSE, escritura dirigida) y agrega una nueva, así queda el historial. Cerrar un lote apaga su `activo`; sus sedes quedan como registro de esa fase. (3) Solo **Administrador** crea, agrega, quita y cierra (`backend/Lotes.gs`, con candado); `Sedes_listar` adjunta a cada sede su `lote`. (4) **«En seguimiento»** = sede en un lote activo **o** con presupuesto registrado. Tablero, Sedes y Municipio filtran por lote. (5) **Responsable de sede ve y registra todo su alcance**, no solo lo que está en seguimiento (el backend nunca lo restringió por lote). (6) Cargas premarca todas las filas con DANE confirmado por archivo, sin mirar lote; las de DANE propuesto siguen sin premarcarse nunca. **Atajo, no regla:** la pantalla Lotes ofrece «tipo 1 y 2 del censo» para recrear en dos clics lo que antes era el lote 1, pero como decisión del Administrador |
 | D-45 | **Un borrador nunca reemplaza a una versión radicada** | **2026-09-24.** Precisa D-37. Defecto hallado en la prueba en real: un borrador de $0 guardado sobre un radicado de Aguadas pasó a ser la versión vigente, sacó el radicado de la bandeja del arquitecto y dejó la sede en «—». **Regla:** un `BORRADOR` guardado sobre una versión que no es borrador entra como fila nueva con `vigente=FALSE` («en espera»); la versión radicada sigue vigente —y en verificación— hasta que se **radique** la nueva, y solo entonces se apaga. Borrador sobre borrador (o sobre nada) reemplaza como siempre. `Presupuestos_obtener` devuelve el borrador en espera aparte (`borrador`, `borrador_items`) para que Registrar lo retome; la versión nueva es la máxima + 1. Los hallazgos automáticos (D-42) se detectan **solo al radicar**: un borrador es trabajo en curso, no un dato declarado |
 | D-46 | **Se ven las 975 sedes; las cifras declaran sobre qué conjunto se cuentan. Inicio es la primera pantalla** | **2026-09-25, decisión del usuario. Revisa D-44 punto 4 y el «en seguimiento» de D-43.** Evidencia: navegando, el usuario no entendía por qué no aparecían las 975 sedes — con 0 lotes, los roles internos solo veían las sedes con presupuesto, no podían llegar navegando a una sede vacía para registrarle uno, y las cifras no decían sobre qué total se calculaban. **Qué cambia:** (1) **Sedes es el directorio**: todas las sedes del alcance (975 para los roles internos), agrupadas por municipio, vacías o no; dentro de un municipio, filtros «Con presupuesto · Sin presupuesto · Con daño y sin presupuesto». (2) Desaparece «en seguimiento»: el selector del encabezado («Contar sobre») elige el conjunto — todas, **con daño reportado (tipos 1 a 4 del censo)** o un lote — y cada pie de página dice cuál es. Razón del conjunto «con daño»: 302 sedes son tipo 5 (sin afectación); «4 de 975» haría creer que faltan 971. (3) **Inicio** (pantalla nueva, la primera de los 4 roles): «Requiere su atención» por rol (esperando concepto con la antigüedad de la más vieja, hallazgos abiertos, devueltas, lotes; al Responsable de sede, sus sedes pendientes con acceso directo a registrar y los pasos del proceso), «Cómo vamos» sobre todo el alcance y los últimos movimientos. (4) **Tablero queda como informe** (avance, valor por municipio, tipo de afectación); pierde el mosaico de municipios (lo cubre Sedes) y la bitácora (pasa a Inicio). **Qué no cambia:** los lotes (D-44) siguen igual y se eligen en el mismo selector; el backend no cambia (`listarSedes` ya enviaba todo el alcance) |
+| D-47 | **Los hallazgos de una versión reemplazada se atenúan; no se resuelven solos** | **2026-09-25, decisión del usuario (hallazgo H1-10 del hito 1, opción a). Precisa D-42.** Cada radicado genera sus propios hallazgos (`<dane>-v<n>-AIU`…): en la corrida, la sede `217050000060` acumuló 4 de AIU (v1, v2, v4, v5) aunque solo la v5 regía. **Regla:** si la versión del hallazgo es menor que la vigente de la sede, la pantalla lo muestra atenuado (↻ «versión reemplazada: la vigente es la vN»), al final de los pendientes, y **no cuenta** en Hallazgos, Inicio ni el riel. En la hoja sigue `ABIERTO` (D-42 intacta: nada se resuelve sin una persona) y se puede marcar resuelto a mano. **`DANEPROP` nunca se atenúa**: no depende de la versión sino de si la sede es la correcta, y como solo se detecta en Cargas, una radicación nueva desde Registrar no lo volvería a generar. Se descartó cerrarlos automáticamente (opción b) por eso y porque cambiaba D-42. Solo frontend (`hallazgos.js::versionQueReemplaza`, `hallazgosPendientes`) |
+| D-48 | **Confirmación de sedes por los alcaldes: campos del oficio y certificado firmado cargado en el sistema** | **2026-09-28, decisión del usuario y de la jefatura.** Módulo urgente: va antes que el resto de la hoja de ruta. **Fuente única de los campos:** el oficio a municipios de la jefatura; lo que no esté ahí no se recoge. **Quién:** solo los 26 alcaldes (usuarios `alcalde` de D-24, correos confirmados); si otra dependencia diligencia, entra con el correo del alcalde; los rectores no entran. El alcalde ve solo la pantalla de confirmación (interruptor de campaña), con todas las sedes oficiales de su municipio. **Por sede:** nivel de afectación del censo, **solo consulta: no se responde ni se certifica** (1 a 5 y «7. Sin revisar»; 1 y 2 con «(PRIORITARIO)»); «¿La sede tiene una intervención terminada o en proceso?» Sí/No; con Sí, **quién interviene** (una sola opción, sin numerar: Alcaldía, IE con recursos de gratuidad, MEN, FFIE, UNGRD, Póliza / aseguradora, Donante, Cofinanciación (varias entidades), Cooperación / sector privado; sin Gobernación), **nombre de quién interviene** (obligatorio con Donante, Cofinanciación o Cooperación) y **estado** (Planeación, Contratación, Ejecución, Terminada); con No, los tres se ocultan. Si hay más de una intervención, se reporta la más reciente que siga en proceso. **Certificado:** lo genera la aplicación (iframe + imprimir, como `pdf.js`; no hay librería de PDF) cuando todas las sedes tienen respuesta: código DANE de la sede, nivel, las cuatro respuestas, resumen, nombre del alcalde (del usuario) y código de verificación (huella de las respuestas). La cédula se escribe a mano y el sistema no la guarda. Se firma, se escanea y **se carga en el sistema** como un solo PDF de hasta 10 MB: sin antivirus (aceptado por el usuario), con validación propia (`%PDF-`, `%%EOF`, peso, sin contenido activo) y en una carpeta de Drive sin compartir. Con el cargue se da por finalizado el reporte; si después cambia un dato, se genera y carga uno nuevo y el anterior queda como historial (D-37). **El certificado y el oficio llevan el logo de la Secretaría** (el del membrete institucional «MEMBRETE CARTA NUEVO»; el oficio, el membrete completo). Oficio listo para el jefe: `trabajo28.09_oficioAlcaldes/OFICIO A ALCALDES - Actualizacion informacion de sedes (para revision del jefe).docx`. Plazo de los alcaldes: 2026-10-02. **Desarrollado el 2026-09-29** con visto bueno del usuario (plan por fases: `docs/PLAN_CONFIRMACION_ALCALDES.md`): `backend/Confirmaciones.gs` y pestañas `Confirmaciones`/`Certificaciones` (§6); pantalla del alcalde `app/js/confirmacion.js`, certificado `app/js/certificado.js`, panel «Confirmación de alcaldes» de la Secretaría `app/js/avance.js`; interruptor `CAMPANA_CONFIRMACION` en `nucleo.js`. Probado con arnés y simulador; **desplegado y probado en real el 2026-09-29** (alcalde de prueba en Aranzazu, ciclo completo) y **demostrado al jefe el mismo día, con visto bueno**. Antes de enviar el enlace: retirar la prueba, activar los 26 alcaldes (hoy inactivos), H-27 y fase 5. Texto aprobado del certificado: `docs/PROPUESTA para jefatura - Certificado de alcaldes y ajustes al oficio v2.docx` |
 
 ---
 
@@ -155,8 +157,8 @@ Tres consecuencias que ya están en decisiones:
   reclasificada de prioritaria a **«4. afectaciones menores»**. **Resuelto por D-32:** manda el
   censo, la sede sale del lote. Queda anotado aquí como registro de que el cambio fue deliberado y
   no una pérdida de datos — si los arquitectos lo corrigen en `dimDaños`, vuelve sola.
-- **5 de las 37 priorizadas no tienen ningún capítulo de daño marcado** en `dimDaños`, pese a estar
-  clasificadas tipo 1 o 2. Están priorizadas por tipo pero sin detalle de qué se dañó, así que no
+- **6 de las 45 sedes tipo 1 y 2 no tienen ningún capítulo de daño marcado** en `dimDaños` (censo del
+  2026-09-28; con el anterior eran 5 de 37), pese a estar clasificadas tipo 1 o 2. Están priorizadas por tipo pero sin detalle de qué se dañó, así que no
   hay contra qué verificar su presupuesto. Reportado en la Ficha con aviso visible.
 
 - `fctMaestra`, I.E. DANE `117380000789` (La Dorada): el campo `I.E.` contiene
@@ -298,7 +300,7 @@ actualiza `config.js`, los dos HTML y `rutas.py` de una sola vez.
 
 ---
 
-## 6. Modelo de datos — backend Apps Script (D-19), 8 pestañas (6 + `Lotes` y `LotesSedes`, D-44)
+## 6. Modelo de datos — backend Apps Script (D-19), 10 pestañas (6 + `Lotes` y `LotesSedes`, D-44 + `Confirmaciones` y `Certificaciones`, D-48)
 
 Reemplaza el modelo anterior, pensado para listas de SharePoint (§8.1, sistema viejo). Este es el
 que se crea en el paso 0 del desarrollo (`docs/PLAN_DESARROLLO.md`).
@@ -338,6 +340,15 @@ motivo · referencia · estado (ABIERTO | RESUELTO) · resuelto_por · fecha_res
 `id_lote · nombre · descripcion · creado_por · fecha_creacion · activo` y
 `id_lote · dane_sede · agregado_por · fecha · vigente`. Una sede, un lote vigente a la vez; nada se borra.
 Se protegen igual que las demás (D-37 capa 2).
+
+**`Confirmaciones`** y **`Certificaciones`** (D-48, 2026-09-29 — confirmación de sedes por los alcaldes;
+`backend/Confirmaciones.gs`):
+`dane_sede · municipio · tiene_intervencion · quien_interviene · nombre_quien_interviene · estado_obra ·
+registrado_por · fecha_registro · vigente` y
+`id_certificacion · municipio · evento (GENERADO | CARGADO) · codigo_verificacion · n_sedes · correo · fecha ·
+archivo_id · archivo_nombre · tamano_bytes · sha256`. Una respuesta vigente por sede (corregir agrega una fila y
+apaga la anterior; guardar lo mismo no agrega nada); `Certificaciones` solo recibe filas nuevas. Los PDF firmados
+van a una carpeta de Drive propia, **sin compartir** (a diferencia de las fotos). Se protegen igual que las demás.
 
 **Estados de `Presupuestos`:** `PENDIENTE · SIN_AFECTACION · BORRADOR · RADICADO ·
 EN_VERIFICACION · REQUIERE_AJUSTE · APROBADO`
@@ -389,27 +400,31 @@ arranque.
 
 975 sedes · 26 municipios · 161 I.E. Todas activas en el DUE, todas con matrícula > 0.
 
-**Censo vigente: `dimDañosInfraestructura.xlsx` (D-26).** Las cifras cambiaron respecto del modelo
-paramétrico porque los arquitectos siguieron visitando: «sin revisar» cayó de 135 a 34 y esas sedes
-se reclasificaron hacia arriba.
+**Censo vigente: `dimDañosInfraestructura.xlsx` (D-26), actualizado el 2026-09-28** con «BASE DE DATOS
+ACTUALIZADA 28_09_2026.xlsx» (exportación de Power BI, hoja `Hoja1`, tipo en la columna AJ; ver
+`tools/rutas.py`). Mismas 975 sedes, cruce exacto por DANE; 184 cambiaron de tipo y **el tipo 6 desapareció**:
+sus 15 sedes se reclasificaron. «Sin revisar» conserva el número 7. **Corrección del usuario:** Patio Bonito
+(`217541001033`) venía como «7. Sin revisar» y queda en «4. Afectaciones menores», corregido en la copia de
+trabajo (H-25); si el próximo censo lo vuelve a traer como 7, hay que corregirlo otra vez.
 
-| Tipo censo | Sedes | Antes (modelo) | Tratamiento |
-|---|---:|---:|---|
-| **1 Colapso total o parcial** | **9** | 8 | **lote 1 — priorizada** |
-| **2 Riesgo inminente de colapso** | **28** | 20 | **lote 1 — priorizada** |
-| 3 Afectaciones estructurales/funcionales | 155 | 140 | abierta para presupuesto |
-| 4 Afectaciones menores | 432 | 386 | abierta para presupuesto |
-| 5 Sin afectación | 302 | 271 | pre-marcada, solo confirmar |
-| 6 No es posible determinar | 15 | 15 | declaración expresa |
-| 7 Sin revisar | 34 | 135 | declaración expresa |
+| Tipo censo | Sedes (28-09) | 16-09 | Modelo (08-09) |
+|---|---:|---:|---:|
+| **1 Colapso total o parcial (PRIORITARIO)** | **12** | 9 | 8 |
+| **2 Riesgo inminente de colapso (PRIORITARIO)** | **33** | 28 | 20 |
+| 3 Afectaciones estructurales/funcionales | 231 | 155 | 140 |
+| 4 Afectaciones menores | 426 | 432 | 386 |
+| 5 Sin afectación | 260 | 302 | 271 |
+| 6 No es posible determinar | — | 15 | 15 |
+| 7 Sin revisar | 13 | 34 | 135 |
 
 > **Histórico desde D-44 (2026-09-24):** ya no existe un «lote 1» predefinido. Los lotes los crea el
 > Administrador en la pantalla Lotes; el tipo del censo se sigue mostrando como dato. Las cifras de abajo
 > describen el censo, no un lote del sistema.
 
-**Tipos 1 y 2 = 37 sedes** (antes «lote 1», D-31), en 12 municipios: Anserma 6, Aguadas 5, Aranzazu 4,
-Risaralda 4, Samaná 4, Belalcázar 3, Chinchiná 3, Filadelfia 2, Pensilvania 2, Viterbo 2,
-Manzanares 1, Salamina 1. Valor de referencia total **$9.718.464.165**; las 37 tienen valor.
+**Tipos 1 y 2 = 45 sedes** (censo del 2026-09-28; eran 37, el antiguo «lote 1» de D-31), en 15 municipios:
+Anserma 8, Aguadas 5, Chinchiná 4, Risaralda 4, Samaná 4, Belalcázar 3, Pensilvania 3, Riosucio 3,
+Aranzazu 2, Filadelfia 2, Supía 2, Viterbo 2, Manzanares 1, Norcasia 1, Salamina 1. Valor de referencia
+**$9.598.830.947**, en 36 de las 45 (dato del censo, no se muestra: D-43).
 
 Municipios con más carga: Riosucio 92, Pensilvania 85, Samaná 81, Anserma 65, Aguadas 61, Neira 49.
 Los más livianos: Marulanda 11, San José 13, Palestina/Marmato/Viterbo 16.

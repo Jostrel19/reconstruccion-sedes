@@ -47,13 +47,13 @@ presupuestos de Cargas no envían correo.
 
 - [x] Backend al día: `Presupuestos.gs`, `Codigo.gs` y `Sedes.gs` confirmados el 2026-09-25;
       `Verificaciones.gs` (correo del concepto) desplegado el 2026-09-25.
-- [ ] Servidor local arriba: `python -m http.server 8779 --bind 127.0.0.1 --directory app` (o la
+- [x] Servidor local arriba: `python -m http.server 8779 --bind 127.0.0.1 --directory app` (o la
       configuración `app-local`) y abrir `http://localhost:8779`. **Recargar forzando** (Ctrl+F5) la
       primera vez, para que el navegador tome `?v=3` y no scripts viejos de la caché.
-- [ ] `data/generado/ingesta_SAMANA.json` regenerado (`python tools/ingesta.py SAMANA --json`); anotar
+- [x] `data/generado/ingesta_SAMANA.json` regenerado (`python tools/ingesta.py SAMANA --json`); anotar
       las cifras que imprime el lector, que son las que se comparan en 2.1.
-- [ ] Una foto tomada con celular (jpg), para 1.5.
-- [ ] Cronómetro a mano: los pasos marcados con ⏱ se miden.
+- [x] Una foto tomada con celular (jpg), para 1.5.
+- [x] Cronómetro a mano: los pasos marcados con ⏱ se miden.
 
 ---
 
@@ -137,22 +137,28 @@ registrar. No se inventan: se definen con el jefe/Planeación antes de construir
 
 ### 7. Cierre
 
-- [ ] Desactivar el Responsable de sede de prueba → su sesión se corta en ≤ 5 min (intentar Actualizar
+- [x] Desactivar el Responsable de sede de prueba → su sesión se corta en ≤ 5 min (intentar Actualizar
       en su ventana: debe volver al ingreso con «Su sesión venció o sus permisos cambiaron»).
-- [ ] El lote «Fase 1 — demostración» se deja abierto para la presentación del hito 2.
-- [ ] Anotar resultados, tiempos y fallas en `docs/REGISTRO_DESARROLLO.md` y en la tabla de abajo.
+- [x] El lote «Fase 1 — demostración» se deja abierto para la presentación del hito 2.
+- [x] Anotar resultados, tiempos y fallas en `docs/REGISTRO_DESARROLLO.md` y en la tabla de abajo.
 
 ---
 
 ## Resultado de la corrida
 
+**Corrida del 2026-09-25**, en real, con `app/` en local (`?v=3`) y el backend publicado. Detalle y
+hallazgos H1-1 a H1-13 en `docs/REGISTRO_DESARROLLO.md`.
+
 | Paso | Resultado | Tiempo (⏱) | Observación |
 |---|---|---|---|
-| 0 | | | |
-| 1 | | | |
-| 2 | | 2.2: | |
-| 3 | | | |
-| 4 | | 4.1: · 4.2: · 4.5: | |
-| 5 | | | |
-| 6 | | | |
-| 7 | | | |
+| 0 | ✅ | | 975 sedes; «Con daño reportado» = **624** (tipos 1-4: 9 + 28 + 155 + 432; 975 − 302 tipo 5 da 673 porque deja dentro los tipos 6 y 7). Crear usuario: H1-1 |
+| 1 | ✅ | Ficha tras radicar: ~10 s | La sede no estaba en v1 sino en **v2 Requiere ajuste** (pruebas del 24); el borrador fue v3 y el radicado **`217050000060-v4`**. Correo de confirmación recibido. H1-3 a H1-6 |
+| 2 | ✅ | 2.2: **139 s** (cronómetro 145 s) para 51 sedes | 51 premarcadas, 0 al volver a subir. 2.4 hecho: La Zainera `217088000047` confirmada a mano → hallazgo DANEPROP. H1-7 |
+| 3 | ✅ | | Devuelto v4 → correo · Corregir → **v5** → correo · aprobado → correo · Samaná sin correo. 54 esperando concepto. H1-8 (corregido en la corrida), H1-10, H1-11 |
+| 4 | ✅ | 4.1: 13 s · 4.2: quitar ~16 s, agregar ~4 s · 4.5: con precarga inmediata, sin ella ~5 s | Lote de 52; Tablero y CSV (52 filas, tildes bien) cuadran. H1-12, H1-13 (datos) |
+| 5 | ✅ | | Saltar al contenido, foco visible, diálogo retiene el foco, 200 % sin cortes |
+| 6 | — | | Solo explicación (Q-14) |
+| 7 | ✅ | | La sesión del desactivado se cortó en el siguiente pedido de su ventana, con el mensaje; pedir código no envió correo |
+
+**Correos enviados:** 2 códigos del Responsable + 2 confirmaciones (v4, v5) + 2 avisos de concepto
+(devuelto, aprobado) + los códigos del Administrador ≈ 8, como se estimó.
