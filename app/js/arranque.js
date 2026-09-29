@@ -33,6 +33,9 @@
     // D-48: el alcalde solo tiene su pantalla; el buscador abre fichas que no ve.
     if (rol === 'alcalde') base.textContent = CONF && CONF.municipios[0] ? `${CONF.municipios[0].municipio} · ${CONF.municipios[0].n_sedes} sedes oficiales` : '';
     document.getElementById('buscador').classList.toggle('oculto', rol === 'alcalde');
+    // El pie «Uso interno — no distribuir…» es para el personal de la Secretaría, no para un alcalde.
+    const pieUso = document.querySelector('.pie-inst > .hace');
+    if (pieUso) pieUso.classList.toggle('oculto', rol === 'alcalde');
 
     let migasHtml = migas;
     if (vista === 'muni' && muniActual)
