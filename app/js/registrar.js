@@ -49,6 +49,7 @@
       estadoActual: null, versionActual: null, vigente: null, borradorEnEspera: null, error: null };
     try {
       const r = await backend('obtenerPresupuesto', { token: sesion.token, dane_sede: dane });
+      if (r.ok) actualizarResumenSede(dane, r);
       if (r.ok && r.presupuesto) {
         // Si hay un borrador en espera (posterior a la versión radicada), el
         // formulario lo retoma; la radicada sigue siendo la vigente.
@@ -80,20 +81,44 @@
     cargarFotosRegistro(dane);
   }
 
+  /* H1-5 (hito 1): la Ficha pinta primero el resumen de la sede que trajo
+     listarSedes. Tras radicar, ese resumen seguía siendo el de la versión
+     anterior (se vio «v2 · Requiere ajuste» ~10 s después de radicar la v4).
+     Se reemplaza con la versión vigente recién leída, con los mismos campos que
+     arma backend/Sedes.gs::_resumenVigentesPorDane. */
+  function actualizarResumenSede(dane, r){
+    const s = SEDES && SEDES.find(x => String(x.dane_sede) === String(dane));
+    if (!s) return;
+    const p = r.presupuesto, v = r.verificacion;
+    s.presupuesto = !p ? null : {
+      id_presupuesto: p.id_presupuesto, version: p.version, estado: p.estado, origen: p.origen,
+      archivo_origen: p.archivo_origen || '', costo_directo: p.costo_directo,
+      total_presupuesto: p.total_presupuesto,
+      declara_sin_afectacion: p.declara_sin_afectacion === true || String(p.declara_sin_afectacion).toUpperCase() === 'TRUE',
+      creado_por: p.creado_por, fecha_creacion: p.fecha_creacion,
+      concepto_resultado: v ? v.resultado : '', fecha_concepto: v ? v.fecha_verificacion : '',
+    };
+  }
+
   /* ─── Fotos (D-29 sección 4, D-19): suben directo a Drive, una carpeta por
      DANE sede (backend/Fotos.gs). Nunca se guarda el contenido en el
      navegador — ni siquiera aquí: `previewDataUrl` es solo la miniatura de lo
      que ya se subió en esta misma sesión, y se pierde al recargar; lo que
      persiste de verdad es lo que devuelve `listarFotos`. ─── */
   let fotosRegistro = [];
+  /* H1-4 (hito 1): una consulta fallida se veía como «0 fotos · Sin
+     fotografías» aunque la sede tuviera fotos en Drive. Ahora se distingue
+     «no hay» de «no se pudo consultar», con un botón para reintentar. */
+  let fotosError = false;
 
   async function cargarFotosRegistro(dane){
-    fotosRegistro = [];
+    fotosRegistro = []; fotosError = false;
     if (vista === 'registrar' && String(daneActual) === String(dane)) renderFotosRegistro();
     try {
       const r = await backend('listarFotos', { token: sesion.token, dane_sede: dane });
       if (r.ok) fotosRegistro = r.fotos.map(f => Object.assign({}, f, { estado: 'subida' }));
-    } catch (err) { /* la sección queda vacía; no bloquea el resto del formulario */ }
+      else fotosError = true;
+    } catch (err) { fotosError = true; /* no bloquea el resto del formulario */ }
     if (vista === 'registrar' && String(daneActual) === String(dane)) {
       renderFotosRegistro();
       sincronizarHechoRegistro();
@@ -113,10 +138,16 @@
       const kb = f.tamano ? `${Math.max(1, Math.round(f.tamano / 1024))} KB` : '';
       return `<div class="foto">${miniatura}<b title="${nombreVisible}">${nombreVisible}</b><small>${kb}</small></div>`;
     }).join('');
-    cont.innerHTML = tarjetas + '<div class="foto add" id="reg-foto-agregar"><span class="mas">+</span><b>Agregar</b><small>jpg, png · máx 8 MB</small></div>';
+    const errorFotos = fotosError
+      ? `<p class="ayuda" role="alert" style="grid-column:1/-1;margin:0;color:var(--err)">No se pudieron consultar las fotos que ya tiene esta sede en Drive. <button class="b sec mini" type="button" id="reg-fotos-reintentar">Volver a consultar</button></p>`
+      : '';
+    cont.innerHTML = errorFotos + tarjetas + '<div class="foto add" id="reg-foto-agregar"><span class="mas">+</span><b>Agregar</b><small>jpg, png · máx 8 MB</small></div>';
     document.getElementById('reg-foto-agregar').addEventListener('click', () => document.getElementById('reg-foto-input').click());
+    const reintentar = document.getElementById('reg-fotos-reintentar');
+    if (reintentar) reintentar.addEventListener('click', () => cargarFotosRegistro(daneActual));
     const nSubidas = fotosRegistro.filter(f => f.estado === 'subida').length;
-    document.getElementById('reg-fotos-eyebrow').textContent = `${nSubidas} foto${nSubidas === 1 ? '' : 's'}`;
+    document.getElementById('reg-fotos-eyebrow').textContent = fotosError && !nSubidas
+      ? 'Sin consultar' : `${nSubidas} foto${nSubidas === 1 ? '' : 's'}`;
   }
 
   function subirFotosSeleccionadas(files){
@@ -250,6 +281,7 @@
     const nFotos = fotosRegistro.filter(f => f.estado === 'subida').length;
     req.push({ ir: 'reg-panel-4', estado: nFotos ? 'ok' : 'aviso',
       texto: nFotos ? `${nFotos} fotografía${nFotos === 1 ? '' : 's'} adjunta${nFotos === 1 ? '' : 's'}`
+        : fotosError ? 'No se pudieron consultar las fotografías de esta sede: vuelva a consultarlas en la sección 4'
         : 'Sin fotografías: se recomienda al menos una como evidencia' });
     return req;
   }
@@ -324,7 +356,7 @@
     document.getElementById('reg-msg').innerHTML = registro.borradorEnEspera
       ? `Está retomando el <b>borrador v${registro.borradorEnEspera.version}</b>${esc(esperaFecha)}. La <b>v${registro.vigente.version} (${txt.toLowerCase()})</b> sigue vigente —y en la bandeja del arquitecto— hasta que radique. Guardar o radicar crea una <b>v${siguiente}</b>; nada se borra.`
       : yaRadicado
-      ? `Esta sede ya tiene un presupuesto <b>${txt.toLowerCase()}</b> (v${registro.versionActual}). Un borrador queda <b>en espera</b> sin reemplazarlo; solo al radicar la <b>v${siguiente}</b> pasa a ser la vigente. La anterior no se borra.`
+      ? `Esta sede ya tiene un presupuesto en estado <b>${esc(txt)}</b> (v${registro.versionActual}). Un borrador queda <b>en espera</b> sin reemplazarlo; solo al radicar la <b>v${siguiente}</b> pasa a ser la vigente. La anterior no se borra.`
       : 'Al radicar ya no podrá editarlo con esta misma versión; si necesita corregir, se genera una <b>versión nueva</b> y la anterior queda como evidencia.';
   }
 

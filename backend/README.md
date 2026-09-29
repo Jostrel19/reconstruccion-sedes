@@ -20,6 +20,13 @@ un archivo `.gs` acá, hay que copiar el cambio también al proyecto real.
    `crearHojas` → ▶ Ejecutar). Autorizar los permisos que pida. Esto crea las 6 pestañas con las
    columnas exactas de `CLAUDE.md` §6.
 
+4.a **Al actualizar el censo** (la última vez, 2026-09-28): copiar el archivo nuevo como
+   `data/insumos/dimDañosInfraestructura.xlsx` (respaldar antes el anterior y conservar el original tal como
+   llegó), revisar hoja y encabezados contra `tools/rutas.py`, correr `build_catalogo.py` y
+   `exportar_backend.py`, importar **solo** `backend_sedes.csv` en `Sedes` (paso 5) y correr **`olvidarCatalogo()`**
+   desde el editor; si no, el servidor sigue con el catálogo viejo en caché hasta 6 horas. **No reimportar
+   `Usuarios`:** se perderían los cambios hechos desde la pantalla Usuarios (activos, usuarios nuevos).
+
 4.b **Ejecutar `configurarRespaldoAutomatico` una vez** (mismo mecanismo, archivo `Backup`). Crea un
    disparador que copia el Sheet completo a una carpeta de Drive todos los días — ver
    `docs/RUNBOOK_CONTINUIDAD.md`. Pedirá autorizar permisos de Drive además de los de Sheets.
@@ -52,13 +59,26 @@ un archivo `.gs` acá, hay que copiar el cambio también al proyecto real.
    Responde `{"ok":true,"token":"...","rol":"ADMINISTRADOR",...}`. Ese `token` es el que se manda
    en `listarSedes` y en todo lo que se agregue después.
 
+## Desplegar la confirmación de alcaldes (D-48, fase 4 de `docs/PLAN_CONFIRMACION_ALCALDES.md`)
+
+1. En el editor de Apps Script: crear el archivo **`Confirmaciones`** y pegar `Confirmaciones.gs` completo;
+   reemplazar completos **`Codigo`**, **`Auth`** y **`Setup`**.
+2. Ejecutar **`crearHojas`**. Deben aparecer `Confirmaciones` y `Certificaciones` (las demás no cambian).
+3. Proteger las dos hojas nuevas como las demás (`Datos → Hojas y rangos protegidos`, solo el dueño; D-37).
+4. **`Implementar → Gestionar implementaciones → editar la existente → Nueva versión`**, con la descripción
+   «D-48: confirmación de sedes por los alcaldes». No crear una implementación nueva: cambiaría la URL `/exec`.
+5. La primera carga de un PDF crea sola la carpeta de Drive «Reconstrucción de sedes — Certificaciones de
+   alcaldes» (sin compartir) y guarda su id en las Propiedades del script (`CERT_CARPETA_RAIZ_ID`). Puede pedir
+   autorizar de nuevo los permisos de Drive.
+6. Prueba en real con un alcalde de prueba y limpieza: pasos en `docs/PLAN_CONFIRMACION_ALCALDES.md`, fase 4.
+
 ## Qué hay hecho y qué falta (ver `docs/PLAN_DESARROLLO.md` §3 para el orden completo)
 
 | Archivo | Qué resuelve | Paso del plan | Desplegado |
 |---|---|---|---|
-| `Setup.gs` | Crea las pestañas con las columnas de `CLAUDE.md` §6 — desde 2026-09-24 también `Lotes` y `LotesSedes` (D-44) | Paso 0 | ✅ desplegado 2026-09-24; `crearHojas()` corrido (8 pestañas) |
-| `Codigo.gs` | `doGet` (ping) + `doPost` con registro de acciones; cada respuesta devuelve `accion` (el navegador descarta respuestas que no son de su pedido); registra `volcarCarga` | Paso 0 | ✅ `accion` desplegado 2026-09-24 · ✅ `volcarCarga` desplegado (confirmado 2026-09-25: el `/exec` publicado la reconoce) |
-| `Auth.gs` | Login por código de un solo uso, token de sesión firmado (D-20); el token deja de valer si el usuario se desactiva o cambia de rol/alcance (caché de 5 min) | Paso 1 | ✅ desplegado 2026-09-24 |
+| `Setup.gs` | Crea las pestañas con las columnas de `CLAUDE.md` §6 — desde 2026-09-24 también `Lotes` y `LotesSedes` (D-44); desde 2026-09-29 `Confirmaciones` y `Certificaciones` (D-48) | Paso 0 | ✅ desplegado 2026-09-24 (8 pestañas) · ✅ D-48 desplegado y `crearHojas()` corrido 2026-09-29 (10 pestañas) |
+| `Codigo.gs` | `doGet` (ping) + `doPost` con registro de acciones; cada respuesta devuelve `accion` (el navegador descarta respuestas que no son de su pedido); registra `volcarCarga` y las 5 acciones de la confirmación (D-48) | Paso 0 | ✅ `accion` desplegado 2026-09-24 · ✅ `volcarCarga` desplegado (confirmado 2026-09-25) · ✅ acciones D-48 desplegadas (el `/exec` las reconoce, 2026-09-29) |
+| `Auth.gs` | Login por código de un solo uso, token de sesión firmado (D-20); el token deja de valer si el usuario se desactiva o cambia de rol/alcance (caché de 5 min); desde 2026-09-29 `validarCodigo` devuelve también `tipo` (D-48) | Paso 1 | ✅ desplegado 2026-09-24 · ✅ `tipo` desplegado 2026-09-29 |
 | `Sedes.gs` | Listado de sedes filtrado por rol/alcance del lado del servidor (D-24, D-25), con el resumen del presupuesto vigente de cada sede y la bitácora de movimientos; sin `valor_referencia` (D-43); `lote` por sede y lista de lotes (D-44); `archivo_origen` en el resumen, para que Cargas no ofrezca de nuevo lo ya volcado | Paso 2 | ✅ D-43 y D-44 desplegados y probados en real 2026-09-24 · ✅ `archivo_origen` desplegado (confirmado por el usuario 2026-09-25) |
 | `Backup.gs` | Respaldo diario del Sheet completo a Drive, con retención de 30 días (D-38) | — resiliencia, no es un paso del plan | ✅ |
 | `Presupuestos.gs` | Guardar/obtener presupuesto, versionado real sin sobrescritura (D-37), historial completo; catálogo en caché (`olvidarCatalogo()` tras regenerar `Sedes`); correo de confirmación al radicar a mano; un borrador sobre un radicado queda en espera sin reemplazarlo y los hallazgos solo se detectan al radicar (D-45); `volcarCarga`: Cargas vuelca hasta 15 sedes por pedido bajo un candado, idempotente, sin volcar filas en $0 | Paso 3 | ✅ D-45 y `volcarCarga` desplegados (confirmado 2026-09-25); falta probarlos en real con `docs/GUION_CASO_DE_EXITO.md` |
@@ -67,6 +87,7 @@ un archivo `.gs` acá, hay que copiar el cambio también al proyecto real.
 | `Hallazgos.gs` | Listar y resolver hallazgos (Administrador, Verificador); detección automática al radicar o cargar: AIU sobre umbral, costo $0, «sin afectación» sobre tipo 1-2, DANE confirmado a mano (D-42); textos sin referencias internas | Paso 6 | ✅ cambio 2026-09-24 desplegado |
 | `Usuarios.gs` | Listar, crear y activar/desactivar usuarios, con validación de rol/tipo/alcance (solo Administrador); cada cambio corta la sesión abierta de esa persona | Paso 6 | ✅ cambio 2026-09-24 desplegado |
 | `Lotes.gs` | **Nuevo (D-44).** Listar, crear, agregar sedes, quitar sede y cerrar lote (solo Administrador para escribir); una sede en un solo lote vigente, nada se borra | — | ✅ desplegado y probado en real 2026-09-24 |
+| `Confirmaciones.gs` | **Nuevo (D-48).** Confirmación de sedes por los alcaldes: listar, guardar respuestas (solo el alcalde, versionado sin sobrescribir), generar la certificación (código de verificación SHA-256), cargar el PDF firmado (validación propia, Drive sin compartir, idempotente) y descargarlo (Secretaría; alcalde, el suyo) | — | ✅ desplegado y **probado en real** 2026-09-29: ciclo completo con un alcalde de prueba en Aranzazu (responder 30, generar, cargar, descargar con SHA-256 idéntico) |
 
 **Falta:** (histórico; el frontend vive en `app/` desde 2026-09-25 y llama al backend real) Hallazgos (Paso 6), Usuarios (Paso 6) y el correo de confirmación
 del radicado. Cada uno se agrega como una entrada nueva en el objeto `manejadores` de `Codigo.gs`, sin
@@ -107,3 +128,7 @@ emitido y foto real subida a Drive; pendiente de limpieza igual que las pruebas 
   contenido del presupuesto. El registro de auditoría completo vive aparte, en `Verificaciones`.
 - **D-40** — `Presupuestos_guardar` admite `origen: CARGA` desde el rol `VERIFICADOR` además de
   `MANUAL` desde `RESPONSABLE_SEDE`/Administrador.
+- **D-48** — confirmación de sedes por los alcaldes (`Confirmaciones.gs`): solo el alcalde escribe y solo en
+  su municipio (el tipo se lee de `Usuarios` en cada pedido); `Confirmaciones` sigue D-37 (fila nueva y `vigente`
+  apagado); `Certificaciones` solo recibe filas; el PDF se valida (encabezado, `%%EOF`, 10 MB, sin contenido
+  activo), se guarda en una carpeta de Drive sin compartir y se identifica por su SHA-256.

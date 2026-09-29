@@ -78,6 +78,10 @@ function Auth_validarCodigo(body) {
     ok: true,
     token: _crearToken(usuario),
     rol: usuario.rol,
+    // D-48: durante la campaña de confirmación, el navegador lleva al alcalde
+    // directo a su pantalla. Solo decide qué se muestra: los permisos los
+    // vuelve a revisar el servidor en cada acción (Confirmaciones.gs::_confQuien).
+    tipo: usuario.tipo,
     nombre: usuario.nombre,
     alcance: usuario.alcance
   };

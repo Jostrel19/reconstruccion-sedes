@@ -177,9 +177,21 @@ def _entero(v):
     return round(v) if isinstance(v, (int, float)) else 0
 
 
+# Desde el 2026-09-28 el censo llega como exportación de Power BI: los encabezados
+# traen el prefijo de la tabla y el DANE se llama «DANE SEDE» (ver rutas.py). Se
+# quita el prefijo para seguir leyendo por nombre de columna, no por posición. El
+# tipo sigue siendo «A2. TIPO DE AFECTACIÓN» (columna AJ); no confundir con
+# «Afectación» (AK: Leve/Moderado/Grave), que es otra clasificación y no se usa.
+PREFIJO_CENSO = "fctEstadoInfraestructura."
+
+
+def _sin_prefijo(r):
+    return {k[len(PREFIJO_CENSO):] if k.startswith(PREFIJO_CENSO) else k: v for k, v in r.items()}
+
+
 censo = 0
-for r in rows(rutas.F_DIM_DANOS, rutas.H_DIM_DANOS):
-    ds = dane(r.get("CODIGO_DANE_SEDE"))
+for r in map(_sin_prefijo, rows(rutas.F_DIM_DANOS, rutas.H_DIM_DANOS)):
+    ds = dane(r.get("CODIGO_DANE_SEDE") or r.get("DANE SEDE"))
     if ds not in sedes:
         continue
     censo += 1
@@ -304,7 +316,7 @@ catalogo = {
     "fuentes": {
         "universo": "fctMaestra.xlsx / MATRICULA (SECTOR=OFICIAL, sin Manizales)",
         "estado_due": "fctMaestra.xlsx / Sedes",
-        "censo": "dimDañosInfraestructura.xlsx / EstadoInfraestructura (D-26)",
+        "censo": f"dimDañosInfraestructura.xlsx / {rutas.H_DIM_DANOS} (D-26; versión del 2026-09-28)",
         "rectores": "Directorio Instituciones Educativas 2026.xlsx (cruce por municipio+nombre)",
         "alcaldes": "Base de datos Funcionarios 2026.xlsx / Alcaldes",
     },

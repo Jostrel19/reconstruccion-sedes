@@ -37,6 +37,7 @@
   }
 
   function exportarVista(){
+    if (vista === 'confirmaciones'){ exportarConfirmaciones(); return; }
     if (vista === 'verif'){
       const enc = ['Radicado', 'DANE sede', 'Municipio', 'Sede', 'Tipo de afectación (censo)', 'Estado', 'Versión',
         'Origen', 'Total presupuesto', 'Costo directo', 'Registrado por', 'Fecha de registro', 'Días esperando concepto'];

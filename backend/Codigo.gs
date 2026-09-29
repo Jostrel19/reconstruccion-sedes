@@ -48,7 +48,13 @@ function doPost(e) {
     crearLote: Lotes_crear,
     agregarSedesLote: Lotes_agregarSedes,
     quitarSedeLote: Lotes_quitarSede,
-    cerrarLote: Lotes_cerrar
+    cerrarLote: Lotes_cerrar,
+    // D-48: confirmación de sedes por los alcaldes (Confirmaciones.gs)
+    listarConfirmaciones: Confirmaciones_listar,
+    guardarConfirmaciones: Confirmaciones_guardar,
+    generarCertificado: Confirmaciones_generarCertificado,
+    subirCertificado: Confirmaciones_subirCertificado,
+    descargarCertificado: Confirmaciones_descargarCertificado
   };
 
   var accion = String(body.accion || '');

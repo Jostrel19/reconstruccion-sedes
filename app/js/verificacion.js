@@ -105,6 +105,11 @@
   function abrirConceptoVerif(idPresupuesto){
     verifSeleccion = idPresupuesto;
     renderConceptoPanel(VERIF.find(x => String(x.id_presupuesto) === String(idPresupuesto)) || null);
+    // El panel está debajo de la bandeja: con decenas de filas quedaba fuera de
+    // la vista y el botón parecía no hacer nada (hallado en el hito 1, 54 filas).
+    const panel = document.getElementById('verif-c-cuerpo').closest('.p');
+    const quieto = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    panel.scrollIntoView({ behavior: quieto ? 'auto' : 'smooth', block: 'start' });
   }
 
   function renderConceptoPanel(p){

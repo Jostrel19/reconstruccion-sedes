@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Reconstrucción de sedes — SED Caldas</title>
-<link rel="stylesheet" href="css/estilos.css?v=3">
+<link rel="stylesheet" href="css/estilos.css?v=8">
 </head>
 <body>
 
@@ -62,7 +62,7 @@
 
               <div id="login-p1">
                 <div class="campo"><label for="u">Correo institucional</label>
-                  <input id="u" type="email" placeholder="nombre@sedcaldas.edu.co" autocomplete="username"></div>
+                  <input id="u" type="email" placeholder="El correo con el que está registrado" autocomplete="username"></div>
                 <button class="b" type="button" id="btn-enviar" onclick="loginEnviarCodigo()">Enviar código</button>
               </div>
 
@@ -78,6 +78,7 @@
               <div class="pie2">
                 Sin contraseña: se entra con el correo institucional y un código de un solo uso,
                 válido 10 minutos. Si el correo no está registrado como usuario, no se envía nada.
+                Si el código no le llega en unos minutos, revise la carpeta de correo no deseado (spam).
               </div>
             </div>
           </div>
@@ -92,7 +93,11 @@
             <div class="marca"><img src="img/logo-riel.png" alt="Gobierno de Caldas — Secretaría de Educación"></div>
             <a href="#" data-mod="inicio" class="sel">
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 14V6.2L8 2l6 4.2V14"/><path d="M2 14h12"/><path d="M6.2 14V9.5h3.6V14"/></svg>Inicio</a>
+            <a href="#" data-mod="confirmacion">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4.2 2.6H3v11.8h10V2.6h-1.2"/><rect x="5.4" y="1.6" width="5.2" height="2" rx=".5"/><path d="M5.4 9 7.2 10.8l3.4-3.6"/></svg>Confirmación de sedes</a>
             <div class="grupo">Seguimiento</div>
+            <a href="#" data-mod="confirmaciones" data-sed>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4.2 2.6H3v11.8h10V2.6h-1.2"/><rect x="5.4" y="1.6" width="5.2" height="2" rx=".5"/><path d="M5.4 9 7.2 10.8l3.4-3.6"/></svg>Confirmación de alcaldes</a>
             <a href="#" data-mod="sedes">
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 14.2V4.5h6v9.7"/><path d="M8.5 7.5h5v6.7"/><path d="M1.5 14.2h13"/><path d="M4.4 7h2.2M4.4 9.5h2.2M4.4 12h2.2M10.4 10h1.2M10.4 12.2h1.2"/></svg>Sedes</a>
             <a href="#" data-mod="tablero" data-sed>
@@ -122,7 +127,7 @@
                 <div class="busca-res oculto" id="busca-res" role="listbox"></div>
               </div>
               <div class="yo"><span class="av" id="av"></span><span><b id="nomTx"></b><span class="rol" id="rolTx"></span></span></div>
-              <button class="b sec mini" type="button" onclick="cerrarSesion()">Salir</button>
+              <button class="b sec mini" type="button" onclick="salir()">Salir</button>
             </div>
 
             <div class="lienzo" id="contenido" role="main" tabindex="-1">
@@ -621,7 +626,7 @@
                         <option value="">Todos</option><option value="12">1 y 2 (colapso y riesgo)</option>
                         <option value="1">1 · Colapso</option><option value="2">2 · Riesgo inminente</option>
                         <option value="3">3 · Estructurales parciales</option><option value="4">4 · Menores</option>
-                        <option value="5">5 · Sin afectación</option><option value="6">6 · No determinable</option>
+                        <option value="5">5 · Sin afectación</option>
                         <option value="7">7 · Sin revisar</option></select></label>
                       <label><span>Presupuesto</span><select id="lote-f-pres">
                         <option value="">Con y sin</option><option value="con">Con presupuesto</option><option value="sin">Sin presupuesto</option></select></label>
@@ -648,6 +653,109 @@
                 </div>
               </section>
 
+              <!-- ─── CONFIRMACIÓN DE SEDES (alcalde, D-48) ─── -->
+              <section class="view" id="s-confirmacion">
+                <div class="franja conf-franja" id="conf-franja"></div>
+
+                <div class="p">
+                  <header><h2>Su reporte</h2><span class="flex"></span><span class="est e-pend" id="conf-estado">—</span></header>
+                  <div class="cuerpo" id="conf-pasos"></div>
+                </div>
+
+                <div class="p">
+                  <header><h2>Sedes oficiales de su municipio</h2><span class="flex"></span><span class="eyebrow" id="conf-eyebrow"></span></header>
+                  <!-- Siempre a la vista (pedido del usuario, 2026-09-29): el alcalde no tiene que
+                       descubrir que hay instrucciones. Los conceptos son los del oficio (D-48). -->
+                  <div class="conf-ayuda" role="note" aria-labelledby="conf-ayuda-tit">
+                    <h3 id="conf-ayuda-tit">Cómo responder cada sede</h3>
+                    <ol class="ca-pasos">
+                      <li><b>Revise el nivel de afectación.</b> Ya viene diligenciado: lo registró la Unidad de Planeación
+                        a partir de los diagnósticos y certificados remitidos por el municipio. Es solo de consulta: no se
+                        responde ni se certifica.</li>
+                      <li><b>Responda Sí o No: ¿la sede tiene una intervención terminada o en proceso?</b> Es decir, si
+                        para atender los daños del sismo ya se hizo o se adelanta alguna obra en la sede, en cualquier etapa.
+                        Si responde <b>No</b>, la sede queda lista y no se piden más datos.</li>
+                      <li><b>Si responde Sí, complete los datos que aparecen en la fila:</b>
+                        <ul>
+                          <li><b>Quién interviene:</b> la entidad o actor responsable de la intervención. Elija una sola
+                            opción; si intervienen varias entidades, elija <i>Cofinanciación (varias entidades)</i>.</li>
+                          <li><b>Nombre de quién interviene:</b> aparece solo con <i>Donante</i>, <i>Cofinanciación</i> o
+                            <i>Cooperación / sector privado</i>, y es obligatorio. Escriba el nombre de la empresa, persona u
+                            organización; en Cofinanciación, los nombres de las entidades.</li>
+                          <li><b>Estado de la obra:</b> la etapa en que está: Planeación, Contratación, Ejecución o Terminada.</li>
+                        </ul>
+                        Si la sede tiene más de una intervención, registre la más reciente que siga en proceso.</li>
+                      <li><b>Pulse «Guardar cambios»</b> en la barra que aparece abajo. Puede responder por partes y volver
+                        después: lo que guarda no se pierde.</li>
+                    </ol>
+                    <div class="ca-ejemplos">
+                      <b>Ejemplos</b>
+                      <ul>
+                        <li>La sede no ha tenido ninguna obra por el sismo → <b>No</b>.</li>
+                        <li>La Alcaldía está contratando la reparación → <b>Sí</b> · Alcaldía · Contratación.</li>
+                        <li>La Alcaldía y el FFIE reparan juntos → <b>Sí</b> · Cofinanciación (varias entidades) ·
+                          nombre: «Alcaldía y FFIE» · Ejecución.</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="chips" id="conf-filtros" role="group" aria-label="Filtrar las sedes"></div>
+                  <div class="cuerpo ras">
+                    <div class="scroll">
+                      <table class="edit conf-tabla">
+                        <thead><tr><th class="n">N.º</th><th>Sede</th><th>Nivel de afectación <span class="th-sub">solo consulta</span></th>
+                          <th>¿Intervención terminada o en proceso?</th><th>Quién interviene <span class="th-sub">y su nombre, cuando se pide</span></th>
+                          <th>Estado de la obra</th><th><span class="sr">Estado de la fila</span></th></tr></thead>
+                        <tbody id="conf-tbody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="conf-barra oculto" id="conf-barra" role="region" aria-label="Cambios sin guardar">
+                    <span id="conf-barra-tx"></span><span class="flex"></span>
+                    <button class="b sec mini" type="button" id="conf-btn-deshacer">Deshacer</button>
+                    <button class="b" type="button" id="conf-btn-guardar">Guardar cambios</button>
+                  </div>
+                  <div class="pie">Las respuestas quedan en el sistema al pulsar <b>Guardar cambios</b>: puede responder por
+                    partes y volver después. Las sedes son todas las oficiales del municipio, también las que no tienen
+                    afectación. Para cualquier inquietud, comuníquese con la Unidad de Planeación de la Secretaría de
+                    Educación por el medio indicado en el oficio.</div>
+                </div>
+              </section>
+
+              <!-- ─── CONFIRMACIÓN DE ALCALDES (Secretaría, D-48) ─── -->
+              <section class="view" id="s-confirmaciones">
+                <div class="franja" id="av-franja"></div>
+
+                <div class="p" id="av-lista-caja">
+                  <header><h2>Municipios</h2></header>
+                  <div class="cuerpo ras">
+                    <div class="scroll">
+                      <table>
+                        <thead><tr><th>Municipio</th><th>Alcalde</th><th class="n">Sedes</th><th>Respondidas</th>
+                          <th class="n">Con intervención</th><th>Estado</th><th>Certificación firmada</th></tr></thead>
+                        <tbody id="av-tbody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="pie" id="av-pie"></div>
+                </div>
+
+                <div class="p oculto" id="av-detalle">
+                  <header><h2 id="av-det-titulo">—</h2><span class="est e-pend" id="av-det-estado">—</span><span class="flex"></span>
+                    <button class="b sec mini" type="button" id="av-volver">Volver a los municipios</button></header>
+                  <div class="cuerpo"><div class="cifras" id="av-det-cifras"></div><div class="av-info" id="av-det-info"></div></div>
+                  <div class="cuerpo ras">
+                    <div class="scroll">
+                      <table>
+                        <thead><tr><th class="n">N.º</th><th>Sede</th><th>DANE</th><th>Nivel de afectación</th><th>¿Intervención?</th>
+                          <th>Quién interviene</th><th>Nombre de quién interviene</th><th>Estado de la obra</th><th>Registrada</th></tr></thead>
+                        <tbody id="av-det-tbody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="pie">Solo lectura: las respuestas y la certificación las registra el alcalde del municipio.</div>
+                </div>
+              </section>
+
               <!-- ─── HALLAZGOS (solo SED) ─── -->
               <section class="view" id="s-hallazgos">
                 <div class="franja" id="hallazgos-franja">
@@ -664,7 +772,9 @@
                   </div>
                   <div class="pie">El sistema los registra solo al radicar o cargar un presupuesto con una
                     inconsistencia (AIU sobre el umbral, costo en $0, declaración que contradice el censo,
-                    DANE confirmado a mano). Ninguno se resuelve solo: alguien confirma el dato real y lo marca.</div>
+                    DANE confirmado a mano). Ninguno se resuelve solo: alguien confirma el dato real y lo marca.
+                    Los de una versión que ya fue reemplazada por otra radicación aparecen atenuados (↻) y no
+                    cuentan como abiertos.</div>
                 </div>
               </section>
 
@@ -763,25 +873,28 @@
 
     </div>
 
-<script src="js/nucleo.js?v=3"></script>
-<script src="js/transporte.js?v=3"></script>
-<script src="js/sesion.js?v=3"></script>
-<script src="js/avisos.js?v=3"></script>
-<script src="js/login.js?v=3"></script>
-<script src="js/registrar.js?v=3"></script>
-<script src="js/ficha.js?v=3"></script>
-<script src="js/pdf.js?v=3"></script>
-<script src="js/verificacion.js?v=3"></script>
-<script src="js/hallazgos.js?v=3"></script>
-<script src="js/usuarios.js?v=3"></script>
-<script src="js/cargas.js?v=3"></script>
-<script src="js/tablero.js?v=3"></script>
-<script src="js/inicio.js?v=3"></script>
-<script src="js/sedes.js?v=3"></script>
-<script src="js/lotes.js?v=3"></script>
-<script src="js/exportar.js?v=3"></script>
-<script src="js/cabecera.js?v=3"></script>
-<script src="js/buscador.js?v=3"></script>
-<script src="js/arranque.js?v=3"></script>
+<script src="js/nucleo.js?v=8"></script>
+<script src="js/transporte.js?v=8"></script>
+<script src="js/sesion.js?v=8"></script>
+<script src="js/avisos.js?v=8"></script>
+<script src="js/login.js?v=8"></script>
+<script src="js/registrar.js?v=8"></script>
+<script src="js/ficha.js?v=8"></script>
+<script src="js/pdf.js?v=8"></script>
+<script src="js/verificacion.js?v=8"></script>
+<script src="js/hallazgos.js?v=8"></script>
+<script src="js/usuarios.js?v=8"></script>
+<script src="js/cargas.js?v=8"></script>
+<script src="js/tablero.js?v=8"></script>
+<script src="js/inicio.js?v=8"></script>
+<script src="js/sedes.js?v=8"></script>
+<script src="js/lotes.js?v=8"></script>
+<script src="js/exportar.js?v=8"></script>
+<script src="js/confirmacion.js?v=8"></script>
+<script src="js/certificado.js?v=8"></script>
+<script src="js/avance.js?v=8"></script>
+<script src="js/cabecera.js?v=8"></script>
+<script src="js/buscador.js?v=8"></script>
+<script src="js/arranque.js?v=8"></script>
 
 </body></html>

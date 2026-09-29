@@ -18,17 +18,29 @@
     const soltar = ocupar(document.getElementById('btn-enviar'), 'Enviando…');
     try {
       const r = await backend('solicitarCodigo', { correo: correoActual });
-      if (!r.ok) { errorLogin(r.error || 'No se pudo enviar el código. Intente de nuevo.'); return; }
-      document.getElementById('login-sub').textContent =
-        'Le enviamos un código a su correo — vence en 10 minutos, un solo uso.';
-      document.getElementById('login-p1').classList.add('oculto');
-      document.getElementById('login-p2').classList.remove('oculto');
-      document.getElementById('cod').focus();
+      if (r.ok) pasoCodigo('Le enviamos un código a su correo — vence en 10 minutos, un solo uso.');
+      else if (r.sinConfirmar) pasoCodigo(AVISO_SIN_CONFIRMAR);
+      else errorLogin(r.error || 'No se pudo enviar el código. Intente de nuevo.');
     } catch (err) {
-      errorLogin('No se pudo contactar el servidor. Intente de nuevo.');
+      if (err && err.sinConfirmar) pasoCodigo(AVISO_SIN_CONFIRMAR);
+      else errorLogin('No se pudo contactar el servidor. Intente de nuevo.');
     } finally {
       soltar();
     }
+  }
+
+  /* Medido el 2026-09-29: con Google lento, el código llegó al correo pero la
+     respuesta fue una página de error, y la pantalla no dejaba escribirlo. Se
+     muestra el campo igual: el servidor valida el código, así que no abre nada.
+     No se reintenta el envío solo, para no mandar correos repetidos (cupo diario). */
+  const AVISO_SIN_CONFIRMAR = 'El servidor tardó y no confirmó el envío. Si le llegó el código, escríbalo aquí ' +
+    '(vence en 10 minutos). Si no le llega en unos minutos, use «Cambiar correo» y pídalo de nuevo.';
+
+  function pasoCodigo(texto){
+    document.getElementById('login-sub').textContent = texto;
+    document.getElementById('login-p1').classList.add('oculto');
+    document.getElementById('login-p2').classList.remove('oculto');
+    document.getElementById('cod').focus();
   }
 
   function loginVolver(){
@@ -46,9 +58,13 @@
     const soltar = ocupar(document.getElementById('btn-entrar'), 'Validando…');
     try {
       const r = await backend('validarCodigo', { correo: correoActual, codigo });
+      if (!r.ok && r.sinConfirmar) {
+        errorLogin('El servidor no respondió a tiempo. Intente «Entrar» otra vez con el mismo código; si le dice que no es válido, use «Cambiar correo» y pida uno nuevo.');
+        return;
+      }
       if (!r.ok) { errorLogin(r.error || 'Código inválido.'); return; }
 
-      const datos = { token: r.token, rolBackend: r.rol, nombre: r.nombre, alcance: r.alcance };
+      const datos = { token: r.token, rolBackend: r.rol, tipo: r.tipo || '', nombre: r.nombre, alcance: r.alcance };
       const clave = aplicarSesion(datos);
       if (!clave) { sesion = null; errorLogin('Rol desconocido: ' + r.rol); return; }
       guardarLocal(CLAVE_SESION, { sesion: datos, correo: correoActual });
@@ -57,7 +73,9 @@
       // Sedes reales: no bloquea la entrada, se repinta cuando llegue.
       cargarSedes().then(() => pintar());
     } catch (err) {
-      errorLogin('No se pudo contactar el servidor. Intente de nuevo.');
+      errorLogin(err && err.sinConfirmar
+        ? 'El servidor no respondió a tiempo. Intente «Entrar» otra vez con el mismo código; si le dice que no es válido, use «Cambiar correo» y pida uno nuevo.'
+        : 'No se pudo contactar el servidor. Intente de nuevo.');
     } finally {
       soltar();
     }

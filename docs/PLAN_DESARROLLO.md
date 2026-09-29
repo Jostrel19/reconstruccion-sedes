@@ -430,7 +430,54 @@ desplegados: el usuario lo confirmó el 2026-09-25 y el `/exec` publicado recono
 
 **Hito 0 cerrado el 2026-09-25.** Hito 1: `docs/GUION_CASO_DE_EXITO.md` actualizado ese día (Inicio, «Contar
 sobre», «Antes de radicar», precarga, Lotes, correo del concepto con una vuelta devolver → corregir →
-aprobar, comprobación rápida de accesibilidad, pasos cronometrados); **falta correrlo en real**.
+aprobar, comprobación rápida de accesibilidad, pasos cronometrados). **Corrido en real el mismo
+2026-09-25: los 8 pasos pasan** (resultados en el guion, detalle en `REGISTRO_DESARROLLO.md`). Quedaron
+13 hallazgos (H1-1 a H1-13): uno corregido en la corrida (H1-8); seis correcciones pequeñas de la
+interfaz (H1-1, H1-3, H1-4, H1-5, H1-7, H1-11) **hechas y probadas con simulador el mismo día**; H1-10
+decidido por el usuario (opción a → **D-47**) y hecho; uno para investigar (H1-12); una mejora antes del
+piloto (H1-2); uno del servidor local (H1-9), y uno de datos que va a `CONFLICTOS_Y_HALLAZGOS.md`
+(H1-13 → H-20). **Falta ver en real** las correcciones del frontend (sin despliegue de Apps Script).
+
+### En discusión (anotado 2026-09-25, actualizado 2026-09-28)
+
+**1. Confirmación de sedes por los alcaldes — definición cerrada el 2026-09-28 (D-48), sin código. Urgente:
+va antes que todo lo demás.** El detalle de lo decidido está en **D-48** (`CLAUDE.md` §2); el texto aprobado del
+certificado y los ajustes al oficio, en `docs/PROPUESTA para jefatura - Certificado de alcaldes y ajustes al oficio v2.docx`. Las contradicciones del oficio y cómo se resolvieron,
+en `CONFLICTOS_Y_HALLAZGOS.md` H-21 a H-24.
+
+**Censo actualizado el 2026-09-28, ya en el sistema desde el 2026-09-29:** «BASE DE DATOS ACTUALIZADA 28_09_2026.xlsx» revisado y
+cruzado (mismas 975 sedes, sin tipo 6, «7. Sin revisar», «(PRIORITARIO)» en 1 y 2), catálogo y
+`backend_sedes.csv` regenerados. Detalle en `REGISTRO_DESARROLLO.md`.
+
+**Lo que sigue, en orden:**
+
+1. ~~**Usuario:** importar `backend_sedes.csv` en `Sedes` y correr `olvidarCatalogo()`~~ → **hecho y verificado
+   2026-09-29**: la app muestra 975 sedes, «Con daño reportado» = **702** y Patio Bonito en tipo 4; municipio, tipo y
+   capítulos de las 975 idénticos al CSV (ver `REGISTRO_DESARROLLO.md`).
+2. ~~**Desarrollo** del módulo~~ → **código completo el 2026-09-29**, por fases (`docs/PLAN_CONFIRMACION_ALCALDES.md`):
+   `backend/Confirmaciones.gs` (5 acciones) y hojas `Confirmaciones`/`Certificaciones`; `app/js/confirmacion.js`
+   (pantalla del alcalde), `certificado.js` (certificado impreso), `avance.js` (panel «Confirmación de alcaldes» de la
+   Secretaría); opción «6» retirada del filtro de Lotes. Verificado con arnés (71 comprobaciones nuevas + 68 de
+   regresión) y con backend simulado; certificado impreso a PDF con Edge: Riosucio 6 páginas, Marulanda 2.
+   **Fase 4 hecha el mismo día:** desplegado y **probado en real** con un alcalde de prueba en Aranzazu (ciclo completo,
+   PDF cargado y descargado idéntico). Datos de prueba retirados, PDF de prueba borrados y las 2 hojas protegidas (verificado el 2026-09-29).
+3. **Antes de enviar el enlace:** publicar en GitHub Pages (workflow de Actions, la app está en `/app`);
+   ~~desactivar los 161 rectores~~ (**verificado 2026-09-29: 0 de 161 activos**); **activar los 26 alcaldes**, que
+   hoy están todos inactivos (0 de 26), justo antes de enviar el oficio; decidir A1-A2 del cupo de correo (punto 2); corregir el oficio con el texto de la v2 y enviarlo
+   a los mismos correos registrados. **Oficio final generado** (membrete completo, cambios aplicados, pendientes
+   resaltados en amarillo: fecha de envío, enlace, QR, firmante y cargo): `trabajo28.09_oficioAlcaldes/OFICIO A ALCALDES - Actualizacion informacion de sedes (para revision del jefe).docx`. Pendiente de la
+   jefatura: el firmante del oficio.
+
+**2. Cupo de correo (100 al día, cuenta personal de Gmail; Workspace da 1.500).** Lo que más gasta es el
+código de ingreso. Propuesta: **A1** «recordar este equipo» 7 días (sesión en el navegador, no solo en la
+pestaña; desactivar al usuario ya corta la sesión) — de ~187 a ~27 códigos al día en campaña; **A2** reservar
+cupo para códigos (si quedan < 20, las notificaciones no se envían y quedan en el Inicio); **A3** opcional,
+quitar el correo de confirmación de radicado. Para escalar, decisión institucional: cuenta de Google
+Workspace (costo; resolvería también D-19) o enviar desde Microsoft 365 (requiere registro de aplicación en
+Entra ID por TI). Descartados: servicio externo tipo SendGrid/Brevo (datos sensibles a un tercero, spam en
+Outlook sin dominio verificado) y varias cuentas de Gmail. Pendiente: si A1-A2 se hacen ya o se llevan al
+jefe junto con el punto 1. **Con la campaña de los 26 alcaldes (cada ingreso gasta un correo) conviene
+decidir A1-A2 antes de enviar el enlace.**
 
 ### Después del piloto (anotado, no se hace antes)
 
@@ -522,7 +569,7 @@ un presupuesto real de un municipio.
 | 5 | **Q-3:** aval de Planeación a los umbrales A > 12 %, U > 8 %. **Ya no es teórico:** Aguadas y Aranzazu radican con **A 25 %** — la alerta va a saltar en casi todo lo que llegue de esos dos. Hay evidencia concreta que llevarle | Planeación |
 | 6 | **Q-7:** mapa definitivo resultado → estado. Mientras tanto rige **D-22** | Planeación |
 | 7 | Las **5 sedes priorizadas sin capítulo de daño marcado** en `dimDaños`: están en el lote pero no hay contra qué verificar su presupuesto | Arquitectos |
-| 8 | **Q-13:** logo oficial en alta y manual de identidad. Hoy se usa el PNG del repo | Comunicaciones |
+| 8 | **Q-13:** logo oficial en alta y manual de identidad. Hoy se usa el PNG del repo. **2026-09-28:** el membrete institucional `MEMBRETE CARTA NUEVO (1).docx` (raíz de la práctica) trae el logo y el pie; se usa en el oficio a alcaldes y en el certificado. Sigue faltando el logo en alta o vectorial | Comunicaciones |
 | 9 | **Q-4:** ¿se agregan campos que el formato oficial no pide (profesional que elabora, obra en curso, cofinanciación)? | Planeación |
 | 10 | **Q-12:** «el catálogo que próximamente se subirá» — ¿es el catálogo de sedes (ya resuelto, es `dimDaños`) o un catálogo de **precios unitarios** para validar presupuestos? Son diseños distintos; D-35 asume que no existe todavía | Planeación |
 

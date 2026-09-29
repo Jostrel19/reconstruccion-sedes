@@ -32,13 +32,25 @@
 
   // Deja lista la sesión (desde el ingreso o desde lo guardado): rol, nombre y
   // texto del rol en la barra superior.
+  // D-48: alcalde = tipo «alcalde» en Usuarios. Las sesiones guardadas antes de
+  // que el ingreso devolviera el tipo se reconocen por el alcance: un municipio,
+  // no una lista de DANE (eso es un rector).
+  function esAlcalde(datos){
+    if (datos.rolBackend !== 'RESPONSABLE_SEDE') return false;
+    if (datos.tipo) return datos.tipo === 'alcalde';
+    const lista = String(datos.alcance || '').split('|').map(x => x.trim()).filter(Boolean);
+    return !!lista.length && !lista.every(x => /^\d{12}$/.test(x));
+  }
+
   function aplicarSesion(datos){
-    const clave = ROL_BACKEND_A_CLAVE[datos.rolBackend];
+    let clave = ROL_BACKEND_A_CLAVE[datos.rolBackend];
     if (!clave) return null;
+    if (CAMPANA_CONFIRMACION && esAlcalde(datos)) clave = 'alcalde';
     sesion = datos;
     rol = clave;
     ROLES[clave].nom = datos.nombre;
     ROLES[clave].ini = iniciales(datos.nombre);
+    if (clave === 'alcalde') ROLES.alcalde.rot = `Alcalde · ${datos.alcance}`;
     if (clave === 'resp'){
       // Alcalde: el alcance es el municipio. Rector: lista de DANE de sede.
       const lista = String(datos.alcance || '').split('|').map(x => x.trim()).filter(Boolean);

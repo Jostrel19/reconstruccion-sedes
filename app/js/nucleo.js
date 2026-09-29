@@ -17,7 +17,21 @@
     hallazgos:['hallazgos', 's-hallazgos', '<span>Administración</span><span class="sep">›</span><span class="hoy">Hallazgos</span>'],
     usuarios: ['usuarios', 's-usuarios', '<span>Administración</span><span class="sep">›</span><span class="hoy">Usuarios</span>'],
     lotes:    ['lotes', 's-lotes', '<span>Administración</span><span class="sep">›</span><span class="hoy">Lotes</span>'],
+    // D-48: la pantalla del alcalde y el avance que ve la Secretaría.
+    confirmacion:  ['confirmacion', 's-confirmacion', '<span class="hoy">Confirmación de sedes</span>'],
+    confirmaciones:['confirmaciones', 's-confirmaciones', ''],
   };
+
+  /* D-48: campaña de confirmación de sedes por los alcaldes. Encendida, el
+     alcalde entra directo a su pantalla y no ve nada más, y la Secretaría ve
+     «Confirmación de alcaldes» en el riel. Apagada, el alcalde vuelve a ser un
+     Responsable de sede como los demás. */
+  const CAMPANA_CONFIRMACION = true;
+  const CONFIRMACION_PLAZO = 'viernes 2 de octubre de 2026';
+  // Fecha del oficio de la jefatura que cita el certificado (texto aprobado).
+  // Si el oficio sale con otra fecha, se cambia aquí.
+  const CONFIRMACION_FECHA_OFICIO = '28 de septiembre de 2026';
+  const VE_CAMPANA = CAMPANA_CONFIRMACION ? ['confirmaciones'] : [];
 
   /* Los 4 roles del sistema (D-20). `ve` es la lista blanca de pantallas y la
      primera es la de entrada (Inicio para todos); `interno` si es personal de
@@ -28,17 +42,23 @@
      con los datos reales de la sesión al entrar. */
   const ROLES = {
     admin:    { ext:false, rot:'Administrador',
-                ve:['inicio','sedes','tablero','muni','ficha','registrar','verif','cargas','lotes','hallazgos','usuarios'],
+                ve:['inicio','sedes','tablero','muni','ficha','registrar','verif','cargas','lotes','hallazgos','usuarios', ...VE_CAMPANA],
                 interno:true,  edita:true,  verifica:true },
     verif:    { ext:false, rot:'Verificador · todo el departamento',
-                ve:['inicio','sedes','tablero','muni','ficha','verif','cargas','hallazgos'],
+                ve:['inicio','sedes','tablero','muni','ficha','verif','cargas','hallazgos', ...VE_CAMPANA],
                 interno:true,  edita:false, verifica:true },
     resp:     { ext:true,  rot:'Responsable de sede',
                 ve:['inicio','sedes','muni','ficha','registrar'],
                 interno:false, edita:true,  verifica:false },
     consulta: { ext:false, rot:'Consulta · solo lectura',
-                ve:['inicio','sedes','tablero','muni','ficha'],
+                ve:['inicio','sedes','tablero','muni','ficha', ...VE_CAMPANA],
                 interno:true,  edita:false, verifica:false },
+    // D-48: el alcalde durante la campaña. En el servidor sigue siendo
+    // RESPONSABLE_SEDE; aquí solo cambia lo que se le muestra. No pide las
+    // sedes de presupuesto (sinSedes): su pantalla trae las suyas.
+    alcalde:  { ext:true,  rot:'Alcalde',
+                ve:['confirmacion'],
+                interno:false, edita:false, verifica:false, sinSedes:true },
   };
 
   let vista = 'login', rol = 'admin';
@@ -159,6 +179,7 @@
      `sedes` sea una lista y, si no lo es, se reintenta una vez. */
   let promesaSedes = null;
   function cargarSedes(){
+    if (ROLES[rol].sinSedes){ SEDES = []; return Promise.resolve(); }
     if (promesaSedes) return promesaSedes;
     cargandoSedes = true;
     promesaSedes = (async () => {
