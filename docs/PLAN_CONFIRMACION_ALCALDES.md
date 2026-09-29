@@ -225,3 +225,11 @@ Publicación preparada: `.github/workflows/pages.yml` (sube solo `app/`) y `.git
 jefatura (traen un teléfono). Revisión de datos personales en lo que se sube: sin correos ni teléfonos nuevos; los
 correos que ya están en `docs/REGISTRO_DESARROLLO.md` y `docs/PLAN_DESARROLLO.md` ya estaban publicados en commits
 anteriores (pendiente aparte: datos personales en el historial).
+
+### 2026-09-29 — D-49: la campaña en el servidor y tope de códigos
+
+Tras la auditoría de seguridad previa al despliegue: el servidor aplica el modo campaña (un Responsable de sede solo
+usa la confirmación) y el envío de códigos tiene tope (3 sin usar por correo cada 6 h). Probado en el arnés (50/50, más
+68/68 y 71/71). **Falta desplegar** `Codigo.gs`, `Auth.gs` y `Usuarios.gs` (nueva versión de la implementación) y
+comprobarlo en real con «Jose Prueba», **antes de activar a los 26 alcaldes**. Detalle: `CLAUDE.md` D-49 y
+`docs/REGISTRO_DESARROLLO.md`.

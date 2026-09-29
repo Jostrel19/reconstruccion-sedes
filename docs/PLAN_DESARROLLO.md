@@ -213,7 +213,7 @@ fabricados en memoria y luego, tras el despliegue, contra el backend real:**
    que la bandeja se refresca.
 
 **Prueba de producción, 2026-09-21, tras el despliegue de `Fotos.gs`, `Codigo.gs`,
-`Verificaciones.gs` y `Presupuestos.gs`:** login real (`data@sedcaldas.edu.co`, código de un solo
+`Verificaciones.gs` y `Presupuestos.gs`:** login real (`correo del administrador`, código de un solo
 uso), sobre la sede 217050000060 (Buenos Aires, I.E. Antonio Nariño — Aranzazu):
 
 - Se radicó un presupuesto de prueba (`guardarPresupuesto`, MANUAL, 1 ítem, $1.020.000) →
@@ -332,7 +332,7 @@ propuesto por nombre — ninguno traía DANE en el Excel): la pantalla mostró l
 coincidencia en el catálogo sin premarcar (D-40), se confirmaron 2 a mano (Buenos Aires
 `217050000060`, Campo Alegre `217050000116`) y "Volcar confirmados" llamó `guardarPresupuesto` real
 dos veces. Verificado leyendo de vuelta ambos registros con `obtenerPresupuesto`: `origen: CARGA`,
-`archivo_origen: ingesta_ARANZAZU.json`, `creado_por: data@sedcaldas.edu.co`, un ítem único por
+`archivo_origen: ingesta_ARANZAZU.json`, `creado_por: correo del administrador`, un ítem único por
 sede con `capitulo` vacío/`unidad: gl`/`cantidad: 1`/`valor_unitario` = costo directo exacto del
 Excel, y la nota de D-36 en `descripcion_afectacion` sobre la falta de desglose — exactamente el
 comportamiento de D-36/D-40/D-41. Las 5 filas sin coincidencia en el catálogo (Camelia Pequeña,
@@ -500,7 +500,7 @@ pinta; una CSP sin `unsafe-inline` exige antes cambiar los `onclick="…"` del H
 |---|---|---|---|
 | 1 | Nombre del repositorio y visibilidad | Practicante | ✅ **Hecho** — `github.com/Jostrel19/reconstruccion-sedes`, público |
 | 2 | Lista de Administrador, Verificador y Consulta: nombre + correo | Jefatura | ✅ **Hecho** — 6 personas confirmadas (2 Administrador, 2 Verificador, 2 Consulta), en `data/insumos/usuarios_manual.csv` |
-| 3 | Cuenta de Google para desplegar el Apps Script, y probar que despliega | Practicante | ✅ **Hecho 2026-09-17** — desplegado con Gmail personal (`jose.saavedra2@gmail.com`, ver D-19 precisada), acceso público confirmado en incógnito, y `MailApp` entrega sin fricción a `@sedcaldas.edu.co` (Office 365) |
+| 3 | Cuenta de Google para desplegar el Apps Script, y probar que despliega | Practicante | ✅ **Hecho 2026-09-17** — desplegado con Gmail personal (ver D-19 precisada), acceso público confirmado en incógnito, y `MailApp` entrega sin fricción a `@sedcaldas.edu.co` (Office 365) |
 
 **Los tres bloqueantes del paso 0 están resueltos.** No queda nada pendiente para empezar el
 paso 1 (backend real) — ver `docs/REGISTRO_DESARROLLO.md` para el detalle de la prueba.

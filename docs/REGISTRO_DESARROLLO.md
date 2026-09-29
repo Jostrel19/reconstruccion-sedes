@@ -435,14 +435,10 @@ contraseña por HTTPS) — confirmado desde acá con `git fetch` + `git log orig
 
 **Pendiente #2 cerrado.** Lista real de usuarios internos, dada por el usuario:
 
-| Correo | Nombre | Rol |
-|---|---|---|
-| data@sedcaldas.edu.co | José Andrés Saavedra Higuera | Administrador |
-| gmartinez@sedcaldas.edu.co | Gustavo Martínez Murillo | Administrador |
-| lhvargas@sedcaldas.edu.co | Luis Herney Vargas Barrera (Secretario de Educación) | Consulta |
-| wgonzalez@sedcaldas.edu.co | Wilmar Gonzales Orozco (Jefe de Planeación) | Consulta |
-| jtmejia@sedcaldas.edu.co | Jessica Tatiana Mejía Ruiz (arquitecta) | Verificador |
-| falopez@sedcaldas.edu.co | Fabián López (arquitecto) | Verificador |
+Seis usuarios internos: **2 Administrador, 2 Consulta** (directivos de la Secretaría) **y 2 Verificador**
+(arquitectos). *Nombres y correos retirados de este registro el 2026-09-29: el repositorio es público y
+esa lista decía quién tiene cada rol (auditoría de seguridad, hallazgo 1.1). Viven solo en la hoja
+`Usuarios` y en `data/insumos/usuarios_manual.csv`, fuera de git.*
 
 Se guardaron en `data/insumos/usuarios_manual.csv` (fuera de git, como todo dato personal) y
 `tools/generar_usuarios_borrador.py` se extendió para leerlo y fusionarlo con el borrador
@@ -464,7 +460,7 @@ errores de consola.
 ### Segunda ronda de auditoría: la pantalla Usuarios y el §8 de CLAUDE.md
 
 **Usuarios del mockup, corregido.** Al preguntar el usuario si algo más había quedado
-desactualizado, se revisó la pantalla Usuarios: mostraba `jsaavedra` como identificador de sesión
+desactualizado, se revisó la pantalla Usuarios: mostraba el usuario como identificador de sesión
 (residuo del modelo usuario/contraseña ya retirado) y placeholders genéricos («Arquitecto —
 infraestructura», «Dirección») que ya no representan la realidad ahora que hay 2 Verificadores y 2
 Consulta confirmados, no 1 de cada uno. Se corrigió a 7 filas con roles y cantidades reales, sin
@@ -543,7 +539,7 @@ de Fase 0.
 ## 2026-09-17 — Prueba de despliegue de Apps Script: hecha, con una precisión a D-19
 
 Al ir a ejecutar `docs/PRUEBA_DESPLIEGUE_APPS_SCRIPT.md`, el primer intento de iniciar sesión en
-script.google.com con `data@sedcaldas.edu.co` falló con «No se pudo encontrar esta cuenta» — **el
+script.google.com con `correo del administrador` falló con «No se pudo encontrar esta cuenta» — **el
 dominio `@sedcaldas.edu.co` es Microsoft 365, no Google Workspace**, así que no existe ninguna cuenta
 de Google con ese correo. D-19 asumía «mismo dominio institucional, mismo patrón que `circular122`»
 sin haber verificado cómo estaba desplegado realmente ese sistema de referencia.
@@ -556,14 +552,14 @@ riesgo de continuidad que ya asume `circular122`, no uno nuevo.
 
 **Prueba ejecutada con Gmail personal, tres partes:**
 
-1. **Despliegue** — `Ejecutar como: Yo (jose.saavedra2@gmail.com)`, `Usuarios con acceso: Cualquiera`.
+1. **Despliegue** — `Ejecutar como: Yo (Gmail personal del practicante)`, `Usuarios con acceso: Cualquiera`.
    Un primer intento de abrir la URL `/exec` en incógnito dio un error de Google Drive («No se puede
    abrir el archivo»); se aisló probando primero en una pestaña normal (con sesión), donde sí
    funcionó, lo que descartó problema de permisos o de código. Repetido en incógnito un par de
    minutos después, funcionó — fue demora de propagación del despliegue nuevo, no un error real.
 2. **Acceso público confirmado**: el JSON de `doGet` se ve sin pedir login, en incógnito.
 3. **Correo a Office 365**: `probarCorreoInstitucional()` ejecutada desde el editor, entregó a
-   `data@sedcaldas.edu.co` sin pedir autorización adicional (ya estaba concedida) y llegó a la
+   `correo del administrador` sin pedir autorización adicional (ya estaba concedida) y llegó a la
    bandeja principal de Outlook, no a spam. Confirma que `MailApp` entrega por SMTP normal
    independiente del proveedor del destinatario — sin integración especial Google↔Microsoft.
 
@@ -664,14 +660,14 @@ la API, que sí versiona. Aplicado en vivo sobre las 5 pestañas.
 **Prueba de punta a punta, con `curl` contra el Web App real** (no la prueba de eco de ayer):
 
 - `doGet` → ping ok.
-- `POST solicitarCodigo` con `data@sedcaldas.edu.co` → `{"ok":true}`, correo recibido. Se disparó
+- `POST solicitarCodigo` con `correo del administrador` → `{"ok":true}`, correo recibido. Se disparó
   3 veces por reintentos de `curl` con problemas de `schannel` en Windows al seguir la redirección
   de Apps Script (`302` a `script.googleusercontent.com/macros/echo?...`) — cada intento ejecuta el
   backend de verdad, así que llegaron 3 correos con 3 códigos distintos; se resolvió siguiendo la
   redirección manualmente en dos pasos (`curl` sin `-L`, extraer `Location`, `curl` aparte) en vez de
   confiar en `-L`.
 - `POST validarCodigo` con el último código → token firmado, `rol: ADMINISTRADOR`,
-  `nombre: JOSE ANDRES SAAVEDRA HIGUERA`, `alcance: TODO_EL_DEPARTAMENTO` — todo leído en vivo de la
+  `nombre: nombre del administrador`, `alcance: TODO_EL_DEPARTAMENTO` — todo leído en vivo de la
   pestaña `Usuarios` real, no de un dato de prueba.
 - `POST listarSedes` con ese token → 975 sedes, `valor_referencia` presente (correcto para
   Administrador, D-6 no le aplica a este rol).
@@ -692,7 +688,7 @@ Apps Script no responde. `Codigo.gs` igual lo parsea como JSON sin mirar la cabe
 
 **Probado en el navegador de punta a punta, con la cuenta real:** correo → código recibido por
 correo → validado → `sesion` queda con el token, rol (`ADMINISTRADOR`), nombre
-(`JOSE ANDRES SAAVEDRA HIGUERA`) y alcance (`TODO_EL_DEPARTAMENTO`) reales, la vista salta sola al
+(`nombre del administrador`) y alcance (`TODO_EL_DEPARTAMENTO`) reales, la vista salta sola al
 Tablero y la barra superior muestra el nombre e iniciales correctos — nada de esto viene ya de un
 dato simulado.
 
@@ -1269,7 +1265,7 @@ Verificador y Responsable de sede (sigue sin haber un correo real de arquitecto,
 Se pegaron `Fotos.gs`, `Codigo.gs`, `Verificaciones.gs` y `Presupuestos.gs` en el proyecto de Apps
 Script y se subió "Nueva versión" sobre la implementación existente ("Paso 0 — 6 pestañas..."). Con
 el despliegue hecho, se repitió contra el backend real la misma prueba que antes solo se había hecho
-con datos fabricados en memoria — login real (`data@sedcaldas.edu.co`) sobre la sede 217050000060
+con datos fabricados en memoria — login real (`correo del administrador`) sobre la sede 217050000060
 (Buenos Aires, Aranzazu):
 
 - **Se descubrió, antes de poder probar, que la limpieza que había hecho el usuario en la hoja
@@ -1303,7 +1299,7 @@ no solo con datos fabricados en memoria.
 
 ## 2026-09-23 — Plan de cierre: seguridad, fotos en la Ficha, Hallazgos y Usuarios (D-42)
 
-Construido y confirmado en producción con login real (`data@sedcaldas.edu.co`):
+Construido y confirmado en producción con login real (`correo del administrador`):
 
 - **Candado de concurrencia** (`LockService`) en `Presupuestos_guardar` y `Verificaciones_emitir`.
 - **`Fotos_subir` valida los bytes reales** (JPEG/PNG): un archivo de texto con extensión de imagen se
@@ -2070,3 +2066,40 @@ Publicación preparada: `.github/workflows/pages.yml` (sube solo `app/`) y `.git
 jefatura (traen un teléfono). Revisión de datos personales en lo que se sube: sin correos ni teléfonos nuevos; los
 correos que ya están en `docs/REGISTRO_DESARROLLO.md` y `docs/PLAN_DESARROLLO.md` ya estaban publicados en commits
 anteriores (pendiente aparte: datos personales en el historial).
+
+## 2026-09-29 — Auditoría de seguridad y D-49 (sin desplegar)
+
+Auditoría solo de lectura antes de habilitar GitHub Pages. El reporte está **fuera del repositorio**
+(`trabajo29.09_auditoriaSeguridad/reporte_seguridad_pre_despliegue.md`) porque describe puntos débiles. Resultados:
+`app/` limpio y sin secretos; funciones de Administrador cerradas en el servidor; **alerta de datos personales** ya
+publicados desde el 2026-09-16 (nombres, correos y rol de 6 personas del equipo en este registro, más correos de
+cuentas; pendiente de decisión del usuario); dos hallazgos corregidos con D-49:
+
+1. **Modo campaña en el servidor** (`Codigo.gs::_bloqueoCampana`): durante la campaña, un `RESPONSABLE_SEDE` solo usa las
+   5 acciones de la confirmación. Propiedad del script `CAMPANA_CONFIRMACION` (sin definir = encendida; `false` la apaga
+   sin desplegar).
+2. **Tope de códigos** (`Auth.gs`): 3 códigos sin usar por correo cada 6 h, en ventana móvil; entrar reinicia la cuenta;
+   `Usuarios.gs::Usuarios_actualizar` la libera (desactivar y activar). Cupo en 0 → mensaje claro. Texto nuevo en el
+   ingreso (`?v=9`).
+
+Pruebas (arnés de Node con reloj y caché con vencimiento simulados): **50 de 50** en el arnés nuevo de seguridad
+(el alcalde rechazado en 14 acciones que no son de confirmación y en funciones de Administrador, sin escrituras;
+token con el rol cambiado a mano rechazado; admin, verificador y consulta sin cambios; rector bloqueado; interruptor por
+propiedad; tope, reinicio al entrar, liberación por el Administrador, ventana de 6 h; 24 h de ataque simulado a 6
+correos registrados: 72 envíos y el cupo nunca se agota). Arnés anterior con la campaña apagada: **68 de 68** (D-24 y
+D-44 intactos al terminar la campaña). Arnés de confirmaciones: **71 de 71**.
+
+**Complemento D-49 (mismo día):** el correo del código llega a nombre de «Secretaría de Educación de Caldas» (`MailApp`,
+opción `name`; la dirección no cambia) y su texto explica que se escribe en la página, vence en 10 minutos, se usa el
+último si llegaron varios y no se debe cerrar la pestaña. Se evaluó un PIN por municipio y se decidió **mantener el
+código por correo**: el cupo alcanza (unos 60 correos en el peor día de la campaña), el flujo ya se probó en real y el
+PIN exigía repartir 26 claves y un camino de ingreso nuevo a tres días del plazo. Queda como plan B si el código no llega
+a varias alcaldías. Arnés de seguridad: **52 de 52**; 68/68 y 71/71 sin cambios. Correo de envío del enlace para los
+alcaldes: `trabajo28.09_oficioAlcaldes/CORREO_ALCALDES_envio_del_enlace.md`.
+
+
+**Datos del equipo retirados de la documentación (2026-09-29, pedido del usuario; auditoría, hallazgo 1.1).** Se quitaron
+de los archivos versionados la tabla con nombre, correo y rol de los 6 usuarios internos, el correo de la cuenta
+Administrador (10 apariciones), el Gmail personal del practicante (2) y su nombre en dos pruebas registradas, y la ruta de
+OneDrive de la cuenta Administrador en el sistema viejo (`web/assets/js/config.js`). Siguen en el historial de git: borrarlos
+de ahí exigiría reescribirlo, y se decidió no hacerlo.

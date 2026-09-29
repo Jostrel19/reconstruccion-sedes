@@ -63,6 +63,9 @@ function doPost(e) {
     return _json({ ok: false, accion: accion, error: 'Acción desconocida: ' + accion });
   }
 
+  var bloqueo = _bloqueoCampana(accion, body);
+  if (bloqueo) return _json({ ok: false, accion: accion, error: bloqueo });
+
   var resultado;
   try {
     resultado = manejador(body);
@@ -71,6 +74,37 @@ function doPost(e) {
   }
   resultado.accion = accion;
   return _json(resultado);
+}
+
+/**
+ * Campaña de confirmación de sedes (D-48, D-49): mientras dure, un Responsable
+ * de sede (alcalde o rector) solo puede usar la confirmación, aunque llame a la
+ * API a mano desde la consola del navegador. Antes la regla era solo de la
+ * pantalla (nucleo.js::CAMPANA_CONFIRMACION) y en el servidor el alcalde
+ * conservaba los permisos de D-24: podía radicar presupuestos o subir fotos de
+ * su municipio (auditoría de seguridad del 2026-09-29, hallazgo 3.3).
+ *
+ * Se apaga sin volver a desplegar: propiedad del script CAMPANA_CONFIRMACION =
+ * false (Configuración del proyecto > Propiedades del script). Si la propiedad
+ * no existe, la campaña cuenta como encendida: es el lado seguro.
+ */
+var ACCIONES_SIN_SESION = { solicitarCodigo: true, validarCodigo: true };
+var ACCIONES_CAMPANA = { listarConfirmaciones: true, guardarConfirmaciones: true, generarCertificado: true,
+  subirCertificado: true, descargarCertificado: true };
+
+function _campanaActiva() {
+  var v = PropertiesService.getScriptProperties().getProperty('CAMPANA_CONFIRMACION');
+  return String(v == null ? 'true' : v).trim().toLowerCase() !== 'false';
+}
+
+// Mensaje de rechazo, o '' si la acción sigue su curso normal. Sin sesión válida
+// no se bloquea aquí: el manejador responde «Sesión inválida o vencida».
+function _bloqueoCampana(accion, body) {
+  if (ACCIONES_SIN_SESION[accion] || ACCIONES_CAMPANA[accion]) return '';
+  var sesion;
+  try { sesion = verificarToken(body.token); } catch (e) { return ''; }
+  if (!sesion || sesion.rol !== 'RESPONSABLE_SEDE' || !_campanaActiva()) return '';
+  return 'Durante la confirmación de sedes solo está disponible la pantalla de confirmación.';
 }
 
 function _json(obj) {
