@@ -461,12 +461,23 @@ cruzado (mismas 975 sedes, sin tipo 6, «7. Sin revisar», «(PRIORITARIO)» en 
    regresión) y con backend simulado; certificado impreso a PDF con Edge: Riosucio 6 páginas, Marulanda 2.
    **Fase 4 hecha el mismo día:** desplegado y **probado en real** con un alcalde de prueba en Aranzazu (ciclo completo,
    PDF cargado y descargado idéntico). Datos de prueba retirados, PDF de prueba borrados y las 2 hojas protegidas (verificado el 2026-09-29).
-3. **Antes de enviar el enlace:** publicar en GitHub Pages (workflow de Actions, la app está en `/app`);
-   ~~desactivar los 161 rectores~~ (**verificado 2026-09-29: 0 de 161 activos**); **activar los 26 alcaldes**, que
-   hoy están todos inactivos (0 de 26), justo antes de enviar el oficio; decidir A1-A2 del cupo de correo (punto 2); corregir el oficio con el texto de la v2 y enviarlo
+3. **Antes de enviar el enlace:** ~~publicar en GitHub Pages~~ (**hecho 2026-09-29:
+   https://jostrel19.github.io/reconstruccion-sedes/**, flujo de Actions que publica solo `app/`; `docs/` y `backend/`
+   dan 404); ~~D-49~~ (**desplegado 2026-09-29**); ~~prueba desde otro PC~~ (**hecha 2026-09-29** con un alcalde de
+   prueba de Chinchiná, ciclo completo; destapó el defecto de tildes del token, corregido y desplegado en la versión 15,
+   ver `REGISTRO_DESARROLLO.md`); ~~limpiar la prueba~~ (**hecha y verificada 2026-09-29**: desactivar los 3 usuarios de prueba, restaurar la fila del
+   Administrador cuyo correo se usó para la prueba, borrar filas de `Confirmaciones`/`Certificaciones` y los PDF de
+   Drive); **ofrecido, sin decidir:** que `Usuarios.gs` rechace municipios inexistentes y guarde el nombre con tilde
+   aunque se escriba sin ella (hoy acepta cualquier texto y un municipio sin tilde deja al alcalde sin sedes);
+   ~~desactivar los 161 rectores~~ (**verificado 2026-09-29: 0 de 161 activos**); ~~activar los 26 alcaldes~~
+   (**26 de 26 activos, verificado 2026-09-29**); decidir A1-A2 del cupo de correo (punto 2); corregir el oficio con el texto de la v2 y enviarlo
    a los mismos correos registrados. **Oficio final generado** (membrete completo, cambios aplicados, pendientes
-   resaltados en amarillo: fecha de envío, enlace, QR, firmante y cargo): `trabajo28.09_oficioAlcaldes/OFICIO A ALCALDES - Actualizacion informacion de sedes (para revision del jefe).docx`. Pendiente de la
-   jefatura: el firmante del oficio.
+   resaltados en amarillo: fecha de envío, enlace, QR, firmante y cargo): `trabajo28.09_oficioAlcaldes/OFICIO A ALCALDES - Actualizacion informacion de sedes (para revision del jefe).docx`. ~~Pendiente de la
+   jefatura: el firmante del oficio.~~ **Oficio y correo completados por el jefe el 2026-09-29**; envío a cargo de la jefatura.
+4. **Durante la campaña (hasta el 2026-10-06):** se sigue trabajando sin publicar — nada de push a `master` que toque
+   `app/` ni versión nueva de Apps Script, salvo un defecto que impida responder a los alcaldes (detalle en
+   `PLAN_CONFIRMACION_ALCALDES.md`). **Desde el 2026-10-07:** rediseño por fases (auditoría de interfaz, fuera del
+   repositorio: `trabajo29.09_auditoriaUI/`) y hito 2 de la hoja de ruta (§3.c).
 
 **2. Cupo de correo (100 al día, cuenta personal de Gmail; Workspace da 1.500).** Lo que más gasta es el
 código de ingreso. Propuesta: **A1** «recordar este equipo» 7 días (sesión en el navegador, no solo en la

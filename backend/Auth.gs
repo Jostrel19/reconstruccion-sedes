@@ -170,7 +170,16 @@ function _crearToken(usuario) {
     alcance: usuario.alcance,
     exp: Date.now() + SESION_HORAS * 60 * 60 * 1000
   };
-  var payloadCod = Utilities.base64EncodeWebSafe(JSON.stringify(payload));
+  // El token se arma solo con caracteres ASCII (las tildes van como Á).
+  // base64EncodeWebSafe de un texto no lo codifica en UTF-8 y verificarToken lo
+  // lee en UTF-8: con «CHINCHINÁ» el alcance llegaba cambiado y la sesión se
+  // rechazaba en el pedido siguiente al ingreso. Afectaba a los 7 municipios con
+  // tilde (hallado en la prueba desde otro PC, 2026-09-29). JSON.parse lo
+  // devuelve igual, y un token sin tildes queda idéntico al de antes.
+  var json = JSON.stringify(payload).replace(/[\u0080-￿]/g, function (c) {
+    return '\\u' + ('000' + c.charCodeAt(0).toString(16)).slice(-4);
+  });
+  var payloadCod = Utilities.base64EncodeWebSafe(json);
   var firma = Utilities.base64EncodeWebSafe(
     Utilities.computeHmacSha256Signature(payloadCod, _secreto())
   );

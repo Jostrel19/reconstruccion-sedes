@@ -230,11 +230,126 @@ anteriores (pendiente aparte: datos personales en el historial).
 
 Tras la auditoría de seguridad previa al despliegue: el servidor aplica el modo campaña (un Responsable de sede solo
 usa la confirmación) y el envío de códigos tiene tope (3 sin usar por correo cada 6 h). Probado en el arnés (50/50, más
-68/68 y 71/71). **Falta desplegar** `Codigo.gs`, `Auth.gs` y `Usuarios.gs` (nueva versión de la implementación) y
-comprobarlo en real con «Jose Prueba», **antes de activar a los 26 alcaldes**. Detalle: `CLAUDE.md` D-49 y
+68/68 y 71/71). **Desplegado el 2026-09-29** (`Codigo.gs`, `Auth.gs` y `Usuarios.gs`, nueva versión de la
+implementación) y comprobado en real en la prueba desde otro PC. Detalle: `CLAUDE.md` D-49 y
 `docs/REGISTRO_DESARROLLO.md`.
 
 **H-27 resuelto (2026-09-29):** el oficio sale hoy. `CONFIRMACION_FECHA_OFICIO` = «29 de septiembre de 2026» (el
 certificado dice «…en atención a su oficio del 29 de septiembre de 2026»; comprobado generando uno de prueba) y el oficio
 dice «Manizales, 29 de septiembre de 2026», ya sin el resaltado de pendiente (respaldo previo
 `…BACKUP-20260929-112634.docx`). En el oficio quedan pendientes, resaltados: el enlace, el código QR, el firmante y el cargo.
+
+## 2026-09-29 — Publicada en GitHub Pages: https://jostrel19.github.io/reconstruccion-sedes/
+
+Al habilitar Pages quedó elegida primero la publicación desde la rama y GitHub publicó **todo el repositorio** (README
+como portada, `docs/*.html`, `CLAUDE.html`, `backend/*.gs`) a las 11:27 a. m. Lo detectó el usuario («dice que ya está
+publicada»); no expuso nada nuevo (el repositorio ya es público y sin los datos del equipo desde `a7413dc`). Corregido el
+mismo día: el usuario creó `.github/workflows/pages.yml` desde la web (commit `388f506`; la credencial local no tiene
+permiso `workflow`) con la fuente en «GitHub Actions». El flujo publica **solo `app/`**. Verificado: la raíz sirve la
+aplicación (`?v=10`, plazo martes 6 de octubre, oficio del 29 de septiembre, logos), `docs/`, `CLAUDE.html` y `backend/`
+responden 404, y desde `github.io` el navegador llega al backend (CORS) en 1,7 s. Avisos del flujo (Node 20 en desuso,
+cambio de Ubuntu el 19 de octubre): informativos, sin efecto. Copia local al día con `git pull`.
+
+**Entrega del código por dominio (2026-09-29):** 25 alcaldías usan Google Workspace (entrega confiable desde Gmail);
+Villamaría usa otro proveedor (`mail.1cero1.com`, vigilar); `caldas.gov.co` (Gobernación, FortiMail) no recibió el código.
+Detalle en `docs/REGISTRO_DESARROLLO.md`.
+
+## 2026-09-29 — Defecto: los alcaldes de municipios con tilde perdían la sesión al entrar
+
+Hallado en la prueba desde otro PC con un alcalde de prueba de **CHINCHINÁ**: el ingreso funcionaba, pero el pedido
+siguiente respondía «Sesión inválida o vencida» y la aplicación lo sacaba («Su sesión venció o sus permisos cambiaron»).
+Con Aranzazu y Anserma, sin tilde, no pasaba.
+
+**Causa:** `Auth.gs::_crearToken` codificaba el token con `Utilities.base64EncodeWebSafe(texto)`, que no usa UTF-8, y
+`verificarToken` lo leía en UTF-8. La «Á» llegaba cambiada, el alcance del token dejaba de coincidir con la hoja
+`Usuarios` y la sesión se rechazaba. Además, el navegador no podía leer el vencimiento de ese token
+(`sesion.js::venceToken`), así que al recargar lo habría dado por vencido. **Afectaba a 7 de los 26 municipios:**
+Belalcázar, Chinchiná, Pácora, Samaná, San José, Supía y Villamaría. El arnés no lo vio porque su simulador codificaba
+en UTF-8.
+
+**Corrección:** el token se arma solo con caracteres ASCII (las tildes van escapadas como `\u00c1`); un token sin
+tildes queda idéntico al de antes, así que no se cierra ninguna sesión abierta. El simulador ahora codifica como Apps
+Script (Latin-1 sin juego de caracteres). El arnés reprodujo el defecto antes de corregir (2 fallas en «municipio con
+tilde») y después da **55 de 55**; 68/68 y 71/71 sin cambios. Comprobado además que los 7 nombres vuelven iguales.
+**Desplegado el 2026-09-29 (versión 15 de la implementación) y comprobado en real el mismo día** con el alcalde de
+prueba de Chinchiná desde otro PC: entra y conserva la sesión, responde las 32 sedes, genera y carga la certificación.
+El panel «Confirmación de alcaldes» muestra Chinchiná con 32 de 32 y «Certificación cargada». El usuario confirmó
+además el resto del proceso sin novedades.
+
+**Caída de 15 minutos al desplegar.** La versión 14 se creó con el archivo `Usuarios` mal pegado y sin guardar:
+`doPost` fallaba con `ReferenceError: Usuarios_listar is not defined` y el navegador recibía la página de error de
+Google en vez de JSON. Se arregló con la versión 15, sin efecto hacia afuera (los alcaldes siguen inactivos).
+Verificado después: JSON en «Acción desconocida», «Sesión inválida o vencida» y `solicitarCodigo`. **Lección:**
+una versión es copia del código *guardado*; guardar todos los archivos (Ctrl+S) antes de crearla (`backend/README.md`).
+
+### 2026-09-29 (cierre del día) — Dónde quedó: lista para el envío del correo
+
+Verificado en la app publicada: versión 10, campaña encendida, plazo «martes 6 de octubre de 2026», fecha del oficio
+«29 de septiembre de 2026», servidor respondiendo (1,8 s). **Falta, en este orden:**
+
+1. ~~**Limpiar la prueba**~~ (**hecho, verificado 2026-09-29**, ver abajo): desactivar los 3 usuarios de prueba; borrar en la hoja la fila del alcalde de
+   prueba de Chinchiná, que usa el correo del Administrador real; devolverle a ese Administrador su correo
+   `…@sedcaldas.edu.co` y activarlo **desde la app**; vaciar `Confirmaciones` y `Certificaciones` (hasta Ctrl+Fin) y
+   borrar solo los PDF de Drive. Verificación: «Confirmación de alcaldes» con los 26 en «Sin empezar» y 0 respuestas.
+2. ~~**Activar los 26 alcaldes**~~ (**26 de 26 activos, verificado 2026-09-29**). Si se activan en la hoja, activar el último desde la app o esperar 5 min
+   antes de enviar (caché de usuarios activos).
+3. **Oficio** (copia en `trabajo28.09_oficioAlcaldes/`): enlace, QR (opcional), firmante y cargo; quitar el resaltado;
+   firmado en PDF.
+4. **Correo** (`CORREO_ALCALDES_envio_del_enlace.md`): teléfono, firmante y cargo; oficio adjunto; a los 26 correos
+   registrados en `Usuarios`, con copia oculta.
+5. ~~*Recomendado:* quitar «Uso interno — no distribuir fuera de la Secretaría» del pie que ve el alcalde~~
+   (**hecho en local 2026-09-29, `?v=11`, junto con el ícono de la pestaña y el botón gris; falta commit y push**,
+   ver la sección de abajo). Hallado en la auditoría de interfaz (fuera del repositorio:
+   `trabajo29.09_auditoriaUI/`).
+
+El primer día: vigilar Villamaría (H-29), el cupo de 100 correos al día y el panel de ejecuciones. No bloquea el envío:
+commit de `Auth.gs` (token ASCII, ya desplegado) y de la documentación, a la espera de autorización.
+
+### 2026-09-29 — Prueba retirada y 26 alcaldes activos (verificado en el panel)
+
+El usuario hizo la limpieza y la activación; se verificó con su sesión de Administrador, solo lectura:
+
+- **«Confirmación de alcaldes»:** 26 municipios en «Sin empezar», 0 de 975 sedes respondidas, 0 certificaciones
+  generadas o cargadas. Las sedes por municipio suman 975. Aranzazu, Anserma y Chinchiná (los de la prueba) en 0.
+- **`Usuarios`** (195 filas, leídas con `listarUsuarios`): **26 alcaldes activos, uno por municipio**, rol
+  `RESPONSABLE_SEDE`, alcance idéntico al nombre del catálogo (también los 7 con tilde), `activo` booleano; sin
+  correos repetidos ni mal formados. 0 de 161 rectores activos. Los usuarios de prueba que quedan («Jose Prueba» de
+  Aranzazu y «Prueba Fase 4») están inactivos; los dos de Chinchiná y Anserma ya no están. El Administrador cuyo
+  correo se usó en la prueba quedó activo con su correo `…@sedcaldas.edu.co`. Activos fuera de los alcaldes: 2
+  Administradores, 2 Verificadores y 2 de Consulta.
+- **Drive:** el usuario borró los PDF de prueba; no se ve desde la aplicación.
+
+**Oficio y correo:** los completó el jefe el 2026-09-29 (enlace, QR, firmante, cargo, teléfono); el envío queda a
+cargo de la jefatura. La versión final no está en `trabajo28.09_oficioAlcaldes/`: ahí siguen los borradores con los
+marcadores. El pie «Uso interno» ya se oculta para el alcalde (`?v=11`, abajo).
+
+**Mientras corre la campaña (hasta el 2026-10-06), acordado con el usuario:** el diseño y las funcionalidades nuevas
+se trabajan, pero no se publican. Tres cosas afectan a los alcaldes en el acto y no se hacen salvo un defecto que les
+impida responder: (1) un push a `master` que toque `app/` (el flujo de Pages publica solo); (2) una **Nueva versión**
+de la implementación de Apps Script (la de los alcaldes es la misma; la caída de 15 minutos del 2026-09-29 salió de
+ahí); (3) cambiar la estructura de las hojas (columnas, pestañas). El trabajo nuevo va en una rama aparte o sin
+publicar, probado con el arnés y el simulador. Un commit de `backend/` o `docs/` a `master` no publica nada (el flujo
+filtra `app/**`). **Seguimiento:** revisar el panel «Confirmación de alcaldes» (quién entró, quién cargó la
+certificación), Villamaría (H-29), el cupo de correo y las ejecuciones de Apps Script. **Desde el 2026-10-07:**
+rediseño por fases (`trabajo29.09_auditoriaUI/auditoria_y_propuesta_ui.md`) y la hoja de ruta (hito 2, decisiones del
+jefe por escrito: `docs/PLAN_DESARROLLO.md` §3.c).
+
+### 2026-09-29 — Ícono de la pestaña y dos ajustes en la pantalla del alcalde (`?v=11`)
+
+Tres cambios visuales pequeños, pedidos por el usuario antes del envío («aprovechar a hacer los cambios pequeños
+visuales… de una vez»); ninguno toca la lógica ni el backend:
+
+1. **Ícono de la pestaña:** `app/img/favicon.png` (64 × 64, el escudo recortado de `logo-certificado.png`) y
+   `<link rel="icon">` en `index.html`. Antes el navegador mostraba su ícono genérico.
+2. **Pie «Uso interno — no distribuir fuera de la Secretaría» oculto para el alcalde** (`arranque.js`, junto a donde
+   ya se oculta el buscador). El personal de la Secretaría lo sigue viendo. Es la fase 0 de la auditoría de interfaz.
+   Se busca con `.pie-inst > .hace`, que existe también en el `index.html` anterior: un navegador con el HTML viejo en
+   caché y el JS nuevo funciona igual.
+3. **«Generar certificación» deshabilitado se ve gris** (`estilos.css`, regla acotada a los pasos del reporte, `.cp`):
+   antes era un verde más claro que parecía activo. Los demás botones deshabilitados no cambian.
+
+`?v=10` → **`?v=11`** en las 24 referencias. **Verificado con el simulador** (servidor local, pestaña aparte): ícono
+cargado; pie oculto como alcalde y visible como Administrador, con el resto del pie intacto; botón gris
+(`#F4F3F0`, texto `#556060`, opacidad 1) y deshabilitado; sin errores en la consola; `node --check` de los 20 scripts.
+**Sin publicar:** falta commit y push a `master` (autorización del usuario), y después comprobar la versión 11 en
+Pages. Es una excepción, decidida por el usuario, al congelamiento de la interfaz del alcalde durante la campaña.
