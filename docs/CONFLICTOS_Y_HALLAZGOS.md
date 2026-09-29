@@ -61,6 +61,16 @@ jefatura las decidió el mismo día (D-48); siguen abiertas hasta que el texto d
 | H-24 | Oficio | «2. Gobernación» marcada en rojo en «Quién interviene» | Decidido 2026-09-28: se retira; las 9 opciones van sin numeración. Falta corregir el oficio |
 | H-27 | Certificado (texto aprobado) vs. oficio final | El certificado aprobado dice «en atención a su oficio del 28 de septiembre de 2026», pero el oficio final lleva la fecha pendiente («[fecha de envío]», resaltada) y el archivo de la jefatura se llama «24_09_2026». Si el oficio sale con otra fecha, el certificado citaría un oficio con fecha distinta | **Resuelto 2026-09-29:** el oficio sale el 29 de septiembre de 2026 (confirmado por el usuario). Cambiado en `app/js/nucleo.js::CONFIRMACION_FECHA_OFICIO` y en la fecha del oficio («Manizales, 29 de septiembre de 2026») |
 
+### Entrega del código de ingreso y datos de `Usuarios` — 2026-09-29
+
+Hallados en la prueba desde otro PC. Detalle de la entrega por dominio en `REGISTRO_DESARROLLO.md`.
+
+| # | Fuente | Hallazgo | Estado |
+|---|---|---|---|
+| H-28 | Correo del código vs. dominio `caldas.gov.co` | El código **no llega** a un correo `@caldas.gov.co` (Gobernación): figura en «Enviados» del Gmail del backend y no hay rebote. Su servidor de correo es FortiMail Cloud, que retiene o descarta en silencio. `@sedcaldas.edu.co` (Microsoft 365) y Outlook sí lo reciben | Abierto — no afecta a los alcaldes. Si un usuario de la Gobernación necesita entrar, TIC de la Gobernación puede revisar la cuarentena o autorizar el remitente |
+| H-29 | Correo del código vs. dominio de Villamaría | 25 alcaldías usan Google Workspace (mismo proveedor que el remitente); **Villamaría** usa otro (`mail.1cero1.com`), sin probar | Abierto — vigilar el primer día; si no le llega, tener listo un correo alterno o el plan B de D-49 |
+| H-30 | `Usuarios` (filas de rectores, del Directorio 2026) | 5 de las 161 filas de rectores traen un `correo` que no sirve para entrar: 4 con dos correos en la misma celda y 1 con números de teléfono en vez de correo | Abierto — sin efecto en la confirmación (los rectores no entran, D-48, y están inactivos). Corregir antes de habilitar a los rectores |
+
 ### Actualización del censo — 2026-09-28
 
 Al cruzar «BASE DE DATOS ACTUALIZADA 28_09_2026.xlsx» contra el censo del 2026-09-16 por DANE (975 de 975; 185
