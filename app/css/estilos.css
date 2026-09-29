@@ -631,6 +631,8 @@
   .cp-tx{ min-width:0; }
   .cp-tx h3{ font-size:.95rem; margin:0 0 .3rem; color:var(--gris-osc); }
   .cp:not(.act):not(.hecho) .cp-tx h3{ color:var(--tx-sec); }
+  /* «Generar certificación» sin habilitar: gris, para que no parezca un verde más claro y activo. */
+  .cp .b:disabled:not(.cargando){ background:var(--fondo); color:var(--tx-sec); border-color:var(--borde-f); opacity:1; }
   .cp-tx p{ margin:0 0 .55rem; font-size:.82rem; color:var(--tx-sec); line-height:1.55; }
   .cp-tx p b{ color:var(--tx); }
   .cp-tx .hace{ display:block; margin-top:.35rem; }
