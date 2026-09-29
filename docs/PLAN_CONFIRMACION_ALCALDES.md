@@ -298,8 +298,7 @@ Verificado en la app publicada: versión 10, campaña encendida, plazo «martes 
 4. **Correo** (`CORREO_ALCALDES_envio_del_enlace.md`): teléfono, firmante y cargo; oficio adjunto; a los 26 correos
    registrados en `Usuarios`, con copia oculta.
 5. ~~*Recomendado:* quitar «Uso interno — no distribuir fuera de la Secretaría» del pie que ve el alcalde~~
-   (**hecho en local 2026-09-29, `?v=11`, junto con el ícono de la pestaña y el botón gris; falta commit y push**,
-   ver la sección de abajo). Hallado en la auditoría de interfaz (fuera del repositorio:
+   (**publicado 2026-09-29, `?v=11`**, junto con el ícono de la pestaña y el botón gris; ver la sección de abajo). Hallado en la auditoría de interfaz (fuera del repositorio:
    `trabajo29.09_auditoriaUI/`).
 
 El primer día: vigilar Villamaría (H-29), el cupo de 100 correos al día y el panel de ejecuciones. No bloquea el envío:
@@ -351,5 +350,7 @@ visuales… de una vez»); ninguno toca la lógica ni el backend:
 `?v=10` → **`?v=11`** en las 24 referencias. **Verificado con el simulador** (servidor local, pestaña aparte): ícono
 cargado; pie oculto como alcalde y visible como Administrador, con el resto del pie intacto; botón gris
 (`#F4F3F0`, texto `#556060`, opacidad 1) y deshabilitado; sin errores en la consola; `node --check` de los 20 scripts.
-**Sin publicar:** falta commit y push a `master` (autorización del usuario), y después comprobar la versión 11 en
-Pages. Es una excepción, decidida por el usuario, al congelamiento de la interfaz del alcalde durante la campaña.
+**Publicado el 2026-09-29** con autorización del usuario (commit `82d6bca`; `Auth.gs` y documentación en `609a81b`).
+Comprobado en Pages: `index.html` con `?v=11` en las 24 referencias, `favicon.png` responde, `arranque.js` y
+`estilos.css` con los cambios; `docs/` y `backend/` siguen sin publicarse (404). Es una excepción, decidida por el
+usuario, al congelamiento de la interfaz del alcalde durante la campaña.
