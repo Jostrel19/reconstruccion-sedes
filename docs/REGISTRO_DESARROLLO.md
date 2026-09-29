@@ -2103,3 +2103,17 @@ de los archivos versionados la tabla con nombre, correo y rol de los 6 usuarios 
 Administrador (10 apariciones), el Gmail personal del practicante (2) y su nombre en dos pruebas registradas, y la ruta de
 OneDrive de la cuenta Administrador en el sistema viejo (`web/assets/js/config.js`). Siguen en el historial de git: borrarlos
 de ahí exigiría reescribirlo, y se decidió no hacerlo.
+
+## 2026-09-29 — Plazo de los alcaldes: martes 6 de octubre (`?v=10`)
+
+La jefatura cambió el plazo del viernes 2 al **martes 6 de octubre de 2026**. Cambiado en `nucleo.js::CONFIRMACION_PLAZO`
+(la pantalla del alcalde y el panel de la Secretaría lo toman de ahí; el certificado no lo cita), en el correo de envío
+(`trabajo28.09_oficioAlcaldes/CORREO_ALCALDES_envio_del_enlace.md`, asunto y cuerpo) y en el oficio para revisión del
+jefe (respaldo previo `…BACKUP-20260929-112112.docx`; el texto estaba entero en un solo tramo del XML y el archivo se
+verificó íntegro). Verificado en el navegador con sesión simulada: «…a más tardar el martes 6 de octubre de 2026». Sigue
+pendiente H-27: la fecha del oficio que cita el certificado (`CONFIRMACION_FECHA_OFICIO`, hoy «28 de septiembre de 2026»).
+
+**H-27 resuelto (2026-09-29):** el oficio sale hoy. `CONFIRMACION_FECHA_OFICIO` = «29 de septiembre de 2026» (el
+certificado dice «…en atención a su oficio del 29 de septiembre de 2026»; comprobado generando uno de prueba) y el oficio
+dice «Manizales, 29 de septiembre de 2026», ya sin el resaltado de pendiente (respaldo previo
+`…BACKUP-20260929-112634.docx`). En el oficio quedan pendientes, resaltados: el enlace, el código QR, el firmante y el cargo.
