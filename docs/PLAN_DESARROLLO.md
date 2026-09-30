@@ -473,11 +473,14 @@ cruzado (mismas 975 sedes, sin tipo 6, «7. Sin revisar», «(PRIORITARIO)» en 
    (**26 de 26 activos, verificado 2026-09-29**); decidir A1-A2 del cupo de correo (punto 2); corregir el oficio con el texto de la v2 y enviarlo
    a los mismos correos registrados. **Oficio final generado** (membrete completo, cambios aplicados, pendientes
    resaltados en amarillo: fecha de envío, enlace, QR, firmante y cargo): `trabajo28.09_oficioAlcaldes/OFICIO A ALCALDES - Actualizacion informacion de sedes (para revision del jefe).docx`. ~~Pendiente de la
-   jefatura: el firmante del oficio.~~ **Oficio y correo completados por el jefe el 2026-09-29**; envío a cargo de la jefatura.
+   jefatura: el firmante del oficio.~~ **Oficio y correo completados por el jefe el 2026-09-29**; ~~envío a cargo de la jefatura~~ **enviado a los
+   alcaldes con el enlace de ingreso (confirmado por el usuario el 2026-09-30): la campaña está en curso.**
 4. **Durante la campaña (hasta el 2026-10-06):** se sigue trabajando sin publicar — nada de push a `master` que toque
    `app/` ni versión nueva de Apps Script, salvo un defecto que impida responder a los alcaldes (detalle en
    `PLAN_CONFIRMACION_ALCALDES.md`). **Desde el 2026-10-07:** rediseño por fases (auditoría de interfaz, fuera del
-   repositorio: `trabajo29.09_auditoriaUI/`) y hito 2 de la hoja de ruta (§3.c).
+   repositorio: `trabajo29.09_auditoriaUI/`, con una muestra navegable del movimiento propuesto en
+   `muestra_animaciones.html`, hecha el 2026-09-30; vista por el usuario el mismo día: no convenció del todo y queda
+   pendiente de revisar antes de ejecutar las fases) y hito 2 de la hoja de ruta (§3.c).
 
 **2. Cupo de correo (100 al día, cuenta personal de Gmail; Workspace da 1.500).** Lo que más gasta es el
 código de ingreso. Propuesta: **A1** «recordar este equipo» 7 días (sesión en el navegador, no solo en la
@@ -487,8 +490,9 @@ quitar el correo de confirmación de radicado. Para escalar, decisión instituci
 Workspace (costo; resolvería también D-19) o enviar desde Microsoft 365 (requiere registro de aplicación en
 Entra ID por TI). Descartados: servicio externo tipo SendGrid/Brevo (datos sensibles a un tercero, spam en
 Outlook sin dominio verificado) y varias cuentas de Gmail. Pendiente: si A1-A2 se hacen ya o se llevan al
-jefe junto con el punto 1. **Con la campaña de los 26 alcaldes (cada ingreso gasta un correo) conviene
-decidir A1-A2 antes de enviar el enlace.**
+jefe junto con el punto 1. ~~Con la campaña de los 26 alcaldes (cada ingreso gasta un correo) conviene
+decidir A1-A2 antes de enviar el enlace.~~ **El enlace salió sin A1-A2 (2026-09-30):** durante la campaña no se
+publica ninguno de los dos (congelamiento); se vigila el cupo en las ejecuciones de Apps Script.
 
 ### Después del piloto (anotado, no se hace antes)
 
