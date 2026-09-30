@@ -2222,3 +2222,34 @@ cargado; pie oculto como alcalde y visible como Administrador, con el resto del 
 Comprobado en Pages: `index.html` con `?v=11` en las 24 referencias, `favicon.png` responde, `arranque.js` y
 `estilos.css` con los cambios; `docs/` y `backend/` siguen sin publicarse (404). Es una excepción, decidida por el
 usuario, al congelamiento de la interfaz del alcalde durante la campaña.
+
+## 2026-09-30 — Enlace enviado a los alcaldes
+
+La jefatura envió el correo con el oficio y el enlace de ingreso a los alcaldes (confirmado por el usuario el
+2026-09-30). La campaña está en curso hasta el martes 2026-10-06 y rige el congelamiento (arriba). Sin cambios de
+código. Seguimiento y soporte: `docs/PLAN_CONFIRMACION_ALCALDES.md`, entrada del 2026-09-30.
+
+Fuera del repositorio, el mismo día: la muestra navegable de la auditoría de interfaz
+(`trabajo29.09_auditoriaUI/muestra_animaciones.html`, §4.13) **no convenció del todo al usuario** y queda pendiente
+de revisar antes de ejecutar el rediseño.
+
+**2026-09-30 — Pensilvania:** usuario de alcalde reemplazado por uno con el correo de un encargado (nombre del
+alcalde, mismo alcance); el anterior quedó inactivo; el encargado ingresó. Sin cambios de código. Detalle en `PLAN_CONFIRMACION_ALCALDES.md`.
+
+## 2026-09-30 — Certificado sin logo (`?v=12`, excepción al congelamiento)
+
+**Decisión del usuario:** el certificado lo firma el alcalde y no puede llevar el membrete de la Secretaría. Sin él, los
+alcaldes no podían firmarlo y no terminaban el reporte, así que se publica durante la campaña como excepción.
+
+- `app/js/certificado.js`: el documento ya no lleva el logo; empieza en el título. `precargarLogoCertificado` queda como
+  función vacía a propósito: un navegador con el `confirmacion.js` anterior en caché todavía la llama, y sin ella la
+  pantalla del alcalde fallaría.
+- `app/js/confirmacion.js`: deja de precargar el logo.
+- `?v=11` → **`?v=12`** en las 24 referencias de `index.html`. `app/img/logo-certificado.png` se conserva (de él sale el
+  favicon). Sin cambios en el backend: el código de verificación y el texto aprobado no cambian.
+
+**Verificado** en local: `node --check` de los 20 scripts; certificado de prueba con el arnés (sedes de Marulanda,
+respuestas ficticias): 0 imágenes, empieza en el título, firma y cédula en blanco intactas; en la app, pintar la
+pantalla del alcalde y generar la impresión (impresión interceptada) sin errores. **Los alcaldes que ya generaron o
+cargaron la certificación con logo** no quedan invalidados por el sistema: el código de verificación no depende del
+logo. Si la jefatura quiere que la rehagan, la regeneran con «Imprimir de nuevo» y cargan otro escaneo.

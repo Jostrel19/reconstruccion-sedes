@@ -354,3 +354,41 @@ cargado; pie oculto como alcalde y visible como Administrador, con el resto del 
 Comprobado en Pages: `index.html` con `?v=11` en las 24 referencias, `favicon.png` responde, `arranque.js` y
 `estilos.css` con los cambios; `docs/` y `backend/` siguen sin publicarse (404). Es una excepción, decidida por el
 usuario, al congelamiento de la interfaz del alcalde durante la campaña.
+
+### 2026-09-30 — Enlace enviado: la campaña está en curso
+
+La jefatura envió a los alcaldes el correo con el oficio y el enlace de ingreso (confirmado por el usuario el
+2026-09-30; la hora exacta del envío no está registrada aquí). Sale sin A1-A2 del cupo de correo
+(`PLAN_DESARROLLO.md` punto 2): no se publican durante la campaña. Rige el congelamiento hasta el 2026-10-06.
+
+**Seguimiento diario:** panel «Confirmación de alcaldes» (quién entró, cuántas sedes respondió, quién cargó la
+certificación); Villamaría (H-29), que no recibe por Google; el cupo de 100 correos (cada ingreso gasta uno) y las
+ejecuciones de Apps Script con error. **Soporte a un alcalde que no recibe el código:** revisar correo no deseado;
+usar solo el último código (cada solicitud nueva deja inválido el anterior); tras 3 códigos sin usar en 6 h, el
+Administrador lo desactiva y lo vuelve a activar para liberarlo (D-49); si aun así no llega, el plan B de D-49.
+
+### 2026-09-30 — Pensilvania: cambio de correo (primer caso de soporte)
+
+La alcaldía de Pensilvania llamó: con el correo de la alcaldía no podían ingresar y pidieron usar el de un encargado
+del alcalde (D-48 lo permite). Como la app no edita el correo de un usuario, el Administrador **creó un usuario nuevo**
+(correo del encargado; nombre **del alcalde**, porque es el que se imprime bajo la firma de la certificación; rol
+Responsable de sede, tipo alcalde, alcance PENSILVANIA) y **desactivó el anterior**, sin borrarlo. La firma manuscrita
+sigue siendo del alcalde. El correo no se escribe aquí (repositorio público). **El encargado ingresó (confirmado por el usuario el 2026-09-30).**
+
+### 2026-09-30 — Certificado sin logo (`?v=12`, excepción al congelamiento)
+
+**Decisión del usuario:** el certificado lo firma el alcalde y no puede llevar el membrete de la Secretaría. Sin él, los
+alcaldes no podían firmarlo y no terminaban el reporte, así que se publica durante la campaña como excepción.
+
+- `app/js/certificado.js`: el documento ya no lleva el logo; empieza en el título. `precargarLogoCertificado` queda como
+  función vacía a propósito: un navegador con el `confirmacion.js` anterior en caché todavía la llama, y sin ella la
+  pantalla del alcalde fallaría.
+- `app/js/confirmacion.js`: deja de precargar el logo.
+- `?v=11` → **`?v=12`** en las 24 referencias de `index.html`. `app/img/logo-certificado.png` se conserva (de él sale el
+  favicon). Sin cambios en el backend: el código de verificación y el texto aprobado no cambian.
+
+**Verificado** en local: `node --check` de los 20 scripts; certificado de prueba con el arnés (sedes de Marulanda,
+respuestas ficticias): 0 imágenes, empieza en el título, firma y cédula en blanco intactas; en la app, pintar la
+pantalla del alcalde y generar la impresión (impresión interceptada) sin errores. **Los alcaldes que ya generaron o
+cargaron la certificación con logo** no quedan invalidados por el sistema: el código de verificación no depende del
+logo. Si la jefatura quiere que la rehagan, la regeneran con «Imprimir de nuevo» y cargan otro escaneo.
