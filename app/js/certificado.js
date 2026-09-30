@@ -8,32 +8,18 @@
      (docs/PROPUESTA para jefatura - Certificado de alcaldes y ajustes al oficio v2.docx):
      no se le agrega nada. Carta horizontal, con las páginas que haga falta. ─── */
 
-  /* El logo va incrustado en el documento (data URI), no enlazado: el
-     2026-09-29 la certificación salió con el logo roto porque el servidor que
-     entrega la página se había apagado entre la carga y la impresión. Se
-     descarga una vez, cuando se pinta la pantalla del alcalde, y se reutiliza. */
-  const LOGO_CERT_URL = 'img/logo-certificado.png';
-  let logoCertDatos = null, promesaLogoCert = null;
-  function precargarLogoCertificado(){
-    if (logoCertDatos) return Promise.resolve(logoCertDatos);
-    if (!promesaLogoCert){
-      promesaLogoCert = fetch(LOGO_CERT_URL)
-        .then(r => { if (!r.ok) throw new Error('logo ' + r.status); return r.blob(); })
-        .then(b => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(b); }))
-        .then(d => (logoCertDatos = d))
-        .finally(() => { promesaLogoCert = null; });
-    }
-    return promesaLogoCert;
-  }
+  /* Sin logo ni membrete de la Secretaría (2026-09-30, decisión del usuario): el
+     documento lo firma el alcalde y no puede llevar el membrete de otra entidad.
+     precargarLogoCertificado queda vacía a propósito: un navegador con el
+     confirmacion.js anterior en caché todavía la llama, y sin ella la pantalla
+     del alcalde fallaría. */
+  function precargarLogoCertificado(){ return Promise.resolve(null); }
 
   // Nombre que propone el navegador al «Guardar como PDF» (Chrome y Edge toman
   // el título de la página) y que sale en el encabezado de impresión.
   const nombreArchivoCertificado = cert => `Confirmación de sedes — Reconstrucción de sedes ${cert.municipio}`;
 
   async function imprimirCertificado(cert, sedes, m){
-    let logo;
-    try { logo = await precargarLogoCertificado(); }
-    catch (err) { throw new Error('No se pudo cargar el logo de la Secretaría para la certificación. Revise su conexión y pulse «Imprimir de nuevo».'); }
     const previo = document.getElementById('marcoCertificado');
     if (previo) previo.remove();
     const marco = document.createElement('iframe');
@@ -43,9 +29,10 @@
     document.body.appendChild(marco);
     const doc = marco.contentDocument;
     doc.open();
-    doc.write(htmlCertificado(cert, sedes, m, logo));
+    doc.write(htmlCertificado(cert, sedes, m));
     doc.close();
-    // Se imprime cuando el logo ya está listo; si tarda más de 4 segundos, igual.
+    // Se imprime cuando las imágenes del documento están listas (hoy no lleva
+    // ninguna); si tarda más de 4 segundos, igual.
     const nombre = nombreArchivoCertificado(cert);
     const tituloAntes = document.title;
     const restaurar = () => { if (document.title === nombre) document.title = tituloAntes; };
@@ -62,7 +49,7 @@
     setTimeout(imprimir, 4000);
   }
 
-  function htmlCertificado(cert, sedes, m, logoUrl){
+  function htmlCertificado(cert, sedes, m){
     const muni = esc(cert.municipio);
     const n = sedes.length;
     const pe = (m && m.por_estado_obra) || {};
@@ -89,8 +76,6 @@
       font-family: Arial, sans-serif; font-size: 8pt; color: #555; } }
   * { box-sizing: border-box; }
   body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #111; margin: 0; line-height: 1.4; }
-  .logo { text-align: center; margin-bottom: .35cm; }
-  .logo img { width: 7cm; }
   h1 { font-size: 12pt; text-align: center; margin: 0; }
   .muni { text-align: center; font-size: 10pt; margin: .1cm 0 .35cm; }
   p { margin: 0 0 .22cm; text-align: justify; }
@@ -109,7 +94,6 @@
   .cod { font-size: 8pt; color: #555; }
 </style></head><body>
 
-<div class="logo"><img src="${esc(logoUrl)}" alt="Gobernación de Caldas — Secretaría de Educación"></div>
 <h1>CERTIFICACIÓN DE INTERVENCIONES EN SEDES EDUCATIVAS OFICIALES</h1>
 <div class="muni">Municipio de ${muni} — Departamento de Caldas</div>
 

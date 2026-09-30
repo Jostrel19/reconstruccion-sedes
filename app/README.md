@@ -30,7 +30,7 @@ for f in app/js/*.js; do node --check "$f"; done
 app/
 ├── index.html        marcado de todas las pantallas; carga el CSS y los JS en orden
 ├── css/estilos.css   tokens y estilos (DISENO_01)
-├── img/              logos de la pantalla de ingreso y del riel, y el del certificado (membrete institucional); `favicon.png`, el escudo solo, para la pestaña del navegador
+├── img/              logos de la pantalla de ingreso y del riel; `logo-certificado.png` ya no se usa (el certificado va sin logo desde el 2026-09-30) y queda porque de él sale el favicon; `favicon.png`, el escudo solo, para la pestaña del navegador
 └── js/               un archivo por pantalla o tema, en este orden de carga:
     nucleo.js         configuración (BACKEND_URL, roles, rutas), estado global, formatos, navegación
     transporte.js     backend(): el ÚNICO que llama a fetch
