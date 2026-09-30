@@ -116,7 +116,6 @@
 
   function pintarConfirmacion(){
     const $ = id => document.getElementById(id);
-    precargarLogoCertificado().catch(() => {}); // para la certificación; si falla, se reintenta al imprimir
     if (!CONF){
       $('conf-franja').innerHTML = esqueletoFranja(5);
       $('conf-pasos').innerHTML = confError ? `<p class="vacio-tx">${esc(confError)}</p>`
