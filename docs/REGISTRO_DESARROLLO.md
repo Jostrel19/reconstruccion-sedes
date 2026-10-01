@@ -2318,3 +2318,5 @@ el `nucleo.js` anterior, sus pantallas de siempre. Nada se rompe.
 directo a «Confirmación de alcaldes»; el riel muestra solo esa entrada (grupo «Seguimiento»); el único pedido al servidor es
 `listarConfirmaciones`; si se intenta ir al Tablero, vuelve al panel; buscador oculto; el detalle de un municipio abre;
 lo mismo con Consulta; Administrador (12 pantallas) y alcalde sin cambios; 0 errores de consola.
+
+**Publicado y comprobado en Pages el 2026-10-01** (commit `d1e895e`): 24 referencias con `?v=14`; `nucleo.js` con Verificador y Consulta limitados al panel durante la campaña; `arranque.js` con el buscador oculto a los roles sin sedes.
