@@ -2297,3 +2297,5 @@ botón nuevo imprime en vez de bajar el Word. En todas las combinaciones el alca
 pasarla a su formato: «Descargar el Word de nuevo» (misma fecha y código, sin fila nueva) y «Cargar otro escaneo». Si la
 jefatura quiere que la rehagan, es decisión suya. Guion de llamadas actualizado (paso 3), fuera del repositorio:
 `trabajo1.10_certificadoWord/`.
+
+**Publicado y comprobado en Pages el 2026-10-01** (commit `7c14ef3`): 24 referencias con `?v=13`, `certificado.js` con `docxCertificado`, `confirmacion.js` sin el botón de imprimir y con «Descargar la certificación en Word», `avance.js` con el texto nuevo del panel. Falta la revisión en real (un alcalde o el usuario generando el Word desde Pages).
