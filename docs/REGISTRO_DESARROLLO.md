@@ -2253,3 +2253,47 @@ respuestas ficticias): 0 imágenes, empieza en el título, firma y cédula en bl
 pantalla del alcalde y generar la impresión (impresión interceptada) sin errores. **Los alcaldes que ya generaron o
 cargaron la certificación con logo** no quedan invalidados por el sistema: el código de verificación no depende del
 logo. Si la jefatura quiere que la rehagan, la regeneran con «Imprimir de nuevo» y cargan otro escaneo.
+
+**Publicado y comprobado en Pages** (24 referencias con `?v=12`, `certificado.js` sin logo) y **revisado en real por el
+usuario el 2026-09-30: sale sin logo.**
+
+## 2026-10-01 — Certificado en Word (D-50, `?v=13`, excepción al congelamiento)
+
+**Retroalimentación del equipo de la Secretaría, decisión del usuario:** cada alcaldía tiene su propio formato oficial.
+Necesitan copiar el contenido que genera la aplicación, pegarlo en su formato, firmarlo y cargar ese PDF. Decidido con el
+usuario: el certificado se baja en Word y la nota final lleva una frase nueva. Primero se dejó la impresión actual como
+alternativa; el mismo día el usuario decidió **quitar ese botón** para no dar un atajo que salte el formato de la alcaldía.
+
+- `app/js/certificado.js`: `descargarCertificadoWord` baja `Certificación de sedes <MUNICIPIO> <código>.docx`, armado en el
+  navegador por `docxCertificado` (Office Open XML en un ZIP sin comprimir, sin librería). `textosCertificado` es la única
+  fuente del texto. El código de verificación va en la fila de encabezado de la tabla (Word la repite en cada página y viaja
+  con la tabla al pegarla); la tabla mide en porcentajes. `imprimirCertificado` sigue, sin botón y sin cambios de forma,
+  como respaldo de caché.
+- `app/js/confirmacion.js`: paso 2 «Generar la certificación en Word» con un solo botón, «Descargar la certificación en
+  Word» (ya generada: «Descargar el Word de nuevo»). Los id de los botones no cambian. El diálogo de carga ya no pide el
+  código «al pie de cada página».
+- `app/js/avance.js`: el panel dice que el PDF debe mostrar el código en el encabezado de la tabla y que su resumen debe
+  coincidir con las cifras del municipio.
+- `?v=12` → **`?v=13`** en las 24 referencias de `index.html`. **Sin cambios en el backend, las hojas ni `arranque.js`.**
+
+**Caché mezclada** (Pages sirve el archivo nuevo aunque la URL lleve el `?v=` anterior, unos 10 minutos): con un
+`confirmacion.js` anterior, sus botones siguen imprimiendo con `imprimirCertificado`; con un `certificado.js` anterior, el
+botón nuevo imprime en vez de bajar el Word. En todas las combinaciones el alcalde obtiene su certificación.
+
+**Verificado en local:**
+- `node --check` de los 23 scripts.
+- Arnés `scratchpad/cert_word.js` (sedes reales de Marulanda, 11, y Riosucio, 92, con respuestas ficticias que incluyen
+  `& < > "`): ZIP válido; python-docx lee 13 y 94 filas con el texto correcto.
+- Word 16 (COM, instancia propia): abre los dos en horizontal, con las filas 1 y 2 marcadas como encabezado repetido.
+  Pegado en un formato vertical con membrete, pie propio y márgenes de 2,5 cm (lo que hará la alcaldía): la tabla cabe en
+  el ancho útil, el código se repite en las 8 páginas de Riosucio y la firma, la nota y el código final llegan completos.
+- Impresión (respaldo): mismo CSS y mismo texto que la versión publicada, salvo la frase nueva de la nota.
+- En la app (`app-local`, backend simulado): un solo botón; hace 1 llamada `generarCertificado` y descarga el `.docx` con el
+  tipo correcto, sin imprimir; «Descargar el Word de nuevo» baja el Word; con un `certificado.js` anterior simulado, imprime;
+  paso 3 y diálogo de carga con el texto nuevo; 0 errores de consola.
+- **No verificado:** LibreOffice (no está instalado) y Google Docs (habría que subir el archivo a un servicio externo).
+
+**Municipios que ya generaron o cargaron:** su certificación sigue válida, porque el código no depende del formato. Para
+pasarla a su formato: «Descargar el Word de nuevo» (misma fecha y código, sin fila nueva) y «Cargar otro escaneo». Si la
+jefatura quiere que la rehagan, es decisión suya. Guion de llamadas actualizado (paso 3), fuera del repositorio:
+`trabajo1.10_certificadoWord/`.

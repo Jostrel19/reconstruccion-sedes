@@ -69,7 +69,7 @@
     ].map(([cl, v, tx]) => `<div class="cifra ${cl}"><b>${v}</b><span>${esc(tx)}</span></div>`).join('');
     $('av-det-info').innerHTML =
       `<p><b>Alcalde:</b> ${al.length ? al.map(a => `${esc(a.nombre)} (${esc(a.correo)})`).join(', ') : 'sin usuario activo'}.` +
-      (m.codigo_actual ? ` <b>Código de verificación vigente:</b> <span class="mono">${esc(m.codigo_actual)}</span> — debe coincidir con el que aparece al pie de cada página del PDF firmado.` : '') + '</p>' +
+      (m.codigo_actual ? ` <b>Código de verificación vigente:</b> <span class="mono">${esc(m.codigo_actual)}</span> — el PDF firmado debe mostrarlo en el encabezado de la tabla, y su resumen debe coincidir con estas cifras.` : '') + '</p>' +
       (m.cargada_desactualizada ? '<p class="aviso-conf"><b>La certificación cargada ya no corresponde:</b> el alcalde cambió respuestas después de cargarla.</p>' : '') +
       (historialConfHtml(m, false) || '<p class="vacio-tx">Todavía no ha cargado ninguna certificación.</p>');
     $('av-det-tbody').innerHTML = sedes.map((s, i) => {
