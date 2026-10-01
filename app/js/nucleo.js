@@ -44,15 +44,19 @@
     admin:    { ext:false, rot:'Administrador',
                 ve:['inicio','sedes','tablero','muni','ficha','registrar','verif','cargas','lotes','hallazgos','usuarios', ...VE_CAMPANA],
                 interno:true,  edita:true,  verifica:true },
+    // D-51: durante la campaña Verificador y Consulta solo ven «Confirmación de
+    // alcaldes» (las demás pantallas no están en uso) y no piden las sedes de
+    // presupuesto. Al apagar la campaña vuelve su lista completa.
     verif:    { ext:false, rot:'Verificador · todo el departamento',
-                ve:['inicio','sedes','tablero','muni','ficha','verif','cargas','hallazgos', ...VE_CAMPANA],
-                interno:true,  edita:false, verifica:true },
+                ve: CAMPANA_CONFIRMACION ? VE_CAMPANA : ['inicio','sedes','tablero','muni','ficha','verif','cargas','hallazgos'],
+                interno:true,  edita:false, verifica:true, sinSedes: CAMPANA_CONFIRMACION },
     resp:     { ext:true,  rot:'Responsable de sede',
                 ve:['inicio','sedes','muni','ficha','registrar'],
                 interno:false, edita:true,  verifica:false },
+    // D-51: igual que el Verificador durante la campaña.
     consulta: { ext:false, rot:'Consulta · solo lectura',
-                ve:['inicio','sedes','tablero','muni','ficha', ...VE_CAMPANA],
-                interno:true,  edita:false, verifica:false },
+                ve: CAMPANA_CONFIRMACION ? VE_CAMPANA : ['inicio','sedes','tablero','muni','ficha'],
+                interno:true,  edita:false, verifica:false, sinSedes: CAMPANA_CONFIRMACION },
     // D-48: el alcalde durante la campaña. En el servidor sigue siendo
     // RESPONSABLE_SEDE; aquí solo cambia lo que se le muestra. No pide las
     // sedes de presupuesto (sinSedes): su pantalla trae las suyas.

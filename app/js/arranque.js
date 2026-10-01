@@ -32,7 +32,10 @@
       : `${SEDES.length} sedes en su alcance · ${conP} con presupuesto`);
     // D-48: el alcalde solo tiene su pantalla; el buscador abre fichas que no ve.
     if (rol === 'alcalde') base.textContent = CONF && CONF.municipios[0] ? `${CONF.municipios[0].municipio} · ${CONF.municipios[0].n_sedes} sedes oficiales` : '';
-    document.getElementById('buscador').classList.toggle('oculto', rol === 'alcalde');
+    // D-51: Verificador y Consulta en campaña no tienen sedes cargadas; el pie habla de la confirmación.
+    else if (R.sinSedes) base.textContent = CONF ? `${CONF.municipios.length} municipio${CONF.municipios.length === 1 ? '' : 's'} · confirmación de sedes` : '';
+    // Sin sedes cargadas (alcalde, y Verificador y Consulta en campaña) no hay buscador: abre fichas que no ven.
+    document.getElementById('buscador').classList.toggle('oculto', !!R.sinSedes);
     // El pie «Uso interno — no distribuir…» es para el personal de la Secretaría, no para un alcalde.
     const pieUso = document.querySelector('.pie-inst > .hace');
     if (pieUso) pieUso.classList.toggle('oculto', rol === 'alcalde');
