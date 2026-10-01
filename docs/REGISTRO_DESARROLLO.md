@@ -2294,8 +2294,8 @@ botón nuevo imprime en vez de bajar el Word. En todas las combinaciones el alca
 - **No verificado:** LibreOffice (no está instalado) y Google Docs (habría que subir el archivo a un servicio externo).
 
 **Municipios que ya generaron o cargaron:** su certificación sigue válida, porque el código no depende del formato. Para
-pasarla a su formato: «Descargar el Word de nuevo» (misma fecha y código, sin fila nueva) y «Cargar otro escaneo». Si la
-jefatura quiere que la rehagan, es decisión suya. Guion de llamadas actualizado (paso 3), fuera del repositorio:
+pasarla a su formato: «Descargar el Word de nuevo» (misma fecha y código, sin fila nueva) y «Cargar otro escaneo». **Al publicar, ningún municipio había cargado certificación** (confirmado por el usuario el
+2026-10-01), así que no hay que rehacer ninguna. Guion de llamadas actualizado (paso 3), fuera del repositorio:
 `trabajo1.10_certificadoWord/`.
 
-**Publicado y comprobado en Pages el 2026-10-01** (commit `7c14ef3`): 24 referencias con `?v=13`, `certificado.js` con `docxCertificado`, `confirmacion.js` sin el botón de imprimir y con «Descargar la certificación en Word», `avance.js` con el texto nuevo del panel. Falta la revisión en real (un alcalde o el usuario generando el Word desde Pages).
+**Publicado y comprobado en Pages el 2026-10-01** (commit `7c14ef3`): 24 referencias con `?v=13`, `certificado.js` con `docxCertificado`, `confirmacion.js` sin el botón de imprimir y con «Descargar la certificación en Word», `avance.js` con el texto nuevo del panel. **Revisado en real por el usuario el 2026-10-01: descarga el Word bien.**
