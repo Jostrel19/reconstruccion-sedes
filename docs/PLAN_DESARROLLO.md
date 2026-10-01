@@ -30,10 +30,10 @@ dato salvo por la etiqueta de origen (`MAN` / `XLS`), que sí se conserva para t
 | Rol | Alcance de sedes | Lotes (D-44) | Diligencia | Verifica | Pantallas |
 |---|---|:--:|:--:|:--:|---|
 | **Administrador** | Todo el departamento | Crea, agrega, quita, cierra | Sí | Sí | Todas |
-| **Verificador** (arquitecto) | **Todo el departamento**, sin restricción por municipio (D-25) | Filtra por lote | No (solo Cargas) | **Sí** | Inicio · Sedes · Tablero · Ficha · Verificación · Cargas · Hallazgos |
+| **Verificador** (arquitecto) | **Todo el departamento**, sin restricción por municipio (D-25) | Filtra por lote | No (solo Cargas) | **Sí** | Inicio · Sedes · Tablero · Ficha · Verificación · Cargas · Hallazgos (durante la campaña de confirmación, solo «Confirmación de alcaldes»: D-51) |
 | **Responsable de sede** — alcalde | **Todas las sedes de su municipio** (D-24) | No los ve | Sí | No | Inicio · Sedes · Ficha · Registrar |
 | **Responsable de sede** — rector | **Las sedes de su I.E. según el catálogo**, de 1 a 18 (D-24) | No los ve | Sí | No | Inicio · Sedes · Ficha · Registrar |
-| **Consulta** (directivo) | Todo el departamento, solo lectura | Filtra por lote | No | No | Inicio · Sedes · Tablero · Ficha |
+| **Consulta** (directivo) | Todo el departamento, solo lectura | Filtra por lote | No | No | Inicio · Sedes · Tablero · Ficha (durante la campaña de confirmación, solo «Confirmación de alcaldes»: D-51) |
 
 *Desde D-43 (2026-09-24) ningún rol ve `valor_referencia`; la columna que decía quién lo veía se reemplazó por la de lotes.*
 
@@ -478,7 +478,7 @@ cruzado (mismas 975 sedes, sin tipo 6, «7. Sin revisar», «(PRIORITARIO)» en 
 4. **Durante la campaña (hasta el 2026-10-06):** se sigue trabajando sin publicar — nada de push a `master` que toque
    `app/` ni versión nueva de Apps Script, salvo un defecto que impida responder a los alcaldes (detalle en
    `PLAN_CONFIRMACION_ALCALDES.md`). Excepciones decididas por el usuario: certificado sin logo (`?v=12`, publicado el
-   2026-09-30) y certificado en Word para pasarlo al formato de cada alcaldía (D-50, `?v=13`, publicado el 2026-10-01).
+   2026-09-30) y certificado en Word para pasarlo al formato de cada alcaldía (D-50, `?v=13`, publicado el 2026-10-01) y Verificador y Consulta con solo el panel de la campaña (D-51, `?v=14`, preparado el 2026-10-01).
    **Desde el 2026-10-07:** rediseño por fases (auditoría de interfaz, fuera del
    repositorio: `trabajo29.09_auditoriaUI/`, con una muestra navegable del movimiento propuesto en
    `muestra_animaciones.html`, hecha el 2026-09-30; vista por el usuario el mismo día: no convenció del todo y queda

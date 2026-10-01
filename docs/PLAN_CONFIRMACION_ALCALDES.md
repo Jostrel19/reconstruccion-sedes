@@ -438,3 +438,22 @@ pasarla a su formato: «Descargar el Word de nuevo» (misma fecha y código, sin
 `trabajo1.10_certificadoWord/`.
 
 **Publicado y comprobado en Pages el 2026-10-01** (commit `7c14ef3`): 24 referencias con `?v=13`, `certificado.js` con `docxCertificado`, `confirmacion.js` sin el botón de imprimir y con «Descargar la certificación en Word», `avance.js` con el texto nuevo del panel. **Revisado en real por el usuario el 2026-10-01: descarga el Word bien.**
+
+### 2026-10-01 — Verificador y Consulta solo ven «Confirmación de alcaldes» (D-51, `?v=14`)
+
+**Decisión del usuario:** las demás pantallas del Verificador no están en uso; durante la campaña solo debe ver el panel.
+Después pidió lo mismo para Consulta, y se publican juntos.
+
+- `app/js/nucleo.js`: `ROLES.verif.ve` y `ROLES.consulta.ve` son `['confirmaciones']` mientras `CAMPANA_CONFIRMACION` esté encendida (al apagarla
+  vuelve su lista completa) y `sinSedes` le evita pedir `listarSedes`, como al alcalde.
+- `app/js/arranque.js`: el buscador global se oculta a todo rol sin sedes cargadas (alcalde y Verificador en campaña), y el
+  pie del riel de esos dos roles dice cuántos municipios tiene la campaña.
+- `?v=13` → **`?v=14`** en las 24 referencias de `index.html`. Sin cambios en el backend: es solo pantalla.
+
+**Caché mezclada:** con el `arranque.js` anterior, Verificador y Consulta verían unos minutos el buscador y un pie con «0 sedes»; con
+el `nucleo.js` anterior, sus pantallas de siempre. Nada se rompe.
+
+**Verificado en local** (`app-local`, sesiones de Verificador y de Consulta simuladas, backend falso): `node --check` de los 23 scripts; entra
+directo a «Confirmación de alcaldes»; el riel muestra solo esa entrada (grupo «Seguimiento»); el único pedido al servidor es
+`listarConfirmaciones`; si se intenta ir al Tablero, vuelve al panel; buscador oculto; el detalle de un municipio abre;
+lo mismo con Consulta; Administrador (12 pantallas) y alcalde sin cambios; 0 errores de consola.
