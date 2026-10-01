@@ -50,7 +50,7 @@ app/
     lotes.js          Lotes
     exportar.js       CSV para Excel
     confirmacion.js   confirmación de sedes (D-48): pantalla del alcalde y lo que comparte con avance.js
-    certificado.js    certificación que firma el alcalde (iframe + imprimir, como pdf.js)
+    certificado.js    certificación que firma el alcalde: en Word, para pasarla al formato de la alcaldía (D-50); la impresión con el formato de la aplicación (iframe + imprimir, como pdf.js) queda sin botón, como respaldo de caché
     avance.js         «Confirmación de alcaldes»: avance de los 26 que ve la Secretaría
     cabecera.js       encabezado de cada vista
     buscador.js       buscador de sedes y migas

@@ -166,18 +166,21 @@
       ? paso(1, 'hecho', 'Responder todas las sedes', `<p>Las ${m.n_sedes} sedes tienen respuesta. Puede corregir cualquiera antes de generar la certificación.</p>`)
       : paso(1, 'act', 'Responder todas las sedes', `<p>${todas ? 'Tiene cambios sin guardar.' : `Faltan <b>${m.n_sedes - m.respondidas}</b> de ${m.n_sedes}.`} Responda en la tabla de abajo y pulse <b>Guardar cambios</b>; puede hacerlo por partes.</p>`);
 
+    // La certificación se baja en Word (D-50). Los id conf-btn-generar y
+    // conf-btn-imprimir se conservan aunque los dos bajen el Word: un arranque.js
+    // anterior todavía en caché los despacha igual.
     const generada = m.estado === 'GENERADA' || m.estado === 'CARGADA';
     let c2;
     if (generada){
       c2 = `<p>Generada${m.generado ? ' el ' + esc(fecha(m.generado.fecha)) : ''} · código de verificación <b class="mono">${esc(m.codigo_actual)}</b>.</p>
-        <button class="b sec mini" type="button" id="conf-btn-imprimir">Imprimir de nuevo</button>`;
+        <button class="b sec mini" type="button" id="conf-btn-imprimir">Descargar el Word de nuevo</button>`;
     } else {
       const bloqueo = !todas ? 'Se habilita cuando todas las sedes tengan respuesta.' : (cambios ? 'Guarde los cambios antes de generarla.' : '');
-      c2 = `<p>La aplicación arma el documento con sus respuestas y abre la ventana de impresión: imprímalo, o guárdelo en PDF para imprimirlo después.</p>
-        <button class="b mini" type="button" id="conf-btn-generar" ${bloqueo ? 'disabled' : ''}>Generar certificación</button>
+      c2 = `<p>La aplicación arma la certificación en Word con sus respuestas. Copie su contenido en el formato oficial de su alcaldía <b>sin modificarlo</b>, con la tabla completa y el código de verificación.</p>
+        <button class="b mini" type="button" id="conf-btn-generar" ${bloqueo ? 'disabled' : ''}>Descargar la certificación en Word</button>
         ${bloqueo ? `<span class="hace">${bloqueo}</span>` : ''}`;
     }
-    const p2 = paso(2, generada ? 'hecho' : (todas && !cambios ? 'act' : ''), 'Generar e imprimir la certificación', c2);
+    const p2 = paso(2, generada ? 'hecho' : (todas && !cambios ? 'act' : ''), 'Generar la certificación en Word', c2);
 
     let c3, e3 = '';
     const elegir = `<input type="file" id="conf-pdf" accept="application/pdf,.pdf" class="oculto">`;
@@ -336,14 +339,21 @@
     pintarConfirmacion();
   }
 
+  // Baja el Word (D-50). Si el certificado.js en caché es anterior y no trae el
+  // Word, abre la ventana de impresión como antes.
   async function generarCertificadoUI(btn){
     const soltar = ocupar(btn, 'Generando…');
     try {
       const r = await backend('generarCertificado', { token: sesion.token });
       if (!r.ok){ avisar(r.error || 'No se pudo generar la certificación.', 'error'); return; }
       aplicarRespuestaConf(r);
-      await imprimirCertificado(r.certificado, r.sedes, r.municipios[0]);
-      avisar('Certificación generada. En la ventana de impresión, imprímala o guárdela en PDF para firmarla.', 'ok');
+      if (typeof descargarCertificadoWord === 'function'){
+        descargarCertificadoWord(r.certificado, r.sedes, r.municipios[0]);
+        avisar('Certificación descargada en Word. Pase su contenido al formato de su alcaldía sin modificarlo.', 'ok');
+      } else {
+        await imprimirCertificado(r.certificado, r.sedes, r.municipios[0]);
+        avisar('Certificación generada. En la ventana de impresión, imprímala o guárdela en PDF para firmarla.', 'ok');
+      }
     } catch (err) {
       avisar(err.message || 'No se pudo contactar el servidor.', 'error');
     } finally {
@@ -367,7 +377,7 @@
     if (cabecera !== '%PDF-'){ avisar('El archivo no es un PDF válido. Escanee la certificación firmada como PDF.', 'error'); return; }
     const ok = await confirmar({ titulo: 'Cargar la certificación firmada',
       html: `<p>Va a cargar <b>${esc(archivo.name)}</b> (${tamanoTexto(archivo.size)}) como la certificación firmada de ${esc(m ? m.municipio : '')}.</p>
-        <p class="nota-dlg">Revise que sea el documento completo, firmado, con el código <b class="mono">${esc(m ? m.codigo_actual : '')}</b> al pie de cada página. Con este cargue se da por finalizado el reporte.</p>`,
+        <p class="nota-dlg">Revise que sea el documento completo y firmado, y que muestre el código de verificación <b class="mono">${esc(m ? m.codigo_actual : '')}</b>. Con este cargue se da por finalizado el reporte.</p>`,
       aceptar: 'Cargar' });
     if (!ok) return;
     const btn = document.getElementById('conf-btn-elegir');
@@ -412,8 +422,9 @@
     }
   }
 
-  // Imprimir de nuevo la certificación ya generada: se pide al servidor, que
-  // devuelve la misma (misma fecha y código) sin crear otra.
+  // Descargar de nuevo la certificación ya generada: se pide al servidor, que
+  // devuelve la misma (misma fecha y código) sin crear otra. El nombre viene de
+  // cuando este botón imprimía; arranque.js lo llama así.
   async function reimprimirCertificadoUI(btn){ await generarCertificadoUI(btn); }
 
   function olvidarConfirmaciones(){

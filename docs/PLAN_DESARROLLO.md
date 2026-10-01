@@ -477,7 +477,9 @@ cruzado (mismas 975 sedes, sin tipo 6, «7. Sin revisar», «(PRIORITARIO)» en 
    alcaldes con el enlace de ingreso (confirmado por el usuario el 2026-09-30): la campaña está en curso.**
 4. **Durante la campaña (hasta el 2026-10-06):** se sigue trabajando sin publicar — nada de push a `master` que toque
    `app/` ni versión nueva de Apps Script, salvo un defecto que impida responder a los alcaldes (detalle en
-   `PLAN_CONFIRMACION_ALCALDES.md`). **Desde el 2026-10-07:** rediseño por fases (auditoría de interfaz, fuera del
+   `PLAN_CONFIRMACION_ALCALDES.md`). Excepciones decididas por el usuario: certificado sin logo (`?v=12`, publicado el
+   2026-09-30) y certificado en Word para pasarlo al formato de cada alcaldía (D-50, `?v=13`, preparado el 2026-10-01).
+   **Desde el 2026-10-07:** rediseño por fases (auditoría de interfaz, fuera del
    repositorio: `trabajo29.09_auditoriaUI/`, con una muestra navegable del movimiento propuesto en
    `muestra_animaciones.html`, hecha el 2026-09-30; vista por el usuario el mismo día: no convenció del todo y queda
    pendiente de revisar antes de ejecutar las fases) y hito 2 de la hoja de ruta (§3.c).
