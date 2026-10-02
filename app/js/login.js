@@ -36,10 +36,17 @@
   const AVISO_SIN_CONFIRMAR = 'El servidor tardó y no confirmó el envío. Si le llegó el código, escríbalo aquí ' +
     '(vence en 10 minutos). Si no le llega en unos minutos, use «Cambiar correo» y pídalo de nuevo.';
 
+  // Barra «1 · Correo / 2 · Código» (rediseño claro). Con un index.html anterior en caché no existe y no hace nada.
+  function marcarPasoLogin(n){
+    const pasos = document.querySelectorAll('#login-pasos li');
+    pasos.forEach((li, i) => { li.classList.toggle('act', i === n - 1); li.classList.toggle('hecho', i < n - 1); });
+  }
+
   function pasoCodigo(texto){
     document.getElementById('login-sub').textContent = texto;
     document.getElementById('login-p1').classList.add('oculto');
     document.getElementById('login-p2').classList.remove('oculto');
+    marcarPasoLogin(2);
     document.getElementById('cod').focus();
   }
 
@@ -48,6 +55,7 @@
     document.getElementById('login-sub').textContent = 'Escriba su correo institucional.';
     document.getElementById('login-p2').classList.add('oculto');
     document.getElementById('login-p1').classList.remove('oculto');
+    marcarPasoLogin(1);
   }
 
   async function loginEntrar(){

@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Reconstrucción de sedes — SED Caldas</title>
 <link rel="icon" type="image/png" href="img/favicon.png">
-<link rel="stylesheet" href="css/estilos.css?v=18">
-<!-- Rediseño claro, fase 1 (2026-10-01): menú, barra superior, «Confirmación de alcaldes», pantalla del alcalde y Usuarios.
+<link rel="stylesheet" href="css/estilos.css?v=19">
+<!-- Rediseño claro, fase 1 (2026-10-01): ingreso, menú, barra superior, «Confirmación de alcaldes», pantalla del alcalde y Usuarios.
      Solo sobrescribe estilos.css: quitar esta línea devuelve el aspecto anterior. -->
-<link rel="stylesheet" href="css/claro.css?v=18">
+<link rel="stylesheet" href="css/claro.css?v=19">
 </head>
 <body>
 
@@ -63,6 +63,8 @@
               <img src="img/logo-ingreso.png" alt="Gobierno de Caldas — Secretaría de Educación">
               <h2>Ingresar</h2>
               <div class="sub" id="login-sub">Escriba su correo institucional.</div>
+              <!-- Los dos pasos del ingreso (rediseño claro): login.js marca el actual. -->
+              <ol class="login-pasos" id="login-pasos" aria-label="Pasos para ingresar"><li class="act">1 · Correo</li><li>2 · Código</li></ol>
 
               <div id="login-p1">
                 <div class="campo"><label for="u">Correo institucional</label>
@@ -72,12 +74,12 @@
 
               <div id="login-p2" class="oculto">
                 <div class="campo"><label for="cod">Código de 6 dígitos</label>
-                  <input id="cod" type="text" inputmode="numeric" maxlength="6" placeholder="000000"></div>
+                  <input id="cod" type="text" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code"></div>
                 <button class="b" type="button" id="btn-entrar" onclick="loginEntrar()">Entrar</button>
-                <button class="b sec mini" type="button" style="margin-top:.5rem" onclick="loginVolver()">Cambiar correo</button>
+                <button class="b sec mini" type="button" id="btn-cambiar" onclick="loginVolver()">Cambiar correo</button>
               </div>
 
-              <div id="login-error" class="oculto" role="alert" style="color:#b3261e;font-size:.85rem;margin:.5rem 0"></div>
+              <div id="login-error" class="login-error oculto" role="alert"></div>
 
               <div class="pie2">
                 Sin contraseña: se entra con el correo institucional y un código de un solo uso,
@@ -749,10 +751,15 @@
                   <div class="pie" id="av-pie"></div>
                 </div>
 
-                <div class="p oculto" id="av-detalle">
-                  <header><h2 id="av-det-titulo">—</h2><span class="est e-pend" id="av-det-estado">—</span><span class="flex"></span>
-                    <button class="b sec mini" type="button" id="av-volver">Volver a los municipios</button></header>
-                  <div class="cuerpo"><div class="cifras" id="av-det-cifras"></div><div class="av-info" id="av-det-info"></div></div>
+                <!-- Detalle de un municipio: «Volver», la ficha (dos tarjetas que pinta avance.js) y la tabla de sedes.
+                     av-det-titulo, av-det-estado, av-det-cifras y av-det-info se conservan para un avance.js anterior en caché. -->
+                <div class="av-detalle oculto" id="av-detalle">
+                  <div class="av-det-cab"><button class="b sec mini" type="button" id="av-volver">← Volver a los municipios</button>
+                    <h2 id="av-det-titulo">—</h2><span class="est e-pend" id="av-det-estado">—</span></div>
+                  <div class="av-ficha" id="av-det-ficha"></div>
+                  <div class="cifras" id="av-det-cifras"></div><div class="av-info" id="av-det-info"></div>
+                  <div class="p">
+                  <header><h2>Sedes</h2><span class="eyebrow" id="av-det-n"></span></header>
                   <div class="cuerpo ras">
                     <div class="scroll alto">
                       <table>
@@ -763,6 +770,7 @@
                     </div>
                   </div>
                   <div class="pie">Solo lectura: las respuestas y la certificación las registra el alcalde del municipio.</div>
+                  </div>
                 </div>
               </section>
 
@@ -899,28 +907,28 @@
 
     </div>
 
-<script src="js/nucleo.js?v=18"></script>
-<script src="js/transporte.js?v=18"></script>
-<script src="js/sesion.js?v=18"></script>
-<script src="js/avisos.js?v=18"></script>
-<script src="js/login.js?v=18"></script>
-<script src="js/registrar.js?v=18"></script>
-<script src="js/ficha.js?v=18"></script>
-<script src="js/pdf.js?v=18"></script>
-<script src="js/verificacion.js?v=18"></script>
-<script src="js/hallazgos.js?v=18"></script>
-<script src="js/usuarios.js?v=18"></script>
-<script src="js/cargas.js?v=18"></script>
-<script src="js/tablero.js?v=18"></script>
-<script src="js/inicio.js?v=18"></script>
-<script src="js/sedes.js?v=18"></script>
-<script src="js/lotes.js?v=18"></script>
-<script src="js/exportar.js?v=18"></script>
-<script src="js/confirmacion.js?v=18"></script>
-<script src="js/certificado.js?v=18"></script>
-<script src="js/avance.js?v=18"></script>
-<script src="js/cabecera.js?v=18"></script>
-<script src="js/buscador.js?v=18"></script>
-<script src="js/arranque.js?v=18"></script>
+<script src="js/nucleo.js?v=19"></script>
+<script src="js/transporte.js?v=19"></script>
+<script src="js/sesion.js?v=19"></script>
+<script src="js/avisos.js?v=19"></script>
+<script src="js/login.js?v=19"></script>
+<script src="js/registrar.js?v=19"></script>
+<script src="js/ficha.js?v=19"></script>
+<script src="js/pdf.js?v=19"></script>
+<script src="js/verificacion.js?v=19"></script>
+<script src="js/hallazgos.js?v=19"></script>
+<script src="js/usuarios.js?v=19"></script>
+<script src="js/cargas.js?v=19"></script>
+<script src="js/tablero.js?v=19"></script>
+<script src="js/inicio.js?v=19"></script>
+<script src="js/sedes.js?v=19"></script>
+<script src="js/lotes.js?v=19"></script>
+<script src="js/exportar.js?v=19"></script>
+<script src="js/confirmacion.js?v=19"></script>
+<script src="js/certificado.js?v=19"></script>
+<script src="js/avance.js?v=19"></script>
+<script src="js/cabecera.js?v=19"></script>
+<script src="js/buscador.js?v=19"></script>
+<script src="js/arranque.js?v=19"></script>
 
 </body></html>

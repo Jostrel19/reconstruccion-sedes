@@ -192,17 +192,28 @@
     const [c, t] = ESTADO_CONF[m.estado] || ['e-pend', '—'];
     $('av-det-estado').className = 'est ' + c;
     $('av-det-estado').textContent = t;
-    const al = (m.alcaldes || []).filter(a => a.activo);
-    $('av-det-cifras').innerHTML = [
-      ['', m.n_sedes, 'Sedes'], [(m.respondidas === m.n_sedes ? 'ok' : 'al') + ' et-' + avColor(m.estado), m.respondidas, 'Respondidas'],
-      ['', m.con_intervencion, 'Con intervención'], ['', m.sin_intervencion, 'Sin intervención'],
-      ...CONF_ESTADOS_OBRA.map(e => ['', (m.por_estado_obra || {})[e] || 0, e]),
-    ].map(([cl, v, tx]) => `<div class="cifra ${cl}"><b>${v}</b><span>${esc(tx)}</span></div>`).join('');
-    $('av-det-info').innerHTML =
-      `<p><b>Alcalde:</b> ${al.length ? al.map(a => `${esc(a.nombre)} (${esc(a.correo)})`).join(', ') : 'sin usuario activo'}.` +
-      (m.codigo_actual ? ` <b>Código de verificación vigente:</b> <span class="mono">${esc(m.codigo_actual)}</span> — el PDF firmado debe mostrarlo en el encabezado de la tabla, y su resumen debe coincidir con estas cifras.` : '') + '</p>' +
-      (m.cargada_desactualizada ? '<p class="aviso-conf"><b>La certificación cargada ya no corresponde:</b> el alcalde cambió respuestas después de cargarla.</p>' : '') +
-      (historialConfHtml(m, false) || '<p class="vacio-tx">Todavía no ha cargado ninguna certificación.</p>');
+    const ficha = $('av-det-ficha');
+    if (ficha){
+      // Ficha del municipio (2026-10-01, segunda muestra aprobada): dos tarjetas en vez de 8 cifras sueltas.
+      ficha.innerHTML = fichaRespuestasHtml(m) + fichaCertificacionHtml(m);
+      $('av-det-cifras').innerHTML = '';
+      $('av-det-info').innerHTML = '';
+      const n = $('av-det-n');
+      if (n) n.textContent = m.n_sedes;
+    } else {
+      // index.html anterior en caché: las cifras y el párrafo de siempre.
+      const al = (m.alcaldes || []).filter(a => a.activo);
+      $('av-det-cifras').innerHTML = [
+        ['', m.n_sedes, 'Sedes'], [(m.respondidas === m.n_sedes ? 'ok' : 'al') + ' et-' + avColor(m.estado), m.respondidas, 'Respondidas'],
+        ['', m.con_intervencion, 'Con intervención'], ['', m.sin_intervencion, 'Sin intervención'],
+        ...CONF_ESTADOS_OBRA.map(e => ['', (m.por_estado_obra || {})[e] || 0, e]),
+      ].map(([cl, v, tx]) => `<div class="cifra ${cl}"><b>${v}</b><span>${esc(tx)}</span></div>`).join('');
+      $('av-det-info').innerHTML =
+        `<p><b>Alcalde:</b> ${al.length ? al.map(a => `${esc(a.nombre)} (${esc(a.correo)})`).join(', ') : 'sin usuario activo'}.` +
+        (m.codigo_actual ? ` <b>Código de verificación vigente:</b> <span class="mono">${esc(m.codigo_actual)}</span> — el PDF firmado debe mostrarlo en el encabezado de la tabla, y su resumen debe coincidir con estas cifras.` : '') + '</p>' +
+        (m.cargada_desactualizada ? '<p class="aviso-conf"><b>La certificación cargada ya no corresponde:</b> el alcalde cambió respuestas después de cargarla.</p>' : '') +
+        (historialConfHtml(m, false) || '<p class="vacio-tx">Todavía no ha cargado ninguna certificación.</p>');
+    }
     $('av-det-tbody').innerHTML = sedes.map((s, i) => {
       const r = s.respuesta;
       const si = r && r.tiene_intervencion === CONF_SI;
@@ -215,6 +226,58 @@
         <td>${si && r.nombre_quien_interviene ? esc(r.nombre_quien_interviene) : '—'}</td><td>${si ? esc(r.estado_obra) : '—'}</td>
         <td>${r ? `<span class="hace">${esc(hace(r.fecha_registro))}</span>` : ''}</td></tr>`;
     }).join('');
+  }
+
+  // Tarjeta 1: cuántas sedes respondió, cómo respondieron (una sola barra con todas las sedes) y en qué va cada obra.
+  // Sí/No son respuestas, no avances: van en gris oscuro y claro; «sin responder» en rosa, el color de lo que falta.
+  function fichaRespuestasHtml(m){
+    const n = m.n_sedes, resp = m.respondidas, con = m.con_intervencion, sin = m.sin_intervencion, pend = n - resp;
+    const pct = x => n ? Math.round(100 * x / n) : 0;
+    const seg = (cl, x) => x ? `<i class="${cl}" style="width:${(100 * x / n).toFixed(2)}%"></i>` : '';
+    const porObra = CONF_ESTADOS_OBRA.map(e => (m.por_estado_obra || {})[e] || 0);
+    const obras = con
+      ? `<ol class="af-obras">${CONF_ESTADOS_OBRA.map((e, i) => `<li class="${i === CONF_ESTADOS_OBRA.length - 1 ? 'fin' : ''}"><b>${porObra[i]}</b><span>${esc(e)}</span>
+          <div class="af-tr"><i style="width:${(100 * porObra[i] / con).toFixed(1)}%"></i></div></li>`).join('')}</ol>`
+      : '<p class="af-nada">Ninguna sede con intervención todavía.</p>';
+    return `<section class="af-card" aria-labelledby="af-t1"><h2 id="af-t1">Respuestas de las sedes</h2>
+      <div class="af-resp"><div class="af-rot">Respondidas<span class="af-pct">${pct(resp)} %</span></div>
+        <div class="af-num">${formatNum(resp, 0)}<small>/ ${formatNum(n, 0)}</small></div>
+        <div><div class="af-barra" data-et="${avColor(m.estado)}" role="img" aria-label="${resp} de ${n} sedes respondidas"><i style="width:${pct(resp)}%"></i></div>
+          <span class="af-nota">${pend ? `Faltan ${avPlural(pend, 'sede', 'sedes')} por responder` : 'Todas las sedes tienen respuesta'}</span></div></div>
+      <div class="af-sec"><h3>Cómo respondieron <span>· ¿La sede tiene una intervención terminada o en proceso?</span></h3>
+        <div class="af-apilada" role="img" aria-label="${con} con intervención, ${sin} sin intervención y ${pend} sin responder, de ${n} sedes">${seg('con', con)}${seg('sin', sin)}${seg('pend', pend)}</div>
+        <ul class="af-ley"><li><i class="con"></i><b>${con}</b> con intervención <em>${pct(con)} %</em></li><li><i class="sin"></i><b>${sin}</b> sin intervención <em>${pct(sin)} %</em></li>
+          <li><i class="pend"></i><b>${pend}</b> sin responder <em>${pct(pend)} %</em></li></ul></div>
+      <div class="af-sec"><h3>Estado de las obras <span>· de ${con === 1 ? 'la sede' : `las ${con} sedes`} con intervención</span></h3>${obras}</div></section>`;
+  }
+
+  // Tarjeta 2: en qué va la certificación, con los mismos tres pasos y colores que ve el alcalde.
+  function fichaCertificacionHtml(m){
+    const e = m.estado, todas = m.n_sedes > 0 && m.respondidas === m.n_sedes;
+    const generada = e === 'GENERADA' || e === 'CARGADA', cargada = e === 'CARGADA';
+    const [cls, txt] = ESTADO_CONF[e] || ['e-pend', '—'];
+    const paso = (cl, et, n, titulo, meta) => `<li class="${cl}" data-et="${et}"><span class="af-n" aria-hidden="true">${cl === 'hecho' ? '✓' : n}</span>` +
+      `<div><b>${titulo}<span class="sr"> — ${cl === 'hecho' ? 'hecho' : (cl === 'act' ? 'paso actual' : 'pendiente')}</span></b><span class="af-m">${meta}</span></div></li>`;
+    const p1 = paso(todas ? 'hecho' : 'act', 'res', 1, 'Responder todas las sedes',
+      todas ? `Las ${m.n_sedes} tienen respuesta` : `${m.respondidas} de ${m.n_sedes} respondidas`);
+    const p2 = paso(generada ? 'hecho' : (todas ? 'act' : 'pend'), 'pdf', 2, 'Generar la certificación en Word',
+      generada ? `Word descargado ${m.generado ? esc(hace(m.generado.fecha)) : ''}`
+        : (todas ? (e === 'DESACTUALIZADA' ? 'Debe descargarla de nuevo: cambió respuestas' : 'Todavía no la ha descargado') : 'Se habilita con todas las sedes respondidas'));
+    const p3 = paso(cargada ? 'hecho' : (generada ? 'act' : 'pend'), 'pdf', 3, 'Firmar, escanear y cargar',
+      cargada ? `Cargada ${esc(hace(m.cargado.fecha))} · <button class="af-enlace" type="button" data-descargar="${esc(m.cargado.id_certificacion)}">Descargar PDF</button>`
+        : (generada ? 'Falta cargar el PDF firmado' : 'Se habilita al generar la certificación'));
+    const anterior = (m.certificaciones || []).find(c => c.evento === 'CARGADO');
+    const aviso = m.cargada_desactualizada
+      ? `<p class="af-aviso"><b>La certificación cargada ya no corresponde:</b> el alcalde cambió respuestas después de cargarla.` +
+        (anterior ? ` <button class="af-enlace" type="button" data-descargar="${esc(anterior.id_certificacion)}">Descargar la anterior</button>` : '') + '</p>' : '';
+    const codigo = m.codigo_actual
+      ? `<div class="af-codigo"><span>Código de verificación vigente</span><code>${esc(m.codigo_actual)}</code><span>El PDF firmado debe mostrarlo en el encabezado de la tabla, y su resumen debe coincidir con estas cifras.</span></div>`
+      : '<div class="af-codigo"><span>El código de verificación se genera cuando todas las sedes tengan respuesta.</span></div>';
+    const al = (m.alcaldes || []).filter(a => a.activo);
+    return `<section class="af-card" aria-labelledby="af-t2"><h2 id="af-t2">Certificación <span class="est ${cls}">${esc(txt)}</span></h2>
+      ${aviso}<ol class="af-pasos">${p1}${p2}${p3}</ol>${codigo}
+      <p class="af-alc">Alcalde: ${al.length ? al.map(a => `<b>${esc(a.nombre)}</b> · ${esc(a.correo)}`).join('; ') : '<b>sin usuario activo</b>'}</p>
+      ${historialConfHtml(m, false)}</section>`;
   }
 
   function abrirAvanceMunicipio(m){ avMuni = m; window.scrollTo(0, 0); pintar(); }

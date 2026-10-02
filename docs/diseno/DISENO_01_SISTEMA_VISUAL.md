@@ -311,5 +311,5 @@ en todo lo que lo muestra; el verde queda para «terminado»; lo que no es un av
 Contraste de los textos sobre sus fondos, calculado: todos de 4,9:1 o más (el más justo, el texto gris de un botón
 deshabilitado, 4,91:1; el texto de cada estado sobre su fondo, de 6,3:1 a 8,7:1; blanco sobre verde, 6,64:1).
 
-Alcance de la fase 1: armazón, botones, estados, diálogo y avisos en todas las pantallas; panel «Confirmación de alcaldes»,
-pantalla del alcalde y Usuarios completos. Las demás pantallas conservan su contenido hasta la fase siguiente.
+Alcance de la fase 1: armazón, botones, estados, diálogo y avisos en todas las pantallas; panel «Confirmación de alcaldes»
+(con la ficha de cada municipio), pantalla del alcalde, Usuarios e ingreso completos. Las demás pantallas conservan su contenido hasta la fase siguiente.
