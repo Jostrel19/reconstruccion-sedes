@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Reconstrucción de sedes — SED Caldas</title>
 <link rel="icon" type="image/png" href="img/favicon.png">
-<link rel="stylesheet" href="css/estilos.css?v=17">
+<link rel="stylesheet" href="css/estilos.css?v=18">
+<!-- Rediseño claro, fase 1 (2026-10-01): menú, barra superior, «Confirmación de alcaldes», pantalla del alcalde y Usuarios.
+     Solo sobrescribe estilos.css: quitar esta línea devuelve el aspecto anterior. -->
+<link rel="stylesheet" href="css/claro.css?v=18">
 </head>
 <body>
 
@@ -93,7 +96,7 @@
         <div class="shell">
           <a class="saltar" href="#contenido">Saltar al contenido</a>
           <nav class="riel" id="riel" aria-label="Navegación principal">
-            <div class="marca"><img src="img/logo-riel.png" alt="Gobierno de Caldas — Secretaría de Educación"></div>
+            <div class="marca"><img src="img/logo-ingreso.png" alt="Gobierno de Caldas — Secretaría de Educación"><span>RECONSTRUCCIÓN DE SEDES</span></div>
             <a href="#" data-mod="inicio" class="sel">
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 14V6.2L8 2l6 4.2V14"/><path d="M2 14h12"/><path d="M6.2 14V9.5h3.6V14"/></svg>Inicio</a>
             <a href="#" data-mod="confirmacion">
@@ -658,7 +661,7 @@
 
               <!-- ─── CONFIRMACIÓN DE SEDES (alcalde, D-48) ─── -->
               <section class="view" id="s-confirmacion">
-                <div class="franja conf-franja" id="conf-franja"></div>
+                <div class="conf-cifras" id="conf-franja"></div>
 
                 <div class="p">
                   <header><h2>Su reporte</h2><span class="flex"></span><span class="est e-pend" id="conf-estado">—</span></header>
@@ -729,10 +732,11 @@
 
               <!-- ─── CONFIRMACIÓN DE ALCALDES (Secretaría, D-48) ─── -->
               <section class="view" id="s-confirmaciones">
-                <div class="franja" id="av-franja"></div>
+                <!-- «Certificación firmada» (la ruta de 4 pasos) y «Sedes respondidas»: las pinta avance.js -->
+                <div class="av-bento" id="av-franja"></div>
 
                 <div class="p" id="av-lista-caja">
-                  <header><h2>Municipios</h2></header>
+                  <header><h2>Municipios</h2><span class="eyebrow" id="av-n"></span></header>
                   <div class="cuerpo ras">
                     <div class="scroll alto">
                       <table>
@@ -786,36 +790,52 @@
 
               <!-- ─── USUARIOS (solo SED) ─── -->
               <section class="view" id="s-usuarios">
+                <!-- Cuatro cifras de la lista (rediseño claro): las pinta usuarios.js -->
+                <div class="usu-cifras" id="usuarios-cifras"></div>
+
                 <div class="p">
-                  <header><h2>Usuarios</h2><span class="flex"></span>
+                  <header><h2>Usuarios</h2><span class="eyebrow" id="usuarios-n"></span><span class="flex"></span>
                     <button class="b mini" type="button" onclick="mostrarFormularioUsuario()">+ Agregar usuario</button></header>
 
-                  <div class="cuerpo ras oculto" id="usuario-form">
-                    <div class="campo"><label for="uf-correo">Correo institucional</label>
-                      <input id="uf-correo" type="email" placeholder="nombre@sedcaldas.edu.co"></div>
-                    <div class="campo"><label for="uf-nombre">Nombre</label>
-                      <input id="uf-nombre" type="text"></div>
-                    <div class="campo"><label for="uf-rol">Rol</label>
-                      <select id="uf-rol" onchange="actualizarCamposUsuarioForm()">
-                        <option value="ADMINISTRADOR">Administrador</option>
-                        <option value="VERIFICADOR">Verificador</option>
-                        <option value="RESPONSABLE_SEDE">Responsable de sede</option>
-                        <option value="CONSULTA">Consulta</option>
-                      </select></div>
-                    <div class="campo oculto" id="uf-campo-tipo"><label for="uf-tipo">Tipo</label>
-                      <select id="uf-tipo">
-                        <option value="alcalde">Alcalde</option>
-                        <option value="rector">Rector</option>
-                      </select></div>
-                    <div class="campo oculto" id="uf-campo-alcance"><label for="uf-alcance" id="uf-alcance-label">Alcance</label>
-                      <input id="uf-alcance" type="text" placeholder="Nombre del municipio, o DANE1|DANE2|..."></div>
-                    <button class="b" type="button" id="uf-btn-crear" onclick="crearUsuarioUI()">Crear usuario</button>
-                    <button class="b sec mini" type="button" style="margin-left:.4rem" onclick="document.getElementById('usuario-form').classList.add('oculto')">Cancelar</button>
-                    <div id="uf-error" class="oculto" style="color:#b3261e;font-size:.85rem;margin-top:.5rem"></div>
+                  <div class="cuerpo uf-caja oculto" id="usuario-form">
+                    <h3>Agregar usuario</h3>
+                    <div class="uf-campos">
+                      <div class="campo"><label for="uf-correo">Correo institucional</label>
+                        <input id="uf-correo" type="email" placeholder="nombre@sedcaldas.edu.co"></div>
+                      <div class="campo"><label for="uf-nombre">Nombre</label>
+                        <input id="uf-nombre" type="text">
+                        <span class="uf-ayuda oculto" id="uf-nombre-ayuda">Escriba el nombre del alcalde en mayúscula: es el que sale en la certificación, aunque entre por el correo de otra persona.</span></div>
+                      <div class="campo"><label for="uf-rol">Rol</label>
+                        <select id="uf-rol" onchange="actualizarCamposUsuarioForm()">
+                          <option value="ADMINISTRADOR">Administrador</option>
+                          <option value="VERIFICADOR">Verificador</option>
+                          <option value="RESPONSABLE_SEDE">Responsable de sede</option>
+                          <option value="CONSULTA">Consulta</option>
+                        </select></div>
+                      <div class="campo oculto" id="uf-campo-tipo"><label for="uf-tipo">Tipo</label>
+                        <select id="uf-tipo" onchange="actualizarCamposUsuarioForm()">
+                          <option value="alcalde">Alcalde</option>
+                          <option value="rector">Rector</option>
+                        </select></div>
+                      <div class="campo uf-ancho oculto" id="uf-campo-alcance"><label for="uf-alcance" id="uf-alcance-label">Alcance</label>
+                        <select id="uf-municipio" class="oculto"></select>
+                        <input id="uf-alcance" type="text" placeholder="Nombre del municipio, o DANE1|DANE2|...">
+                        <span class="uf-ayuda" id="uf-alcance-ayuda"></span></div>
+                    </div>
+                    <div class="uf-acc">
+                      <button class="b" type="button" id="uf-btn-crear" onclick="crearUsuarioUI()">Crear usuario</button>
+                      <button class="b sec mini" type="button" onclick="document.getElementById('usuario-form').classList.add('oculto')">Cancelar</button>
+                    </div>
+                    <div id="uf-error" class="err-campo oculto" role="alert"></div>
                   </div>
 
+                  <div class="usu-herr" id="usuarios-herr">
+                    <input type="search" id="usuarios-busca" placeholder="Buscar por nombre, correo o municipio" aria-label="Buscar usuarios por nombre, correo o municipio">
+                    <div class="usu-chips" id="usuarios-f-estado" role="group" aria-label="Filtrar por estado"></div>
+                    <div class="usu-chips" id="usuarios-f-tipo" role="group" aria-label="Filtrar por tipo de usuario"></div>
+                  </div>
                   <div class="cuerpo ras">
-                    <div class="scroll">
+                    <div class="scroll alto">
                       <table>
                         <thead><tr><th>Persona</th><th>Rol</th><th>Ámbito</th><th>Estado</th><th></th></tr></thead>
                         <tbody id="usuarios-tbody">
@@ -879,28 +899,28 @@
 
     </div>
 
-<script src="js/nucleo.js?v=17"></script>
-<script src="js/transporte.js?v=17"></script>
-<script src="js/sesion.js?v=17"></script>
-<script src="js/avisos.js?v=17"></script>
-<script src="js/login.js?v=17"></script>
-<script src="js/registrar.js?v=17"></script>
-<script src="js/ficha.js?v=17"></script>
-<script src="js/pdf.js?v=17"></script>
-<script src="js/verificacion.js?v=17"></script>
-<script src="js/hallazgos.js?v=17"></script>
-<script src="js/usuarios.js?v=17"></script>
-<script src="js/cargas.js?v=17"></script>
-<script src="js/tablero.js?v=17"></script>
-<script src="js/inicio.js?v=17"></script>
-<script src="js/sedes.js?v=17"></script>
-<script src="js/lotes.js?v=17"></script>
-<script src="js/exportar.js?v=17"></script>
-<script src="js/confirmacion.js?v=17"></script>
-<script src="js/certificado.js?v=17"></script>
-<script src="js/avance.js?v=17"></script>
-<script src="js/cabecera.js?v=17"></script>
-<script src="js/buscador.js?v=17"></script>
-<script src="js/arranque.js?v=17"></script>
+<script src="js/nucleo.js?v=18"></script>
+<script src="js/transporte.js?v=18"></script>
+<script src="js/sesion.js?v=18"></script>
+<script src="js/avisos.js?v=18"></script>
+<script src="js/login.js?v=18"></script>
+<script src="js/registrar.js?v=18"></script>
+<script src="js/ficha.js?v=18"></script>
+<script src="js/pdf.js?v=18"></script>
+<script src="js/verificacion.js?v=18"></script>
+<script src="js/hallazgos.js?v=18"></script>
+<script src="js/usuarios.js?v=18"></script>
+<script src="js/cargas.js?v=18"></script>
+<script src="js/tablero.js?v=18"></script>
+<script src="js/inicio.js?v=18"></script>
+<script src="js/sedes.js?v=18"></script>
+<script src="js/lotes.js?v=18"></script>
+<script src="js/exportar.js?v=18"></script>
+<script src="js/confirmacion.js?v=18"></script>
+<script src="js/certificado.js?v=18"></script>
+<script src="js/avance.js?v=18"></script>
+<script src="js/cabecera.js?v=18"></script>
+<script src="js/buscador.js?v=18"></script>
+<script src="js/arranque.js?v=18"></script>
 
 </body></html>
