@@ -2362,3 +2362,5 @@ sin desplazamiento lateral de la página. 0 errores de consola.
 **Quienes ya están usando la aplicación:** nada se recarga solo; la versión nueva llega al recargar la página, y si hay
 cambios sin guardar la aplicación pregunta antes de salir. Unos minutos de archivos mezclados en caché solo afectan el
 aspecto (con un `confirmacion.js` anterior, la ayuda queda abierta como antes).
+
+**Publicado y comprobado en Pages el 2026-10-01** (commit `bf217af`): 24 referencias con `?v=17`; `index.html` con las 3 listas `scroll alto` y la ayuda plegable; `estilos.css` con `overflow-x:clip` y `.scroll.alto`; `confirmacion.js` con la regla de la ayuda.
