@@ -1,6 +1,7 @@
 /* app/css/claro.css — Rediseño claro, fase 1 (2026-10-01).
    Alcance aprobado por el usuario: menú y barra superior, panel «Confirmación de alcaldes» (Secretaría),
-   pantalla del alcalde («Confirmación de sedes») y Usuarios. Las demás pantallas conservan su contenido
+   pantalla del alcalde («Confirmación de sedes») y Usuarios; el mismo día, en una segunda muestra, la ficha de
+   cada municipio del panel y la pantalla de ingreso (`?v=19`). Las demás pantallas conservan su contenido
    y solo heredan el armazón, los botones, los avisos y el diálogo.
    Se carga DESPUÉS de estilos.css y solo lo sobrescribe: quitar el <link> devuelve el aspecto anterior.
    Muestras aprobadas, fuera del repositorio: trabajo1.10_redisenoPanel/muestra_*.html.
@@ -232,6 +233,73 @@
   #av-detalle tbody td{ padding:10px; }
   #av-detalle .conf-sede{ min-width:190px; }
   #av-detalle .conf-nivel{ min-width:150px; }
+  /* ─── Ficha de un municipio (segunda muestra aprobada, 2026-10-01): dos tarjetas en vez de 8 cifras sueltas ─── */
+  .av-det-cab{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .av-det-cab h2, .av-det-cab .est{ display:none; }   /* el título ya está en el encabezado; el estado, en «Certificación» */
+  #av-det-cifras:empty, #av-det-info:empty{ display:none; }
+  .av-detalle > #av-det-cifras:not(:empty), .av-detalle > #av-det-info:not(:empty){ margin-bottom:16px; }
+  .av-ficha{ display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); gap:16px; margin-bottom:18px; }
+  .av-ficha:empty{ display:none; }
+  .af-card{ background:var(--sup); border-radius:var(--r-tile); box-shadow:var(--sombra-1); padding:20px 22px; min-width:0; }
+  .af-card > h2{ display:flex; align-items:center; gap:10px; margin:0 0 16px; font-family:var(--f-ui); font-size:15px; font-weight:650; color:var(--t1); }
+  .af-card > h2 .est{ margin-left:auto; }
+  .af-resp{ display:grid; grid-template-columns:auto minmax(0,1fr); align-items:end; gap:6px 28px; }
+  .af-rot{ grid-column:1 / -1; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--t2); }
+  .af-pct{ font-size:12px; font-weight:700; color:var(--t2); background:var(--sup2); padding:2px 9px; border-radius:999px; }
+  .af-num{ font-family:var(--f-tit); font-size:46px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
+  .af-num small{ margin-left:6px; font-family:var(--f-ui); font-size:18px; color:var(--t3); }
+  .af-barra{ height:10px; margin-bottom:8px; background:var(--sup2); border-radius:999px; overflow:hidden; }
+  .af-barra i{ display:block; height:100%; border-radius:inherit; background:var(--af-b,var(--contorno)); transform-origin:left center; animation:crecer .9s cubic-bezier(.2,.7,.2,1) both; }
+  .af-barra[data-et="res"]{ --af-b:var(--res-pt); } .af-barra[data-et="pdf"]{ --af-b:var(--pdf-pt); }
+  .af-barra[data-et="des"]{ --af-b:var(--des-pt); } .af-barra[data-et="car"]{ --af-b:var(--verde); }
+  .af-nota{ font-size:12.5px; color:var(--t3); }
+  .af-sec{ margin-top:20px; padding-top:16px; border-top:1px solid var(--linea); }
+  .af-sec h3{ margin:0 0 10px; font-family:var(--f-ui); font-size:13px; font-weight:600; color:var(--t2); }
+  .af-sec h3 span{ font-weight:400; color:var(--t3); }
+  /* Cómo respondieron: Sí/No en gris (son respuestas, no avances), «sin responder» en rosa. */
+  .af-apilada{ display:flex; gap:2px; height:16px; border-radius:999px; overflow:hidden; background:var(--sup2); }
+  .af-apilada i{ display:block; height:100%; transform-origin:left center; animation:crecer .9s cubic-bezier(.2,.7,.2,1) both; }
+  .af-apilada .con, .af-ley .con{ background:#334155; }
+  .af-apilada .sin, .af-ley .sin{ background:#CBD5E1; }
+  .af-apilada .pend, .af-ley .pend{ background:var(--sin-pt); }
+  .af-ley{ display:flex; flex-wrap:wrap; gap:6px 20px; margin:12px 0 0; padding:0; list-style:none; font-size:12.5px; color:var(--t2); }
+  .af-ley li{ display:inline-flex; align-items:center; gap:7px; }
+  .af-ley i{ width:10px; height:10px; border-radius:3px; flex:none; }
+  .af-ley b{ color:var(--t1); font-variant-numeric:tabular-nums; }
+  .af-ley em{ font-style:normal; color:var(--t3); font-variant-numeric:tabular-nums; }
+  /* Estado de las obras: una secuencia (planeación → terminada), en pasos con su flecha; «Terminada» en verde. */
+  .af-obras{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+  .af-obras li{ position:relative; padding:12px 14px; border-radius:12px; background:var(--sup2); }
+  .af-obras li:not(:last-child)::after{ content:""; position:absolute; right:-8px; top:50%; width:6px; height:6px; margin-top:-3px;
+    border-top:1.5px solid var(--t3); border-right:1.5px solid var(--t3); transform:rotate(45deg); }
+  .af-obras b{ display:block; font-family:var(--f-tit); font-size:26px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums; }
+  .af-obras span{ display:block; margin-top:6px; font-size:12px; color:var(--t3); }
+  .af-tr{ height:4px; margin-top:10px; border-radius:999px; background:var(--contorno); overflow:hidden; }
+  .af-tr i{ display:block; height:100%; background:#334155; transform-origin:left center; animation:crecer .9s cubic-bezier(.2,.7,.2,1) both; }
+  .af-obras li.fin b{ color:var(--v8); } .af-obras li.fin .af-tr i{ background:var(--verde); }
+  .af-nada{ margin:0; font-size:12.5px; color:var(--t3); }
+  /* Certificación: los tres pasos del alcalde, con los mismos colores que ve él. */
+  .af-pasos{ list-style:none; margin:0; padding:0; }
+  .af-pasos li{ position:relative; display:grid; grid-template-columns:30px minmax(0,1fr); column-gap:12px; padding-bottom:16px; }
+  .af-pasos li:not(:last-child)::before{ content:""; position:absolute; left:14px; top:34px; bottom:2px; width:2px; border-radius:2px; background:var(--contorno); }
+  .af-n{ width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:13px; background:var(--sup); color:var(--t3); box-shadow:inset 0 0 0 1.5px var(--contorno); }
+  .af-pasos li.hecho .af-n{ background:var(--verde); color:#fff; box-shadow:none; }
+  .af-pasos li.hecho:not(:last-child)::before{ background:var(--v1); }
+  .af-pasos li.act[data-et="res"]{ --a-n:var(--res-tx); --a-bg:var(--res-bg); }
+  .af-pasos li.act[data-et="pdf"]{ --a-n:var(--pdf-tx); --a-bg:var(--pdf-bg); }
+  .af-pasos li.act .af-n{ background:var(--a-n); color:#fff; box-shadow:0 0 0 4px var(--a-bg); }
+  .af-pasos b{ display:block; margin-top:5px; font-size:13.5px; font-weight:600; color:var(--t1); }
+  .af-pasos li.pend b{ color:var(--t3); font-weight:500; }
+  .af-m{ display:block; margin-top:2px; font-size:12.5px; color:var(--t3); }
+  .af-enlace{ border:0; background:none; padding:0; cursor:pointer; font:inherit; font-size:12.5px; font-weight:600; color:var(--v8); }
+  .af-enlace:hover{ text-decoration:underline; text-underline-offset:3px; }
+  .af-codigo{ display:flex; align-items:center; flex-wrap:wrap; gap:4px 10px; padding:12px 14px; border-radius:12px; background:var(--sup2); font-size:12.5px; line-height:1.5; color:var(--t2); }
+  .af-codigo code{ font-family:var(--f-mono); font-size:14px; font-weight:600; letter-spacing:.04em; color:var(--t1); }
+  .af-aviso{ margin:0 0 14px; padding:10px 14px; border-radius:12px; background:var(--des-bg); color:var(--des-tx); font-size:12.5px; line-height:1.5; }
+  .af-aviso .af-enlace{ color:inherit; }
+  .af-alc{ margin:14px 0 0; font-size:12.5px; color:var(--t3); }
+  .af-alc b{ color:var(--t1); font-weight:600; }
+  .af-card .conf-hist{ margin-top:12px; }
   /* Sí / No: una respuesta, no un avance. */
   .sino-r{ display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600; background:var(--sup2); color:var(--t2); }
   .sino-r.si{ background:#E2E8F0; color:var(--t1); }
@@ -375,6 +443,42 @@
   #s-usuarios .perm.no{ color:#B6C0CC; }
   #s-usuarios .perm.lim{ font-family:var(--f-ui); font-size:12px; font-weight:600; color:var(--t2); }
 
+  /* ═══ Ingreso (segunda muestra aprobada, 2026-10-01): mismos textos y pasos; lado institucional claro y tarjeta blanca ═══ */
+  #v-login .login{ background:var(--fondo); }
+  #v-login .mast{ background:linear-gradient(160deg,#FFFFFF 0%,#F4FAF6 55%,var(--v0) 100%); color:var(--t1); padding:44px 48px; gap:40px; box-shadow:1px 0 0 var(--linea); }
+  #v-login .mast > svg g{ stroke:var(--verde); }          /* las curvas de nivel, en verde sobre el fondo claro */
+  #v-login .mast > svg path[fill]{ display:none; }
+  #v-login .mast .eyebrow{ color:var(--v8); font-size:12px; font-weight:700; letter-spacing:.09em; margin-bottom:18px; }
+  #v-login .mast h1{ font-family:var(--f-ui); font-size:46px; line-height:1.08; font-weight:650; letter-spacing:-.025em; color:var(--t1); max-width:12ch; }
+  #v-login .mast .fecha{ margin-top:18px; max-width:40ch; padding-left:14px; border-left:3px solid var(--verde); font-size:15px; color:var(--t2); }
+  #v-login .contacto{ border-top:1px solid rgba(15,23,42,.08); padding-top:20px; gap:14px; font-size:12.5px; color:var(--t3); }
+  #v-login .contacto b{ color:var(--t2); font-size:11.5px; letter-spacing:.07em; }
+  #v-login .contacto a{ color:var(--v8); border-bottom-color:var(--v1); }
+  #v-login .contacto .redes{ color:var(--t2); font-size:12px; }
+  #v-login .acceso{ background:transparent; padding:40px 24px; }
+  #v-login .form{ max-width:400px; padding:34px 32px 26px; border-radius:18px; background:var(--sup); box-shadow:var(--sombra-2); }
+  #v-login .form > img{ width:210px; max-width:100%; height:auto; margin-bottom:28px; }
+  #v-login .form h2{ font-family:var(--f-ui); font-size:22px; font-weight:650; letter-spacing:-.01em; margin:0; }
+  #v-login .form .sub{ margin:6px 0 18px; font-size:13.5px; line-height:1.55; color:var(--t3); }
+  /* Los dos pasos del ingreso: el orden es información. */
+  .login-pasos{ display:flex; gap:8px; margin:0 0 20px; padding:0; list-style:none; font-size:12px; font-weight:600; color:var(--t3); }
+  .login-pasos li{ flex:1; display:flex; flex-direction:column; gap:6px; }
+  .login-pasos li::before{ content:""; height:4px; border-radius:999px; background:var(--contorno); }
+  .login-pasos li.act{ color:var(--v8); }
+  .login-pasos li.act::before, .login-pasos li.hecho::before{ background:var(--verde); }
+  .login-pasos li.hecho{ color:var(--t2); }
+  #v-login .campo{ margin-bottom:14px; }
+  #v-login .campo label{ text-transform:none; letter-spacing:0; font-size:12.5px; font-weight:600; color:var(--t2); margin-bottom:6px; }
+  #v-login .campo input{ height:46px; padding:0 14px; border:1px solid var(--contorno); border-radius:10px; font-size:15px; background:var(--sup); color:var(--t1); }
+  #v-login .campo input::placeholder{ color:#94A3B8; }
+  #v-login .campo input:focus{ outline:none; border-color:var(--verde); box-shadow:0 0 0 3px rgba(0,107,57,.14); }
+  #v-login #cod{ height:56px; font-size:24px; letter-spacing:.5em; padding:0 0 0 .5em; }
+  #v-login .form .b{ height:46px; margin-top:0; padding:0 14px; font-size:14.5px; box-shadow:0 10px 22px -10px rgba(0,107,57,.65); }
+  #v-login .form .b.sec{ height:40px; margin-top:8px; background:transparent; color:var(--t2); box-shadow:none; font-size:13.5px; }
+  #v-login .form .b.sec:hover{ background:var(--sup2); }
+  .login-error{ margin:12px 0 0; padding:10px 14px; border-radius:10px; background:var(--des-bg); color:var(--des-tx); font-size:13px; line-height:1.5; }
+  #v-login .form .pie2{ margin-top:22px; padding:12px 14px; border:0; border-radius:12px; background:var(--sup2); font-size:12.5px; line-height:1.6; color:var(--t3); }
+
   /* ─── Responsivo ─── */
   @media (max-width:1180px){
     .av-ruta{ grid-template-columns:1fr; }
@@ -387,8 +491,14 @@
     .cc-avance{ grid-column:1 / -1; }
     .usu-cifras{ grid-template-columns:repeat(2,minmax(0,1fr)); }
     #s-confirmaciones .cifras{ grid-template-columns:repeat(4,minmax(0,1fr)); }
+    .av-ficha{ grid-template-columns:1fr; }
   }
   @media (max-width:880px){
+    /* Ingreso en celular: primero el formulario (es a lo que se viene) y después los datos de la Secretaría. */
+    #v-login .acceso{ order:-1; padding:20px 16px 8px; align-items:flex-start; }
+    #v-login .form{ padding:26px 20px 20px; }
+    #v-login .mast{ padding:28px 20px; gap:24px; box-shadow:none; }
+    #v-login .mast h1{ font-size:34px; }
     /* Una sola columna: el menú pasa a panel lateral (estilos.css). Sin esto, la regla de 248 px de arriba gana y el
        contenido queda de 248 px de ancho en el celular. */
     .shell{ grid-template-columns:1fr; }
@@ -424,4 +534,8 @@
     .cc-mini span, .conf-cifras > .c > span{ font-size:12px; }
     .usu-cifras{ grid-template-columns:1fr 1fr; }
     #s-confirmaciones .cifras{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .af-card{ padding:16px; }
+    .af-resp{ grid-template-columns:1fr; }
+    .af-obras{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .af-obras li:nth-child(2)::after{ display:none; }
   }

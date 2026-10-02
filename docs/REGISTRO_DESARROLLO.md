@@ -2435,3 +2435,29 @@ cambios sin guardar la aplicación pregunta antes de salir. Recomendación: publ
 Pages con el Administrador real. Sin commit ni push hasta que el usuario lo pida.
 
 **Publicado y comprobado en Pages el 2026-10-01** (commit `d56a1ac`, por decisión del usuario: «Publicalo»): `index.html` con 25 referencias `?v=18`, `claro.css` (200), el membrete en el menú y los contenedores nuevos (`av-bento`, `conf-cifras`, `usuarios-cifras`); `avance.js`, `confirmacion.js`, `usuarios.js`, `nucleo.js` y `arranque.js` con el código nuevo. Falta la revisión en real del usuario con su sesión de Administrador.
+
+### 2026-10-01 — Ficha de cada municipio e ingreso en el rediseño claro (`?v=19`)
+
+**Pedido del usuario:** «No me gustaron los gráficos como quedaron en la ficha de cada municipio» y «quiero que el login también
+cambie». Se hicieron las muestras (`trabajo1.10_redisenoPanel/muestra_panel_claro.html`, clic en un municipio de la ruta, y
+`muestra_ingreso_claro.html`) y el usuario las aprobó: «Súbelo así».
+
+- **Ficha de un municipio** (`avance.js::fichaRespuestasHtml`, `fichaCertificacionHtml`; contenedor `av-det-ficha`): las 8
+  cifras sueltas pasan a dos tarjetas. *Respuestas de las sedes:* «Respondidas» con su barra del color del paso; «Cómo
+  respondieron», una sola barra con todas las sedes (con intervención y sin intervención en gris oscuro y claro, porque son
+  respuestas; sin responder en rosa) con número y %; «Estado de las obras», Planeación › Contratación › Ejecución › Terminada,
+  con cantidad y barra (Terminada en verde). *Certificación:* el estado, los tres pasos del alcalde con sus colores y fechas
+  («Descargar PDF» en el último), el aviso naranja si quedó desactualizada (con «Descargar la anterior»), el código de
+  verificación con su indicación de revisión, el alcalde y el historial. El estado sale de la línea del título.
+- **Ingreso** (`index.html #v-login`, `claro.css`, `login.js::marcarPasoLogin`): mismos textos, pasos y datos de la
+  Gobernación; lado institucional claro con las curvas de nivel en verde; tarjeta blanca con el membrete; campos más grandes;
+  código en letras grandes y espaciadas; errores en naranja. Nuevo: barra «1 · Correo / 2 · Código» y, en celular, el
+  formulario primero (antes había que bajar por todos los datos de la Gobernación para llegar al correo).
+- Compatibilidad con la caché: se conservan `av-det-titulo`, `av-det-estado`, `av-det-cifras` y `av-det-info` (un
+  `avance.js` anterior sigue mostrando las cifras de antes) y todos los identificadores del ingreso.
+
+**Verificado en local** (`app-local`, backend simulado): ingreso con correo vacío (error naranja), envío, «Cambiar correo»
+(la barra vuelve al paso 1), código inválido y entrada como Verificador; ficha de Riosucio (respondiendo), Aguadas (cargada,
+«Descargar PDF» llama a `descargarCertificado`), Norcasia (desactualizada, con aviso) y Belalcázar (sin empezar, «Ninguna sede
+con intervención todavía»); la ruta se oculta en el detalle; sin desplazamiento lateral a 1366 px ni a 390 px; en celular el
+formulario de ingreso queda arriba y la ficha en una columna con las obras en 2 × 2.
