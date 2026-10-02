@@ -583,3 +583,5 @@ cada estado: varias capturas del navegador fallaron y se revisó por estructura 
 certificaciones**. Nada se recarga solo: quien tenga la página abierta sigue con la versión anterior hasta recargar, y si hay
 cambios sin guardar la aplicación pregunta antes de salir. Recomendación: publicar en una hora tranquila (noche) y revisar en
 Pages con el Administrador real. Sin commit ni push hasta que el usuario lo pida.
+
+**Publicado y comprobado en Pages el 2026-10-01** (commit `d56a1ac`, por decisión del usuario: «Publicalo»): `index.html` con 25 referencias `?v=18`, `claro.css` (200), el membrete en el menú y los contenedores nuevos (`av-bento`, `conf-cifras`, `usuarios-cifras`); `avance.js`, `confirmacion.js`, `usuarios.js`, `nucleo.js` y `arranque.js` con el código nuevo. Falta la revisión en real del usuario con su sesión de Administrador.

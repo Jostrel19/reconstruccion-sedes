@@ -478,7 +478,7 @@ cruzado (mismas 975 sedes, sin tipo 6, «7. Sin revisar», «(PRIORITARIO)» en 
 4. **Durante la campaña (hasta el 2026-10-06):** se sigue trabajando sin publicar — nada de push a `master` que toque
    `app/` ni versión nueva de Apps Script, salvo un defecto que impida responder a los alcaldes (detalle en
    `PLAN_CONFIRMACION_ALCALDES.md`). Excepciones decididas por el usuario: certificado sin logo (`?v=12`, publicado el
-   2026-09-30) y certificado en Word para pasarlo al formato de cada alcaldía (D-50, `?v=13`, publicado el 2026-10-01) y Verificador y Consulta con solo el panel de la campaña (D-51, `?v=14`, publicado el 2026-10-01); menos desplazamiento en la pantalla del alcalde y en el panel (`?v=17`, publicado el 2026-10-01).
+   2026-09-30) y certificado en Word para pasarlo al formato de cada alcaldía (D-50, `?v=13`, publicado el 2026-10-01) y Verificador y Consulta con solo el panel de la campaña (D-51, `?v=14`, publicado el 2026-10-01); menos desplazamiento en la pantalla del alcalde y en el panel (`?v=17`, publicado el 2026-10-01); rediseño claro, fase 1 (D-52, `?v=18`, publicado el 2026-10-01).
    **Desde el 2026-10-07:** rediseño por fases (auditoría de interfaz, fuera del
    repositorio: `trabajo29.09_auditoriaUI/`, con una muestra navegable del movimiento propuesto en
    `muestra_animaciones.html`, hecha el 2026-09-30; vista por el usuario el mismo día: no convenció del todo y queda
@@ -508,8 +508,7 @@ cruzado (mismas 975 sedes, sin tipo 6, «7. Sin revisar», «(PRIORITARIO)» en 
    rectores activos, personal de la Secretaría), buscador y filtros por estado y tipo, municipio del alcalde elegido de la
    lista de los 26 (escrito como en el catálogo, con tilde) y una ayuda en «Nombre» para que el del alcalde vaya en mayúscula.
    **Aprobadas las cuatro propuestas el 2026-10-01. Las tres muestras quedaron hechas en la aplicación ese mismo día
-   (D-52, `?v=18`, `app/css/claro.css` nuevo), probadas en local y sin publicar:** publicarlas es una excepción al congelamiento
-   que decide el usuario. Fase siguiente del rediseño, desde el 2026-10-07: las demás pantallas del Administrador (Inicio, Sedes,
+   (D-52, `?v=18`, `app/css/claro.css` nuevo), probadas en local y publicadas en Pages el mismo día (commit `d56a1ac`) por decisión del usuario.** Fase siguiente del rediseño, desde el 2026-10-07: las demás pantallas del Administrador (Inicio, Sedes,
    Tablero, Verificación, Cargas, Lotes, Hallazgos), que por ahora conservan su contenido dentro del armazón nuevo.
 
 **2. Cupo de correo (100 al día, cuenta personal de Gmail; Workspace da 1.500).** Lo que más gasta es el
