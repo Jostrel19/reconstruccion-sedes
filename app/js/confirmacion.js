@@ -21,15 +21,29 @@
   const nivelHtml = s => { const t = tipoNum(s); return (t === 1 || t === 2 ? tipoChipNum(t) + ' ' : '') + esc(nivelTexto(s)); };
 
   // Estado de un municipio: lo calcula el servidor (_confEstadoMunicipio).
+  // Clases: e-* son las de estilos.css; c-* las del rediseño claro (claro.css), que van por paso de la ruta:
+  // «Falta generar» y «Falta cargar» son el mismo paso («Falta firmar y cargar») y llevan el mismo color.
   const ESTADO_CONF = {
-    SIN_EMPEZAR: ['e-pend', 'Sin empezar'],
-    EN_DILIGENCIAMIENTO: ['e-rad', 'En diligenciamiento'],
-    POR_GENERAR: ['e-rad', 'Falta generar la certificación'],
-    GENERADA: ['e-ver', 'Falta cargar la certificación firmada'],
-    CARGADA: ['e-apr', 'Certificación cargada'],
-    DESACTUALIZADA: ['e-err', 'Certificación desactualizada'],
+    SIN_EMPEZAR: ['e-pend c-sin', 'Sin empezar'],
+    EN_DILIGENCIAMIENTO: ['e-rad c-res', 'En diligenciamiento'],
+    POR_GENERAR: ['e-rad c-pdf', 'Falta generar la certificación'],
+    GENERADA: ['e-ver c-pdf', 'Falta cargar la certificación firmada'],
+    CARGADA: ['e-apr c-car', 'Certificación cargada'],
+    DESACTUALIZADA: ['e-err c-des', 'Certificación desactualizada'],
   };
   const estadoConfBadge = m => { const [c, t] = ESTADO_CONF[m && m.estado] || ['e-pend', '—']; return `<span class="est ${c}">${esc(t)}</span>`; };
+
+  /* Los 4 pasos de la ruta de un alcalde (rediseño claro, 2026-10-01). Cada paso tiene su color y ese color se repite en
+     todo lo que lo muestra: el panel de la Secretaría (avance.js) y la pantalla del alcalde. Solo agrupan los estados de
+     arriba; no hay estados nuevos. «des» (desactualizada) es parte de «pdf», pero lleva su propio color de aviso. */
+  const CONF_ETAPAS = [
+    { p: 'sin', titulo: 'Sin empezar', desc: 'Ninguna sede respondida', estados: ['SIN_EMPEZAR'] },
+    { p: 'res', titulo: 'Respondiendo', desc: 'Tienen sedes por responder', estados: ['EN_DILIGENCIAMIENTO'] },
+    { p: 'pdf', titulo: 'Falta firmar y cargar', desc: 'Respondieron todas sus sedes', estados: ['DESACTUALIZADA', 'GENERADA', 'POR_GENERAR'] },
+    { p: 'car', titulo: 'Certificación cargada', desc: 'Firmada y en el sistema', estados: ['CARGADA'] } ];
+  const CONF_ETAPA_DE = {};
+  CONF_ETAPAS.forEach(e => e.estados.forEach(s => { CONF_ETAPA_DE[s] = e.p; }));
+  const colorConf = estado => estado === 'DESACTUALIZADA' ? 'des' : (CONF_ETAPA_DE[estado] || 'sin');
 
   let CONF = null;          // respuesta de listarConfirmaciones: {sedes, municipios, alcalde?}
   let confCargadoEn = 0;
@@ -138,13 +152,17 @@
     if (ayuda && !ayuda.dataset.decidida){ ayuda.open = m.respondidas === 0; ayuda.dataset.decidida = '1'; }
     const sedes = confSedesMias();
     const faltan = m.n_sedes - m.respondidas;
-    $('conf-franja').innerHTML = [
-      ['', m.n_sedes, 'Sedes oficiales del municipio'],
-      [faltan ? '' : 'ok', m.respondidas, 'Respondidas'],
-      [faltan ? 'al' : 'na', faltan, 'Por responder'],
-      ['', m.con_intervencion, 'Con intervención'],
-      ['', m.sin_intervencion, 'Sin intervención'],
-    ].map(([c, n, t]) => `<div class="c ${c}"><b>${formatNum(n, 0)}</b><span>${t}</span></div>`).join('');
+    // Las 5 cifras de siempre: «Respondidas» en grande, con su barra del color del paso en que va el municipio
+    // (el mismo con que lo ve la Secretaría), y al lado las otras tres.
+    const avance = m.n_sedes ? m.respondidas / m.n_sedes : 0;
+    $('conf-franja').innerHTML =
+      `<div class="cc-avance" data-et="${colorConf(m.estado)}">
+        <div class="cc-rot">Respondidas<span class="cc-pct">${Math.round(avance * 100)} %</span></div>
+        <div class="cc-num"><b>${formatNum(m.respondidas, 0)}</b><small>/ ${formatNum(m.n_sedes, 0)}</small></div>
+        <div class="cc-barra" role="img" aria-label="${m.respondidas} de ${m.n_sedes} sedes respondidas"><i style="width:${(avance * 100).toFixed(1)}%"></i></div>
+        <p>${formatNum(m.n_sedes, 0)} sedes oficiales del municipio</p></div>` +
+      [[faltan ? 'falta' : '', faltan, 'Por responder'], ['', m.con_intervencion, 'Con intervención'], ['', m.sin_intervencion, 'Sin intervención']]
+        .map(([c, n, t]) => `<div class="cc-mini ${c}"><span>${t}</span><b>${formatNum(n, 0)}</b></div>`).join('');
     const [claseEst, textoEst] = ESTADO_CONF[m.estado] || ['e-pend', '—'];
     $('conf-estado').className = 'est ' + claseEst;
     $('conf-estado').textContent = textoEst;
@@ -162,8 +180,9 @@
     const cambios = confPendientesDeGuardar().length;
     const todas = m.respondidas === m.n_sedes;
     const fecha = f => f ? new Date(f).toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' }) : '';
+    // data-et: color del paso actual (claro.css): responder va en ámbar; generar, firmar y cargar, en verde azulado.
     const paso = (n, estado, titulo, cuerpo) =>
-      `<li class="cp ${estado}"><span class="cp-n" aria-hidden="true">${estado === 'hecho' ? '✓' : n}</span>
+      `<li class="cp ${estado}" data-et="${n === 1 ? 'res' : 'pdf'}"><span class="cp-n" aria-hidden="true">${estado === 'hecho' ? '✓' : n}</span>
         <div class="cp-tx"><h3>${titulo}<span class="sr"> — ${estado === 'hecho' ? 'hecho' : (estado === 'act' ? 'paso actual' : 'pendiente')}</span></h3>${cuerpo}</div></li>`;
 
     const p1 = todas && !cambios

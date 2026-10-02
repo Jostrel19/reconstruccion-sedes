@@ -375,6 +375,17 @@ del alcalde (D-48 lo permite). Como la app no edita el correo de un usuario, el 
 Responsable de sede, tipo alcalde, alcance PENSILVANIA) y **desactivó el anterior**, sin borrarlo. La firma manuscrita
 sigue siendo del alcalde. El correo no se escribe aquí (repositorio público). **El encargado ingresó (confirmado por el usuario el 2026-09-30).**
 
+**Varios correos para un mismo municipio (respondido al usuario el 2026-10-01).** Es posible: cada correo es una fila de
+`Usuarios` con rol Responsable de sede, tipo alcalde, alcance = el municipio **exactamente como en el catálogo, con tilde**,
+y **el nombre del alcalde en todas** (la certificación imprime el `nombre` de quien la genera, `Confirmaciones.gs:189`).
+Todos ven y responden las mismas sedes; si dos guardan la misma sede, queda la última respuesta (la anterior pasa a
+historial, D-37). Al terminar la campaña conviene desactivar los correos de apoyo: con la campaña apagada vuelven a ser
+Responsables de sede con acceso a presupuestos (D-24).
+
+**2026-10-01 — Los alcaldes ya empezaron a cargar certificaciones firmadas** (dicho por el usuario). Desde aquí, cualquier
+cambio que se publique no puede tocar lo que ya quedó registrado: respuestas, filas `GENERADO`/`CARGADO`, códigos de
+verificación ni el nombre con que sale la certificación (el `nombre` de `Usuarios`, en mayúscula).
+
 ### 2026-09-30 — Certificado sin logo (`?v=12`, excepción al congelamiento)
 
 **Decisión del usuario:** el certificado lo firma el alcalde y no puede llevar el membrete de la Secretaría. Sin él, los
@@ -502,4 +513,73 @@ sin desplazamiento lateral de la página. 0 errores de consola.
 cambios sin guardar la aplicación pregunta antes de salir. Unos minutos de archivos mezclados en caché solo afectan el
 aspecto (con un `confirmacion.js` anterior, la ayuda queda abierta como antes).
 
-**Publicado y comprobado en Pages el 2026-10-01** (commit `bf217af`): 24 referencias con `?v=17`; `index.html` con las 3 listas `scroll alto` y la ayuda plegable; `estilos.css` con `overflow-x:clip` y `.scroll.alto`; `confirmacion.js` con la regla de la ayuda.
+**Publicado y comprobado en Pages el 2026-10-01** (commit `bf217af`): 24 referencias con `?v=17`; `index.html` con las 3 listas `scroll alto` y la ayuda plegable; `estilos.css` con `overflow-x:clip` y `.scroll.alto`; `confirmacion.js` con la regla de la ayuda. **Revisado en real por el usuario el 2026-10-01: funciona bien.**
+
+### 2026-10-01 — Rediseño claro, fase 1 (`?v=18`, hecho en local, sin publicar)
+
+**Pedido y decisiones del usuario (2026-10-01):** rediseño evolutivo en tema claro del panel «Confirmación de alcaldes».
+Antes de tocar la aplicación se hicieron tres muestras con datos ficticios, fuera del repositorio
+(`trabajo1.10_redisenoPanel/muestra_panel_claro.html`, `muestra_alcalde_claro.html`, `muestra_usuarios_claro.html`), y el
+usuario aprobó las tres: alcance menú + barra superior + panel, más la pantalla del alcalde (opción A: «nadie la está usando»)
+y Usuarios; CSS propio, sin librerías; tema claro con el verde institucional; cada color indica un estado y se repite igual en
+todo lo que lo muestra; el anillo de «Certificación firmada» en dos tonos (verde y gris); las cuatro propuestas de Usuarios.
+Publicación: «apenas lo aprobemos», pero como excepción al congelamiento la decide el usuario (ver abajo).
+
+**Qué cambia (solo pantalla: backend, hojas, datos y certificado sin cambios):**
+- **`app/css/claro.css`, nuevo,** cargado después de `estilos.css`, que no se toca: quitar su `<link>` en `index.html`
+  devuelve el aspecto anterior.
+- **Armazón:** menú blanco con el membrete de la Secretaría (`img/logo-ingreso.png`, el de la pantalla de ingreso) y
+  «RECONSTRUCCIÓN DE SEDES» en una línea; barra superior translúcida; encabezado de pantalla sin la banda de papel. Botones,
+  estados (píldoras), diálogo y avisos toman el estilo nuevo en todas las pantallas. Las demás pantallas del Administrador
+  (Inicio, Sedes, Tablero, Verificación, Cargas, Lotes, Hallazgos) conservan su contenido dentro del armazón nuevo: es la fase 1.
+- **Panel de la Secretaría (`avance.js`):** «Certificación firmada» es una ruta de 4 pasos (sin empezar → respondiendo → falta
+  firmar y cargar → cargada) con el nombre de cada municipio en el paso donde va (clic: abre su detalle; «+N más» pasado de 10),
+  un anillo de 26 segmentos (verde = cargada), la cuenta regresiva del plazo (`nucleo.js::CONFIRMACION_PLAZO_FECHA`, nueva) y la
+  frase «Para llamar hoy»; debajo, «Sedes respondidas». La tabla de municipios lleva la barra de «Respondidas» del color del paso;
+  el detalle de un municipio ya no muestra la ruta encima, colorea «Respondidas» según el paso y pone Sí/No sin color de estado.
+  Los mosaicos «Diligenciando» y «Sin empezar» desaparecen: son pasos de la ruta.
+- **Pantalla del alcalde (`confirmacion.js`):** mismos textos, botones, orden, reglas e identificadores. Las 5 cifras pasan a
+  4 mosaicos («Respondidas» en grande con su barra del color del paso); el paso actual de «Su reporte» va con el color de su
+  paso (`data-et`: responder en ámbar; generar, firmar y cargar en verde azulado); estado de cada fila: guardada verde, sin
+  guardar ámbar, le falta un dato naranja, sin responder rosa; Sí/No como control segmentado sin color; barra «Guardar
+  cambios» blanca y flotante. `ESTADO_CONF` suma las clases `c-*` (sin quitar las `e-*`); los pasos de la ruta y su color viven
+  aquí (`CONF_ETAPAS`, `colorConf`) y los usa también el panel.
+- **Usuarios (`usuarios.js`):** cuatro cifras (usuarios activos; municipios con alcalde activo, en rosa y con los nombres si a
+  alguno le falta; rectores activos; personal de la Secretaría), buscador y filtros por estado y tipo, el municipio del alcalde
+  se elige de la lista del catálogo (escrito igual, con tilde) y una ayuda pide el nombre del alcalde en mayúscula, porque es el
+  que sale en la certificación. De paso: cambiar el «Tipo» ahora actualiza el formulario (antes, al pasar a rector, la etiqueta
+  y el ejemplo seguían diciendo «Municipio»).
+- **Compatibilidad con la caché de GitHub Pages:** se conservan todos los identificadores; `claro.css` le da forma también al
+  marcado anterior (cifras sueltas, pasos sin `data-et`), y el código nuevo revisa que existan las piezas nuevas antes de
+  usarlas. Mientras convivan archivos viejos y nuevos solo cambia el aspecto; no se rompe ninguna acción.
+- `?v=17` → **`?v=18`** (25 referencias).
+
+**Verificado en local** (`app-local`, backend simulado con 975 sedes ficticias repartidas en los 26 municipios y 189
+usuarios ficticios; `node --check` de los 23 scripts):
+
+| Prueba | Resultado |
+|---|---|
+| Verificador: solo «Confirmación de alcaldes» (D-51) | ruta 9 · 9 · 5 · 3, anillo 3 de 26, «Faltan 5 días», frase correcta |
+| Panel: clic en un nombre de la ruta, Enter en una fila, «Volver» | abre y cierra el detalle; la ruta se oculta en el detalle |
+| Alcalde: Sí incompleto → completar (con nombre obligatorio) → guardar | barra «1 incompleta», fila naranja, 1 llamada, aviso «Se guardaron 2 respuestas» |
+| Alcalde: responder todo → Word → cargar PDF → cambiar una respuesta | Falta generar → Falta cargar → Cargada → diálogo «Cambiar respuestas ya certificadas» → Desactualizada con aviso naranja |
+| Alcalde: Deshacer (Esc cancela) | diálogo de peligro; Esc lo cierra sin deshacer |
+| Barra «Guardar cambios» | fija abajo (754 de 768 px) |
+| Administrador, Usuarios | 4 cifras; buscar «pácora» → 1; desactivar al único de Marmato → «25 de 26 · Sin alcalde activo: MARMATO»; crear sin municipio → error del servidor; crear eligiendo MARMATO → vuelve a 26 de 26 |
+| Las otras 7 pantallas del Administrador | sin desplazamiento lateral ni errores |
+| 1366 px | tablas del alcalde, del panel y del detalle caben sin desplazarse de lado |
+| Celular 390 px | sin desplazamiento lateral de la página; menú lateral abre y cierra; la tabla del alcalde se desplaza por dentro, como antes |
+| Marcado anterior en caché (simulado) | las cifras se ven como mosaicos y el paso actual en ámbar |
+
+**Defectos hallados en la prueba y corregidos antes de entregar:** (1) en el detalle de un municipio la ruta seguía encima;
+(2) en celular el contenido quedaba de 248 px de ancho (la regla de dos columnas de `claro.css` le ganaba a la de una columna
+de `estilos.css`); (3) a 1366 px la tabla del alcalde se salía 38 px y la del detalle 171 px (relleno y títulos ajustados).
+
+**Límites conocidos:** a 1024 px la tabla del alcalde se desplaza por dentro (361 px), igual que en celular; las demás pantallas
+del Administrador mezclan el armazón nuevo con su contenido anterior hasta la fase siguiente. No se pudo revisar con capturas
+cada estado: varias capturas del navegador fallaron y se revisó por estructura y medidas.
+
+**Pendiente — decisión del usuario:** publicarlo es una excepción al congelamiento y **los alcaldes ya están cargando
+certificaciones**. Nada se recarga solo: quien tenga la página abierta sigue con la versión anterior hasta recargar, y si hay
+cambios sin guardar la aplicación pregunta antes de salir. Recomendación: publicar en una hora tranquila (noche) y revisar en
+Pages con el Administrador real. Sin commit ni push hasta que el usuario lo pida.

@@ -483,6 +483,34 @@ cruzado (mismas 975 sedes, sin tipo 6, «7. Sin revisar», «(PRIORITARIO)» en 
    repositorio: `trabajo29.09_auditoriaUI/`, con una muestra navegable del movimiento propuesto en
    `muestra_animaciones.html`, hecha el 2026-09-30; vista por el usuario el mismo día: no convenció del todo y queda
    pendiente de revisar antes de ejecutar las fases) y hito 2 de la hoja de ruta (§3.c).
+   **2026-10-01 — rediseño claro del panel «Confirmación de alcaldes», en muestra (sin tocar la aplicación):**
+   `trabajo1.10_redisenoPanel/muestra_panel_claro.html` (fuera del repositorio, datos ficticios). Decisiones del usuario:
+   alcance panel + menú y barra superior; CSS propio, sin librerías; tema claro con el verde institucional; publicar apenas
+   se apruebe. El usuario considera viable rediseñar también la pantalla del alcalde (opción A) porque nadie la está usando;
+   antes se hace su muestra. Pendiente de aprobación; se publica como excepción al congelamiento solo si el usuario lo decide.
+   Ajustes pedidos y hechos en la muestra el mismo día: «Certificación firmada» pasa a una **ruta de 4 pasos** (sin empezar →
+   respondiendo → falta firmar y cargar → cargada) con el nombre de cada municipio en su paso, un anillo de 26 segmentos, la
+   cuenta regresiva del plazo y la frase «Para llamar hoy»; **cada paso tiene su color y ese color se repite** en todo lo que
+   muestra el paso (nombres, barras de la tabla, insignias, frase); el verde queda solo para «cargada». El anillo se queda
+   en dos tonos, verde para las cargadas y gris para las demás (el usuario lo prefirió así al ver la versión por colores). Membrete de
+   la Secretaría en el menú (`app/img/logo-ingreso.png`) con «RECONSTRUCCIÓN DE SEDES» en una línea. **Los nombres de los
+   alcaldes se muestran tal como están en `Usuarios` (en mayúscula, como salen en la certificación): el rediseño no cambia
+   mayúsculas ni minúsculas.** Al llevarlo a la aplicación hace falta una constante con la fecha del plazo junto a
+   `CONFIRMACION_PLAZO` (hoy solo es texto). **Orden acordado:** después de la pantalla del alcalde se rediseña la de Usuarios.
+   **Pantalla del alcalde, en muestra el 2026-10-01** (`trabajo1.10_redisenoPanel/muestra_alcalde_claro.html`, opción A
+   aprobada por el usuario): mismos textos, botones, orden y reglas que `confirmacion.js` (copiadas en la muestra, con la regla
+   de estado de `Confirmaciones.gs::_confEstadoMunicipio`); cambia solo el aspecto. El paso actual de «Su reporte» y la barra
+   de avance llevan el color del paso de la ruta en que va el municipio (el mismo con que lo ve la Secretaría); estado de
+   cada fila: guardada verde, sin guardar ámbar, le falta un dato naranja, sin responder rosa; Sí/No sin colores de estado.
+   **Aprobada por el usuario el 2026-10-01.** **Usuarios, en muestra el mismo día** (`muestra_usuarios_claro.html`): mismas
+   columnas, formulario, textos y mensajes del servidor (`usuarios.js`, `Usuarios.gs`). Propuestas marcadas «Nuevo», todas solo
+   de pantalla: 4 cifras (usuarios activos, municipios con alcalde activo —en rosa y con los nombres si a alguno le falta—,
+   rectores activos, personal de la Secretaría), buscador y filtros por estado y tipo, municipio del alcalde elegido de la
+   lista de los 26 (escrito como en el catálogo, con tilde) y una ayuda en «Nombre» para que el del alcalde vaya en mayúscula.
+   **Aprobadas las cuatro propuestas el 2026-10-01. Las tres muestras quedaron hechas en la aplicación ese mismo día
+   (D-52, `?v=18`, `app/css/claro.css` nuevo), probadas en local y sin publicar:** publicarlas es una excepción al congelamiento
+   que decide el usuario. Fase siguiente del rediseño, desde el 2026-10-07: las demás pantallas del Administrador (Inicio, Sedes,
+   Tablero, Verificación, Cargas, Lotes, Hallazgos), que por ahora conservan su contenido dentro del armazón nuevo.
 
 **2. Cupo de correo (100 al día, cuenta personal de Gmail; Workspace da 1.500).** Lo que más gasta es el
 código de ingreso. Propuesta: **A1** «recordar este equipo» 7 días (sesión en el navegador, no solo en la

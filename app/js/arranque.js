@@ -196,14 +196,28 @@
   avPantalla.addEventListener('click', e => {
     const d = e.target.closest('[data-descargar]');
     if (d){ e.stopPropagation(); descargarCertificadoUI(d.dataset.descargar, d); return; }
-    const tr = e.target.closest('tr[data-av-muni]');
-    if (tr) abrirAvanceMunicipio(tr.dataset.avMuni);
+    // «+N más» / «Ver menos» de un paso de la ruta de «Certificación firmada».
+    const mas = e.target.closest('[data-av-mas]');
+    if (mas){ if (typeof alternarPasoAv === 'function') alternarPasoAv(mas.dataset.avMas); return; }
+    // Una fila de la tabla o el nombre de un municipio en la ruta abren su detalle.
+    const fila = e.target.closest('[data-av-muni]');
+    if (fila) abrirAvanceMunicipio(fila.dataset.avMuni);
   });
   avPantalla.addEventListener('keydown', e => {
     const tr = e.target.closest('tr[data-av-muni]');
     if (tr && e.key === 'Enter' && e.target === tr) abrirAvanceMunicipio(tr.dataset.avMuni);
   });
   document.getElementById('av-volver').addEventListener('click', cerrarAvanceMunicipio);
+
+  // ─── Usuarios: buscador y filtros (rediseño claro). Con un index.html anterior no existen y no se enganchan. ───
+  const usuBusca = document.getElementById('usuarios-busca');
+  const usuFiltrar = cambio => { if (typeof filtrarUsuarios === 'function') filtrarUsuarios(cambio); }; // usuarios.js anterior en caché: no hace nada
+  if (usuBusca) usuBusca.addEventListener('input', e => usuFiltrar({ texto: e.target.value }));
+  const usuHerr = document.getElementById('usuarios-herr');
+  if (usuHerr) usuHerr.addEventListener('click', e => {
+    const b = e.target.closest('[data-usu-estado],[data-usu-tipo]');
+    if (b) usuFiltrar({ estado: b.dataset.usuEstado, tipo: b.dataset.usuTipo });
+  });
 
   // Registrar presupuesto (Paso 3): estos elementos son estáticos (no se
   // regeneran en cada pintada, a diferencia de las filas de ítems), así que

@@ -289,3 +289,27 @@ Medidos, no estimados (razón de contraste calculada sobre los tokens):
 El oro claro **sigue siendo el acento** (franjas, regla superior, ítem activo del riel); solo deja de usarse
 donde tiene que ser legible o marcar un estado. Nuevo componente: **«Saltar al contenido»** (`.saltar`),
 invisible hasta recibir el foco con teclado.
+
+## 10. Rediseño claro, fase 1 (2026-10-01, D-52)
+
+Revisa este documento para lo que cubre la fase 1; lo demás sigue igual. Vive en `app/css/claro.css`, que se carga después
+de `estilos.css` y solo lo sobrescribe.
+
+| Antes (este documento) | Fase 1 |
+|---|---|
+| Riel oscuro (`--rail`) con el logo en blanco | Menú blanco con el membrete en color (`img/logo-ingreso.png`) y «RECONSTRUCCIÓN DE SEDES» |
+| Papel cálido `#F4F3F0` | Fondo pizarra muy pálido `#F7F9FB`; superficies blancas |
+| Paneles con borde y sin sombra; la sombra solo en lo que flota | Tarjetas sin borde, con sombra amplia y muy difusa; radio de 18 px (controles 10 px) |
+| Títulos en serif | Títulos en sans (Segoe UI Variable); las cifras siguen en Georgia |
+| Estados con franja lateral de color | Estados en píldora con punto; cada estado de la campaña con su color (abajo) |
+| Foco en oro oscuro | Foco en verde institucional |
+
+**Colores de la campaña de alcaldes** (fondo / texto / punto o barra): sin empezar `#FFF0F2 / #9F1239 / #F4B6C2`;
+respondiendo `#FFF6E5 / #8A4B07 / #F59E0B`; falta firmar y cargar `#E9F7F5 / #115E59 / #14B8A6`; cargada `#EBF6F0 /
+#0B4F2E / #006B39`; desactualizada `#FFF1EA / #9A3412 / #EA580C`. **Regla:** cada color indica un estado y se repite igual
+en todo lo que lo muestra; el verde queda para «terminado»; lo que no es un avance (rol, Sí/No) va sin color de estado.
+Contraste de los textos sobre sus fondos, calculado: todos de 4,9:1 o más (el más justo, el texto gris de un botón
+deshabilitado, 4,91:1; el texto de cada estado sobre su fondo, de 6,3:1 a 8,7:1; blanco sobre verde, 6,64:1).
+
+Alcance de la fase 1: armazón, botones, estados, diálogo y avisos en todas las pantallas; panel «Confirmación de alcaldes»,
+pantalla del alcalde y Usuarios completos. Las demás pantallas conservan su contenido hasta la fase siguiente.

@@ -1,0 +1,427 @@
+/* app/css/claro.css — Rediseño claro, fase 1 (2026-10-01).
+   Alcance aprobado por el usuario: menú y barra superior, panel «Confirmación de alcaldes» (Secretaría),
+   pantalla del alcalde («Confirmación de sedes») y Usuarios. Las demás pantallas conservan su contenido
+   y solo heredan el armazón, los botones, los avisos y el diálogo.
+   Se carga DESPUÉS de estilos.css y solo lo sobrescribe: quitar el <link> devuelve el aspecto anterior.
+   Muestras aprobadas, fuera del repositorio: trabajo1.10_redisenoPanel/muestra_*.html.
+   Regla de color: cada estado de la campaña tiene su color y se repite igual en todo lo que lo muestra
+   (sin empezar rosa, respondiendo ámbar, falta firmar y cargar verde azulado, cargada verde, desactualizada
+   naranja); el verde queda solo para «terminado». Lo que no es un avance (rol, Sí/No) va sin color de estado.
+   Mientras unos archivos estén en caché y otros no, la pantalla del alcalde debe seguir funcionando: por eso
+   aquí también se le da forma al marcado anterior (.c de la franja, pasos sin data-et). */
+
+  .device{
+    --fondo:#F7F9FB;
+    --f-ui:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+    --sup:#FFFFFF; --sup2:#F3F6F9; --t1:#0F172A; --t2:#334155; --t3:#5B6779;
+    --linea:#EDF1F5; --contorno:#E2E8F0;
+    --v7:#0A7D45; --v8:#0B4F2E; --v1:#D7EDE1; --v0:#EBF6F0; --oro0:#FCF6E3;
+    /* Colores de los pasos: fondo, texto y punto (o barra). */
+    --sin-bg:#FFF0F2; --sin-tx:#9F1239; --sin-pt:#F4B6C2;
+    --res-bg:#FFF6E5; --res-tx:#8A4B07; --res-pt:#F59E0B;
+    --pdf-bg:#E9F7F5; --pdf-tx:#115E59; --pdf-pt:#14B8A6;
+    --des-bg:#FFF1EA; --des-tx:#9A3412; --des-pt:#EA580C;
+    --sombra-1:0 0 0 1px rgba(15,23,42,.04), 0 1px 2px rgba(15,23,42,.04), 0 6px 20px -6px rgba(15,23,42,.08);
+    --sombra-2:0 0 0 1px rgba(15,23,42,.05), 0 2px 4px rgba(15,23,42,.04), 0 22px 44px -16px rgba(15,23,42,.16);
+    --r-tile:18px; --r-ctl:10px;
+    background:var(--fondo);
+  }
+  .device a:focus-visible,.device button:focus-visible,.device input:focus-visible,.device select:focus-visible,
+  .device textarea:focus-visible,.device [tabindex]:focus-visible{ outline:2px solid var(--verde); outline-offset:2px; border-radius:6px; }
+
+  /* ─── Armazón: menú lateral blanco con el membrete ─── */
+  .shell{ grid-template-columns:248px minmax(0,1fr); }
+  .riel{ background:var(--sup); color:var(--t2); box-shadow:1px 0 0 var(--linea); padding:18px 14px 16px; gap:2px; }
+  .riel .marca{ display:flex; flex-direction:column; align-items:flex-start; gap:12px; padding:6px 8px 16px; margin-bottom:6px; border-bottom:1px solid var(--linea); }
+  .riel .marca img{ width:188px; max-width:100%; }
+  .riel .marca span{ font-size:11.5px; font-weight:700; letter-spacing:.08em; color:var(--v8); white-space:nowrap; }
+  .riel .grupo{ color:var(--t3); font-size:11px; font-weight:600; letter-spacing:.07em; padding:14px 10px 6px; }
+  .riel a{ color:var(--t2); border-left:0; border-radius:var(--r-ctl); padding:8px 10px; font-size:14px; gap:10px; }
+  .riel a:hover{ background:var(--sup2); color:var(--t1); }
+  .riel a.sel{ background:var(--v0); color:var(--v8); box-shadow:none; font-weight:600; }
+  .riel a svg{ width:17px; height:17px; color:var(--t3); opacity:1; }
+  .riel a.sel svg{ color:var(--verde); }
+  .riel a:focus-visible, .riel button:focus-visible{ outline-color:var(--verde); }
+  .riel .base{ color:var(--t3); border-top-color:var(--linea); padding:12px 10px 0; font-size:12px; }
+
+  /* Barra superior translúcida */
+  .top{ background:rgba(247,249,251,.82); -webkit-backdrop-filter:saturate(180%) blur(14px); backdrop-filter:saturate(180%) blur(14px);
+    border-bottom:0; box-shadow:0 1px 0 rgba(226,232,240,.9); padding:10px 28px; min-height:58px; }
+  .migas{ font-size:13px; color:var(--t3); }
+  .migas a, .migas .sep{ color:var(--t3); }
+  .migas .hoy{ font-family:var(--f-ui); font-size:13px; font-weight:600; color:var(--t1); }
+  .yo{ gap:10px; }
+  .yo .av{ width:34px; height:34px; background:var(--v1); color:var(--v8); font-size:12.5px; }
+  .yo .av.ext{ background:#E8EDF3; color:var(--t2); }
+  .yo b{ font-size:13px; color:var(--t1); }
+  .yo .rol{ font-size:12px; color:var(--t3); }
+  .buscador input{ border:0; background-color:var(--sup); box-shadow:var(--sombra-1); padding:8px 14px 8px 34px; width:260px; }
+  .buscador input:focus{ box-shadow:0 0 0 3px rgba(0,107,57,.14), var(--sombra-1); width:300px; }
+
+  .lienzo{ padding:26px 28px 40px; }
+  .cab-vista{ margin:0 0 22px; padding:0; background:none; border:0; }
+  .cab-vista h1{ font-family:var(--f-ui); font-size:28px; font-weight:650; letter-spacing:-.02em; color:var(--t1); }
+  .cab-vista p{ margin-top:6px; font-size:13.5px; color:var(--t3); }
+  .pie-inst{ background:transparent; border-top-color:var(--linea); color:var(--t3); padding:12px 28px; }
+  .pie-inst .sello{ color:var(--t2); }
+
+  /* ─── Botones, estados, diálogo y avisos (todas las pantallas) ─── */
+  .b{ border:0; border-radius:var(--r-ctl); padding:8px 14px; font-size:13px; font-weight:600; background:var(--verde);
+    box-shadow:0 8px 18px -8px rgba(0,107,57,.55); transition:background .15s, box-shadow .18s, transform .08s; }
+  .b:hover{ background:var(--v7); }
+  .b.sec{ background:var(--sup); color:var(--t1); border:0; box-shadow:var(--sombra-1); }
+  .b.sec:hover{ background:var(--sup); box-shadow:var(--sombra-2); }
+  .b.mini{ padding:6px 11px; font-size:12.5px; }
+  .b:disabled{ opacity:1; cursor:not-allowed; background:#E9EEF3; color:var(--t3); box-shadow:inset 0 0 0 1px var(--contorno); }
+  .b.peligro{ background:var(--sin-tx); box-shadow:none; }
+  .b.peligro:hover{ background:#7F0E2C; }
+
+  .est{ border-left:0; border-radius:999px; padding:3px 10px 3px 8px; font-size:12px; font-weight:600; gap:6px; }
+  .est::before{ content:""; flex:none; width:6px; height:6px; border-radius:50%; background:currentColor; }
+  /* Estados de la campaña, por paso de la ruta. */
+  .est.c-sin{ --sbg:var(--sin-bg); --stx:var(--sin-tx); }
+  .est.c-res{ --sbg:var(--res-bg); --stx:var(--res-tx); }
+  .est.c-pdf{ --sbg:var(--pdf-bg); --stx:var(--pdf-tx); }
+  .est.c-car{ --sbg:var(--v0); --stx:var(--v8); }
+  .est.c-des{ --sbg:var(--des-bg); --stx:var(--des-tx); }
+
+  .dlg-fondo{ background:rgba(15,23,42,.32); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px); }
+  .dlg{ border-top:0; border-radius:18px; box-shadow:0 30px 60px -20px rgba(15,23,42,.45); padding:22px 22px 18px; }
+  .dlg h3{ font-family:var(--f-ui); font-size:17px; font-weight:650; color:var(--t1); }
+  .dlg p{ color:var(--t2); }
+  .nota-dlg{ background:var(--sup2); border-radius:10px; padding:10px 12px; color:var(--t2); }
+
+  .aviso{ border:0; border-radius:12px; box-shadow:var(--sombra-2); padding:12px 14px; gap:10px; align-items:flex-start; }
+  .aviso::before{ content:""; flex:none; width:9px; height:9px; margin-top:6px; border-radius:50%; background:#D8AE23; }
+  .aviso.ok::before{ background:var(--verde); }
+  .aviso.error::before{ background:var(--des-pt); }
+
+  /* ─── Las tres pantallas rediseñadas: tarjetas sin borde y tablas sin ruido ─── */
+  #s-confirmaciones .p, #s-confirmacion .p, #s-usuarios .p{ background:var(--sup); border:0; border-radius:var(--r-tile); box-shadow:var(--sombra-1); margin-bottom:18px; }
+  #s-confirmaciones .p > header, #s-confirmacion .p > header, #s-usuarios .p > header{ border-bottom:0; padding:18px 22px 14px; }
+  #s-confirmaciones h2, #s-confirmacion h2, #s-usuarios h2, #s-confirmacion h3, #s-confirmaciones h3, #s-usuarios h3{ font-family:var(--f-ui); }
+  #s-confirmaciones .p > header h2, #s-confirmacion .p > header h2, #s-usuarios .p > header h2{ font-size:16px; font-weight:650; color:var(--t1); letter-spacing:-.01em; }
+  #s-confirmaciones .eyebrow, #s-confirmacion .eyebrow, #s-usuarios .eyebrow{ font-size:12px; font-weight:600; letter-spacing:0; text-transform:none;
+    color:var(--t3); background:var(--sup2); padding:2px 9px; border-radius:999px; }
+  #s-confirmaciones .eyebrow:empty, #s-usuarios .eyebrow:empty{ display:none; }
+  #s-confirmaciones .p .pie, #s-confirmacion .p .pie, #s-usuarios .p .pie{ border-top:0; box-shadow:inset 0 1px 0 var(--linea); padding:14px 22px 18px; font-size:12.5px; color:var(--t3); }
+  #s-confirmaciones thead th, #s-confirmacion thead th, #s-usuarios thead th{ background:rgba(255,255,255,.97); text-transform:none; letter-spacing:0;
+    font-size:12px; font-weight:600; color:var(--t3); border-bottom:0; box-shadow:inset 0 -1px 0 var(--linea); padding:10px 14px; }
+  #s-confirmaciones tbody td, #s-confirmacion tbody td, #s-usuarios tbody td{ border-bottom:1px solid var(--linea); }
+  #s-confirmaciones table, #s-usuarios table{ font-size:13.5px; }
+  #s-confirmaciones tbody td, #s-usuarios tbody td{ padding:12px 14px; }
+  #s-confirmaciones th:first-child, #s-confirmaciones td:first-child, #s-confirmacion th:first-child, #s-confirmacion td:first-child,
+  #s-usuarios th:first-child, #s-usuarios td:first-child{ padding-left:22px; }
+  #s-confirmaciones th:last-child, #s-confirmaciones td:last-child, #s-confirmacion th:last-child, #s-confirmacion td:last-child,
+  #s-usuarios th:last-child, #s-usuarios td:last-child{ padding-right:22px; }
+  #s-confirmaciones tbody tr.click:hover{ background:#F8FAFC; }
+  #s-confirmaciones .hace, #s-confirmacion .hace, #s-usuarios .hace{ color:var(--t3); }
+  #s-confirmacion .tenue, #s-confirmaciones .tenue{ color:var(--t3); }
+  #s-confirmaciones .pri.p1, #s-confirmaciones .pri.p2, #s-confirmacion .pri.p1, #s-confirmacion .pri.p2{ font-family:var(--f-ui); font-weight:700;
+    background:var(--sin-bg); color:var(--sin-tx); border-radius:6px; padding:1px 7px; }
+  .fila-est{ font-size:12px; font-weight:600; padding:3px 10px; }
+  /* Estado de una fila: guardada = hecho (verde), sin guardar = en curso (ámbar), le falta algo = aviso (naranja), sin responder = rosa. */
+  #s-confirmacion .fila-est.ok, #s-confirmaciones .fila-est.ok{ background:var(--v0); color:var(--v8); }
+  #s-confirmacion .fila-est.al, #s-confirmaciones .fila-est.al{ background:var(--res-bg); color:var(--res-tx); }
+  #s-confirmacion .fila-est.er, #s-confirmaciones .fila-est.er{ background:var(--des-bg); color:var(--des-tx); }
+  #s-confirmacion .fila-est.na, #s-confirmaciones .fila-est.na{ background:var(--sin-bg); color:var(--sin-tx); }
+  #s-confirmaciones .aviso-conf, #s-confirmacion .aviso-conf{ border:0; border-radius:12px; background:var(--des-bg); color:var(--des-tx); padding:12px 16px; font-size:13px; }
+  #s-confirmaciones .aviso-conf b, #s-confirmacion .aviso-conf b{ color:var(--des-tx); }
+  .conf-hist summary{ font-weight:600; color:var(--t1); }
+
+  /* ═══ Panel de la Secretaría: «Confirmación de alcaldes» ═══ */
+  .av-bento{ display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px; margin-bottom:18px; }
+  .av-tile{ position:relative; background:var(--sup); border-radius:var(--r-tile); box-shadow:var(--sombra-1); overflow:hidden; min-width:0; }
+  /* Marcado de un avance.js anterior en caché (seis cifras sueltas): se ven como mosaicos. */
+  .av-bento > .c{ grid-column:span 2; background:var(--sup); border-radius:14px; box-shadow:var(--sombra-1); padding:14px 16px; }
+  .av-bento > .c b{ display:block; font-family:var(--f-tit); font-size:28px; line-height:1.05; color:var(--t1); }
+  .av-bento > .c > span{ display:block; margin-top:6px; font-size:12px; color:var(--t3); }
+
+  /* Certificación firmada */
+  .av-ruta{ grid-column:1 / -1; display:grid; grid-template-columns:200px minmax(0,1fr); gap:18px 34px; padding:20px 24px 0; }
+  .av-ruta-cab{ grid-column:1 / -1; display:flex; align-items:center; gap:8px 14px; flex-wrap:wrap; }
+  .av-ruta-cab h2{ margin:0; font-size:15px; font-weight:650; color:var(--t1); display:flex; align-items:center; gap:8px; }
+  .av-ruta-cab h2::before{ content:""; width:18px; height:18px; background:var(--verde); flex:none;
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 17c3-6 5-9 7-9s-1 7 1 7 3-4 5-4-1 4 1 4 3-1 4-2'/%3E%3Cpath d='M3 21h18'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 17c3-6 5-9 7-9s-1 7 1 7 3-4 5-4-1 4 1 4 3-1 4-2'/%3E%3Cpath d='M3 21h18'/%3E%3C/svg%3E") center / contain no-repeat; }
+  .av-que{ font-size:13px; color:var(--t3); }
+  .av-plazo{ margin-left:auto; padding:5px 12px; border-radius:999px; font-size:12.5px; font-weight:600; white-space:nowrap; }
+  .av-plazo.p-ok{ background:var(--oro0); color:#6B5000; }
+  .av-plazo.p-med{ background:var(--res-bg); color:var(--res-tx); }
+  .av-plazo.p-urg{ background:var(--sin-bg); color:var(--sin-tx); }
+  .av-meta{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; }
+  .av-meta p{ margin:0; max-width:190px; font-size:13px; line-height:1.4; color:var(--t2); }
+  .av-anillo{ position:relative; width:156px; height:156px; }
+  .av-anillo svg{ display:block; width:100%; height:100%; }
+  .av-anillo path{ fill:none; stroke-width:14; stroke:#E6EBF1; }
+  .av-anillo path.s-car{ stroke:var(--verde); }
+  .av-centro{ position:absolute; inset:0; display:grid; place-content:center; }
+  .av-centro b{ font-family:var(--f-tit); font-size:50px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
+  .av-centro span{ margin-top:4px; font-size:13px; color:var(--t3); }
+  .av-pasos{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px 22px; align-self:start; }
+  .av-paso{ position:relative; min-width:0; }
+  .av-paso:not(:last-child)::after{ content:""; position:absolute; top:19px; left:48px; right:-14px; height:2px; border-radius:2px; background:var(--contorno); }
+  .av-bola{ width:38px; height:38px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:15px; font-variant-numeric:tabular-nums;
+    background:var(--b-bg); color:var(--b-tx); box-shadow:inset 0 0 0 2px var(--b-pt); }
+  /* Cada paso: --b-* para la bola, --c-* para los municipios que están en él. */
+  .av-paso[data-p="sin"]{ --b-bg:var(--sin-bg); --b-tx:var(--sin-tx); --b-pt:var(--sin-pt); --c-bg:var(--sin-bg); --c-tx:var(--sin-tx); }
+  .av-paso[data-p="res"]{ --b-bg:var(--res-bg); --b-tx:var(--res-tx); --b-pt:#F5C76A; --c-bg:var(--res-bg); --c-tx:var(--res-tx); }
+  .av-paso[data-p="pdf"]{ --b-bg:var(--pdf-bg); --b-tx:var(--pdf-tx); --b-pt:#7FD3C7; --c-bg:var(--pdf-bg); --c-tx:var(--pdf-tx); }
+  .av-paso[data-p="car"]{ --b-bg:var(--verde); --b-tx:#fff; --b-pt:var(--verde); --c-bg:var(--v0); --c-tx:var(--v8); }
+  .av-paso h3{ margin:10px 0 0; font-size:13.5px; font-weight:650; line-height:1.3; color:var(--t1); }
+  .av-desc{ margin:2px 0 0; font-size:12px; color:var(--t3); }
+  .av-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .av-chip{ display:inline-flex; align-items:baseline; gap:6px; max-width:100%; border:0; cursor:pointer; padding:5px 9px; border-radius:8px; font:inherit;
+    background:var(--c-bg,var(--sup2)); font-size:12.5px; line-height:1.3; text-align:left; color:var(--t1); transition:box-shadow .15s, transform .15s; }
+  .av-chip b{ font-weight:600; }
+  .av-chip span{ font-size:11.5px; color:var(--c-tx,var(--t3)); font-variant-numeric:tabular-nums; }
+  .av-chip:hover{ box-shadow:inset 0 0 0 1px rgba(15,23,42,.22); transform:translateY(-1px); }
+  /* Respondiendo: el fondo se llena con el porcentaje de sedes respondidas. */
+  .av-chip.lleno{ background:linear-gradient(90deg,#FCE3B4 var(--p),var(--res-bg) var(--p)); }
+  .av-chip.alerta{ background:var(--des-bg); }
+  .av-chip.alerta b, .av-chip.alerta span{ color:var(--des-tx); }
+  .av-chip.mas{ background:transparent; color:var(--c-tx,var(--v8)); font-weight:600; }
+  .av-chip.mas:hover{ box-shadow:none; transform:none; text-decoration:underline; text-underline-offset:3px; }
+  .av-ninguno{ margin:10px 0 0; font-size:12.5px; color:var(--t3); }
+  .av-hoy{ grid-column:1 / -1; margin:2px -24px 0; padding:13px 24px 15px 50px; background:var(--sup2); font-size:13px; line-height:1.5; color:var(--t2); position:relative; }
+  .av-hoy::before{ content:""; position:absolute; left:24px; top:15px; width:16px; height:16px; background:var(--verde);
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2'/%3E%3C/svg%3E") center / contain no-repeat; }
+  .av-hoy b{ color:var(--t1); }
+  .av-hoy .t-pdf{ color:var(--pdf-tx); } .av-hoy .t-sin{ color:var(--sin-tx); } .av-hoy .t-des{ color:var(--des-tx); font-weight:600; }
+  .av-cargando{ padding-bottom:20px; }
+
+  /* Sedes respondidas */
+  .av-heroe{ grid-column:1 / -1; display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:6px 40px; padding:18px 24px;
+    background:var(--sup) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='160' viewBox='0 0 640 160'%3E%3Cg fill='none' stroke='%23006B39' stroke-opacity='.10' stroke-width='1'%3E%3Cpath d='M0 150 C 92 120 172 134 274 110 S 452 82 640 100'/%3E%3Cpath d='M0 126 C 90 96 170 110 270 86 S 450 58 640 76'/%3E%3Cpath d='M0 102 C 88 70 168 86 266 62 S 448 36 640 52'/%3E%3Cpath d='M0 78 C 86 46 166 62 262 38 S 446 14 640 28'/%3E%3Cpath d='M0 54 C 84 22 164 38 258 14 S 444 -10 640 4'/%3E%3C/g%3E%3C/svg%3E") right -40px bottom -60px / 560px 140px no-repeat; }
+  .av-rot{ display:flex; align-items:center; gap:8px; margin:0; font-size:13px; font-weight:600; color:var(--t2); }
+  .av-pct{ margin-left:6px; font-size:12px; font-weight:700; color:var(--v8); background:var(--v0); padding:2px 9px; border-radius:999px; }
+  .av-num{ margin-top:8px; font-family:var(--f-tit); font-size:46px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
+  .av-num small{ margin-left:6px; font-family:var(--f-ui); font-size:18px; color:var(--t3); }
+  .av-barra-g{ height:10px; margin-bottom:12px; background:var(--sup2); border-radius:999px; overflow:hidden; }
+  .av-barra-g i{ display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#0E8A4F,var(--verde)); transform-origin:left center; animation:crecer .9s cubic-bezier(.2,.7,.2,1) both; }
+  .av-sub{ display:flex; gap:28px; flex-wrap:wrap; }
+  .av-sub div{ display:flex; flex-direction:column; gap:2px; }
+  .av-sub b{ font-size:20px; font-weight:650; color:var(--t1); font-variant-numeric:tabular-nums; }
+  .av-sub span{ font-size:12.5px; color:var(--t3); }
+  .av-sub .pend b{ color:var(--sin-tx); }
+
+  /* Tabla de municipios: la barra de «Respondidas» toma el color del paso del municipio */
+  #s-confirmaciones .av-barra{ width:84px; height:6px; margin-right:10px; background:var(--sup2); border-radius:999px; }
+  #s-confirmaciones .av-barra i{ border-radius:inherit; transform-origin:left center; animation:crecer .7s cubic-bezier(.2,.7,.2,1) both; }
+  .av-barra i.et-res{ background:var(--res-pt); } .av-barra i.et-pdf{ background:var(--pdf-pt); }
+  .av-barra i.et-des{ background:var(--des-pt); } .av-barra i.et-car{ background:var(--verde); }
+  #s-confirmaciones .av-resp{ white-space:nowrap; }
+  #s-confirmaciones .av-alc{ color:var(--t2); }
+  /* «Descargar PDF» como enlace: es una acción de la fila, no la principal de la pantalla. */
+  #s-confirmaciones .av-cert .b{ background:none; box-shadow:none; color:var(--v8); padding:4px 0; }
+  #s-confirmaciones .av-cert .b:hover{ text-decoration:underline; text-underline-offset:3px; }
+  #s-confirmaciones .av-cert .hace{ display:block; margin-left:0; }
+
+  /* Detalle de un municipio */
+  #s-confirmaciones .cifras{ grid-template-columns:repeat(8,minmax(0,1fr)); gap:12px; background:none; border:0; border-radius:0; overflow:visible; }
+  #s-confirmaciones .cifra{ background:var(--sup2); border-radius:14px; padding:14px 16px; }
+  #s-confirmaciones .cifra b{ font-size:28px; color:var(--t1); }
+  #s-confirmaciones .cifra span{ font-size:12px; color:var(--t3); margin-top:6px; }
+  #s-confirmaciones .cifra.et-res b{ color:var(--res-tx); } #s-confirmaciones .cifra.et-pdf b{ color:var(--pdf-tx); }
+  #s-confirmaciones .cifra.et-des b{ color:var(--des-tx); } #s-confirmaciones .cifra.et-car b{ color:var(--v8); }
+  #s-confirmaciones .av-info{ color:var(--t2); font-size:13.5px; }
+  #s-confirmaciones .av-info .mono{ background:var(--sup2); padding:2px 8px; border-radius:6px; color:var(--t1); }
+  /* Tabla de sedes del detalle (9 columnas): títulos en dos líneas y relleno justo para que quepa sin desplazarse de lado. */
+  #av-detalle thead th{ white-space:normal; vertical-align:bottom; padding:10px; }
+  #av-detalle tbody td{ padding:10px; }
+  #av-detalle .conf-sede{ min-width:190px; }
+  #av-detalle .conf-nivel{ min-width:150px; }
+  /* Sí / No: una respuesta, no un avance. */
+  .sino-r{ display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600; background:var(--sup2); color:var(--t2); }
+  .sino-r.si{ background:#E2E8F0; color:var(--t1); }
+
+  /* ═══ Pantalla del alcalde: «Confirmación de sedes» ═══ */
+  .conf-cifras{ display:grid; grid-template-columns:minmax(0,2.8fr) repeat(3,minmax(0,1fr)); gap:16px; margin-bottom:18px; }
+  .cc-avance, .cc-mini, .conf-cifras > .c{ background:var(--sup); border-radius:var(--r-tile); box-shadow:var(--sombra-1); padding:18px 22px; min-width:0; }
+  .cc-avance{ display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-areas:"rot barra" "num nota"; align-items:center; gap:6px 32px; }
+  .cc-rot{ grid-area:rot; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--t2); }
+  .cc-pct{ margin-left:4px; font-size:12px; font-weight:700; color:var(--t2); background:var(--sup2); padding:2px 9px; border-radius:999px; }
+  .cc-num{ grid-area:num; font-family:var(--f-tit); font-size:46px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
+  .cc-num small{ margin-left:6px; font-family:var(--f-ui); font-size:18px; color:var(--t3); }
+  .cc-barra{ grid-area:barra; height:10px; background:var(--sup2); border-radius:999px; overflow:hidden; }
+  .cc-barra i{ display:block; height:100%; border-radius:inherit; background:var(--cc-bar,var(--contorno)); transform-origin:left center; animation:crecer .9s cubic-bezier(.2,.7,.2,1) both; }
+  /* La barra lleva el color del paso en que va el municipio, el mismo con que lo ve la Secretaría. */
+  .cc-avance[data-et="res"]{ --cc-bar:var(--res-pt); } .cc-avance[data-et="pdf"]{ --cc-bar:var(--pdf-pt); }
+  .cc-avance[data-et="des"]{ --cc-bar:var(--des-pt); } .cc-avance[data-et="car"]{ --cc-bar:var(--verde); }
+  .cc-avance p{ grid-area:nota; margin:0; font-size:12.5px; color:var(--t3); }
+  .cc-mini{ display:flex; flex-direction:column; gap:12px; }
+  .cc-mini span, .conf-cifras > .c > span{ font-size:13px; font-weight:600; color:var(--t2); }
+  .cc-mini b, .conf-cifras > .c b{ font-family:var(--f-tit); font-size:36px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums; }
+  .cc-mini.falta b{ color:var(--sin-tx); }
+  /* Marcado de un confirmacion.js anterior en caché (cinco cifras sueltas). */
+  .conf-cifras > .c{ display:flex; flex-direction:column-reverse; justify-content:flex-end; gap:10px; }
+
+  /* Su reporte: los tres pasos. El actual va con el color de su paso; los hechos, en verde con ✓. */
+  .conf-pasos{ gap:14px; }
+  .cp{ border:0; border-radius:14px; padding:16px; background:var(--sup2); gap:12px; }
+  .cp-n{ width:32px; height:32px; font-family:var(--f-ui); font-weight:700; font-size:14px; background:var(--sup); color:var(--t3); box-shadow:inset 0 0 0 1.5px var(--contorno); }
+  .cp-tx h3{ font-size:14px; font-weight:650; margin:5px 0 6px; color:var(--t3); }
+  .cp-tx p{ font-size:13px; color:var(--t2); }
+  .cp-tx p b{ color:var(--t1); }
+  .cp-tx .hace{ font-size:12px; margin-top:8px; }
+  .cp:not(.act):not(.hecho) .cp-tx h3{ color:var(--t3); }
+  .cp.act{ --a-bg:var(--res-bg); --a-pt:#F5C76A; --a-n:var(--res-tx); background:var(--a-bg); box-shadow:inset 0 0 0 1.5px var(--a-pt); }
+  .cp.act[data-et="pdf"]{ --a-bg:var(--pdf-bg); --a-pt:#7FD3C7; --a-n:var(--pdf-tx); }
+  .cp.act .cp-n{ background:var(--a-n); color:#fff; box-shadow:none; }
+  .cp.act .cp-tx h3{ color:var(--t1); }
+  .cp.hecho{ background:var(--v0); box-shadow:none; }
+  .cp.hecho .cp-n{ background:var(--verde); color:#fff; box-shadow:none; }
+  .cp.hecho .cp-tx h3{ color:var(--v8); }
+  .cp .b:disabled:not(.cargando){ background:#E9EEF3; color:var(--t3); box-shadow:inset 0 0 0 1px var(--contorno); }
+  .conf-soltar{ border:1.5px dashed #7FD3C7; border-radius:12px; background:var(--sup); padding:12px; gap:8px; }
+  .conf-soltar:hover{ border-color:var(--pdf-pt); background:var(--sup); }
+  .conf-hist{ border-radius:12px; background:var(--sup2); padding:10px 14px; }
+
+  /* Ayuda plegable */
+  #s-confirmacion .conf-ayuda-caja{ margin:0 22px 14px; border:0; border-radius:14px; background:var(--sup2); }
+  #s-confirmacion .conf-ayuda-caja > summary{ font-family:var(--f-ui); font-size:14px; font-weight:650; color:var(--t1); padding:12px 16px; }
+  #s-confirmacion .conf-ayuda-caja > summary::marker{ color:var(--t3); }
+  #s-confirmacion .conf-ayuda-caja:not([open]) > summary::after{ font-size:13px; color:var(--t3); }
+  #s-confirmacion .conf-ayuda{ padding:0 16px 16px; font-size:13px; color:var(--t2); }
+  #s-confirmacion .conf-ayuda ol.ca-pasos > li{ color:var(--t2); padding-left:34px; }
+  #s-confirmacion .conf-ayuda ol.ca-pasos > li::before{ width:24px; height:24px; background:var(--sup); color:var(--t2); box-shadow:inset 0 0 0 1.5px var(--contorno); font-size:12px; }
+  #s-confirmacion .ca-ejemplos{ border:0; border-radius:12px; background:var(--sup); color:var(--t2); }
+  #s-confirmacion .ca-ejemplos > b{ color:var(--t1); }
+
+  /* Filtros: la selección va en tinta (es una elección, no un estado) */
+  #s-confirmacion .chips, #s-usuarios .usu-chips{ border-bottom:0; gap:8px; }
+  #s-confirmacion .chips{ padding:0 22px 12px; }
+  #s-confirmacion .chip, #s-usuarios .chip{ border:0; background:var(--sup2); color:var(--t2); font-size:12.5px; font-weight:600; padding:6px 12px; }
+  #s-confirmacion .chip b, #s-usuarios .chip b{ color:var(--t3); }
+  #s-confirmacion .chip:hover, #s-usuarios .chip:hover{ background:#EAEFF4; }
+  #s-confirmacion .chip[aria-pressed="true"], #s-usuarios .chip[aria-pressed="true"]{ background:var(--t1); color:#fff; }
+  #s-confirmacion .chip[aria-pressed="true"] b, #s-usuarios .chip[aria-pressed="true"] b{ color:#CBD5E1; }
+
+  /* Tabla de respuestas */
+  #s-confirmacion .scroll.alto{ box-shadow:inset 0 1px 0 var(--linea); }
+  /* Relleno justo: con el menú de 248 px la tabla de 7 columnas debe caber a 1366 px sin desplazarse de lado. */
+  #s-confirmacion table.edit td{ padding:9px 8px; }
+  #s-confirmacion thead th{ padding:10px 8px; }
+  #s-confirmacion th:first-child, #s-confirmacion td:first-child{ padding-left:16px; }
+  #s-confirmacion th:last-child, #s-confirmacion td:last-child{ padding-right:16px; }
+  #s-confirmacion .conf-sede b{ font-size:13px; color:var(--t1); }
+  #s-confirmacion .conf-nivel{ color:var(--t2); }
+  #s-confirmacion .conf-tabla tr.sucia td{ background:#FFFBF2; }
+  #s-confirmacion .th-sub{ font-size:11.5px; }
+  /* Sí / No: control segmentado sin colores de estado */
+  .sino{ border:0; border-radius:10px; padding:3px; gap:2px; background:var(--sup2); }
+  .sino span{ border-radius:8px; padding:5px 15px; font-size:13px; color:var(--t2); background:transparent; }
+  .sino label + label span{ border-left:0; }
+  .sino label:hover span{ background:#E8EDF3; }
+  .sino input:checked + span{ background:var(--t1); color:#fff; box-shadow:0 1px 2px rgba(15,23,42,.2); }
+  .sino input:focus-visible + span{ outline:2px solid var(--verde); outline-offset:1px; }
+  #s-confirmacion table.edit select, #s-confirmacion table.edit input[type="text"]{ border:1px solid var(--contorno); border-radius:var(--r-ctl); padding:7px 10px; font-size:12.5px; background-color:var(--sup); color:var(--t1); }
+  #s-confirmacion table.edit select{ -webkit-appearance:none; appearance:none; padding-right:30px; cursor:pointer;
+    background:var(--sup) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235B6779' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") right 10px center no-repeat; }
+  #s-confirmacion table.edit select:focus, #s-confirmacion table.edit input[type="text"]:focus{ outline:none; border-color:var(--verde); box-shadow:0 0 0 3px rgba(0,107,57,.14); }
+
+  /* Barra «Guardar cambios»: blanca y flotante; queda fija abajo mientras haya cambios */
+  .conf-barra{ bottom:14px; margin:12px 16px; padding:10px 12px 10px 38px; border-radius:14px; background:var(--sup); color:var(--t2); font-size:13px;
+    box-shadow:var(--sombra-2), 0 0 0 1px rgba(15,23,42,.06); }
+  .conf-barra::before{ content:""; position:absolute; left:16px; top:50%; width:9px; height:9px; margin-top:-4.5px; border-radius:50%; background:var(--res-pt); box-shadow:0 0 0 4px var(--res-bg); }
+  .conf-barra b{ color:var(--t1); }
+  .conf-barra .b.sec{ background:var(--sup); color:var(--t1); border:0; box-shadow:var(--sombra-1); }
+  .conf-barra .b.sec:hover{ background:var(--sup); box-shadow:var(--sombra-2); }
+  .conf-barra .b:focus-visible{ outline-color:var(--verde); }
+
+  /* ═══ Usuarios ═══ */
+  .usu-cifras{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin-bottom:18px; }
+  .usu-cifras:empty{ display:none; }
+  .uc{ background:var(--sup); border-radius:var(--r-tile); box-shadow:var(--sombra-1); padding:18px 20px; min-width:0; }
+  .uc > span{ display:block; font-size:13px; font-weight:600; color:var(--t2); }
+  .uc > b{ display:block; margin-top:12px; font-family:var(--f-tit); font-size:36px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
+  .uc > b small{ margin-left:4px; font-family:var(--f-ui); font-size:15px; font-weight:400; color:var(--t3); }
+  .uc p{ margin:8px 0 0; font-size:12.5px; line-height:1.45; color:var(--t3); }
+  /* Municipios con alcalde activo: verde si están todos; rosa (falta) si alguno se quedó sin alcalde. */
+  .uc.ok > b{ color:var(--v8); }
+  .uc.falta > b, .uc.falta p strong{ color:var(--sin-tx); }
+
+  #s-usuarios .uf-caja{ margin:0 22px 18px; padding:18px; border-radius:14px; background:var(--sup2); }
+  #s-usuarios .uf-caja h3{ margin:0 0 12px; font-size:14px; font-weight:650; color:var(--t1); }
+  .uf-campos{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 16px; }
+  .uf-campos .campo{ margin:0; }
+  .uf-campos .uf-ancho{ grid-column:1 / -1; }
+  #s-usuarios .campo label{ text-transform:none; letter-spacing:0; font-size:12.5px; font-weight:600; color:var(--t2); margin-bottom:5px; }
+  #s-usuarios .campo input, #s-usuarios .campo select{ width:100%; max-width:none; padding:8px 11px; border:1px solid var(--contorno); border-radius:var(--r-ctl); background-color:var(--sup); font-size:13.5px; color:var(--t1); }
+  #s-usuarios .campo select{ -webkit-appearance:none; appearance:none; padding-right:32px; cursor:pointer;
+    background:var(--sup) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235B6779' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") right 11px center no-repeat; }
+  #s-usuarios .campo input:focus, #s-usuarios .campo select:focus{ outline:none; border-color:var(--verde); box-shadow:0 0 0 3px rgba(0,107,57,.14); }
+  .uf-ayuda{ display:block; margin-top:5px; font-size:12px; line-height:1.45; color:var(--t3); }
+  .uf-ayuda:empty{ display:none; }
+  .uf-acc{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:16px; }
+  #s-usuarios .err-campo{ border:0; border-radius:10px; background:var(--des-bg); color:var(--des-tx); padding:10px 14px; font-size:13px; margin-top:12px; }
+
+  .usu-herr{ display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; padding:0 22px 12px; }
+  .usu-herr input[type="search"]{ width:min(320px,100%); padding:7px 14px 7px 34px; border:1px solid var(--contorno); border-radius:999px; font:inherit; font-size:13px; color:var(--t1);
+    background:var(--sup) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%235B6779' stroke-width='1.6'%3E%3Ccircle cx='7' cy='7' r='4.6'/%3E%3Cpath d='m10.5 10.5 3.6 3.6'/%3E%3C/svg%3E") 12px center / 14px no-repeat; }
+  .usu-herr input[type="search"]:focus{ outline:none; border-color:var(--verde); box-shadow:0 0 0 3px rgba(0,107,57,.14); }
+  .usu-chips{ display:flex; flex-wrap:wrap; }
+  .usu-chips:empty{ display:none; }
+  #s-usuarios .scroll.alto{ box-shadow:inset 0 1px 0 var(--linea); }
+  #s-usuarios tbody strong{ font-weight:600; color:var(--t1); }
+  #s-usuarios tr.inactivo strong, #s-usuarios tr.inactivo td{ color:var(--t3); }
+  /* El rol es una categoría, no un estado: sin colores de estado. */
+  .usu-rol{ display:inline-block; padding:2px 9px; border-radius:999px; background:var(--sup2); font-size:12.5px; font-weight:600; color:var(--t2); white-space:nowrap; }
+  #s-usuarios td:last-child{ text-align:right; }
+  /* Qué puede hacer cada rol */
+  #s-usuarios .perm.si{ color:var(--verde); font-size:0; }
+  #s-usuarios .perm.si::before{ content:"✓"; display:inline-grid; place-items:center; width:22px; height:22px; border-radius:50%; background:var(--v0); color:var(--verde); font-size:13px; font-family:var(--f-ui); }
+  #s-usuarios .perm.no{ color:#B6C0CC; }
+  #s-usuarios .perm.lim{ font-family:var(--f-ui); font-size:12px; font-weight:600; color:var(--t2); }
+
+  /* ─── Responsivo ─── */
+  @media (max-width:1180px){
+    .av-ruta{ grid-template-columns:1fr; }
+    .av-meta{ flex-direction:row; text-align:left; gap:18px; }
+    .av-meta p{ max-width:260px; }
+    .av-pasos{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .av-paso:nth-child(2n)::after{ display:none; }
+    .av-bento > .c{ grid-column:span 4; }
+    .conf-cifras{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .cc-avance{ grid-column:1 / -1; }
+    .usu-cifras{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    #s-confirmaciones .cifras{ grid-template-columns:repeat(4,minmax(0,1fr)); }
+  }
+  @media (max-width:880px){
+    /* Una sola columna: el menú pasa a panel lateral (estilos.css). Sin esto, la regla de 248 px de arriba gana y el
+       contenido queda de 248 px de ancho en el celular. */
+    .shell{ grid-template-columns:1fr; }
+    .riel{ box-shadow:var(--sombra-2); }
+    .top{ padding:8px 16px; }
+    .lienzo{ padding:18px 16px 28px; }
+    .cab-vista{ margin:0 0 18px; padding:0; }
+    .pie-inst{ padding:12px 16px; }
+  }
+  @media (max-width:640px){
+    .uf-campos{ grid-template-columns:1fr; }
+    #s-usuarios .uf-caja{ margin:0 16px 16px; padding:14px; }
+    .usu-herr, #s-confirmacion .chips{ padding-left:16px; padding-right:16px; }
+    #s-confirmacion .conf-ayuda-caja{ margin:0 16px 12px; }
+  }
+  @media (max-width:560px){
+    .av-ruta{ padding:18px 16px 0; }
+    .av-hoy{ margin:2px -16px 0; padding:12px 16px 14px 42px; }
+    .av-hoy::before{ left:16px; top:14px; }
+    .av-plazo{ margin-left:0; white-space:normal; }
+    .av-anillo{ width:120px; height:120px; } .av-centro b{ font-size:40px; }
+    /* En celular la ruta se lee de arriba abajo, con la línea a la izquierda. */
+    .av-pasos{ grid-template-columns:1fr; gap:14px; }
+    .av-paso{ display:grid; grid-template-columns:38px minmax(0,1fr); column-gap:12px; }
+    .av-paso .av-bola{ grid-row:1 / span 3; }
+    .av-paso h3{ margin-top:2px; }
+    .av-paso:not(:last-child)::after, .av-paso:nth-child(2n):not(:last-child)::after{ display:block; top:44px; bottom:-10px; left:18px; right:auto; width:2px; height:auto; }
+    .av-heroe{ grid-template-columns:1fr; padding:16px; }
+    .av-bento > .c{ grid-column:span 6; }
+    .cc-avance{ grid-template-columns:1fr; grid-template-areas:"rot" "num" "barra" "nota"; padding:16px; }
+    .cc-mini, .conf-cifras > .c{ padding:14px; }
+    .cc-mini b, .conf-cifras > .c b{ font-size:28px; }
+    .cc-mini span, .conf-cifras > .c > span{ font-size:12px; }
+    .usu-cifras{ grid-template-columns:1fr 1fr; }
+    #s-confirmaciones .cifras{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  }
