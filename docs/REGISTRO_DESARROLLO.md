@@ -2461,3 +2461,5 @@ cambie». Se hicieron las muestras (`trabajo1.10_redisenoPanel/muestra_panel_cla
 «Descargar PDF» llama a `descargarCertificado`), Norcasia (desactualizada, con aviso) y Belalcázar (sin empezar, «Ninguna sede
 con intervención todavía»); la ruta se oculta en el detalle; sin desplazamiento lateral a 1366 px ni a 390 px; en celular el
 formulario de ingreso queda arriba y la ficha en una columna con las obras en 2 × 2.
+
+**Publicado y comprobado en Pages el 2026-10-01** (commit `da965ee`, por pedido del usuario: «Súbelo así»): `index.html` con 25 referencias `?v=19`, el contenedor `av-det-ficha` y la barra `login-pasos`; `avance.js`, `login.js` y `claro.css` con el código nuevo. Falta la revisión en real del usuario.
