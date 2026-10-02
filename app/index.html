@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Reconstrucción de sedes — SED Caldas</title>
 <link rel="icon" type="image/png" href="img/favicon.png">
-<link rel="stylesheet" href="css/estilos.css?v=14">
+<link rel="stylesheet" href="css/estilos.css?v=17">
 </head>
 <body>
 
@@ -667,10 +667,12 @@
 
                 <div class="p">
                   <header><h2>Sedes oficiales de su municipio</h2><span class="flex"></span><span class="eyebrow" id="conf-eyebrow"></span></header>
-                  <!-- Siempre a la vista (pedido del usuario, 2026-09-29): el alcalde no tiene que
-                       descubrir que hay instrucciones. Los conceptos son los del oficio (D-48). -->
+                  <!-- Abierta mientras el municipio no tenga respuestas guardadas; con respuestas, plegada
+                       (2026-10-01; antes siempre a la vista, pedido del 2026-09-29). Lo decide pintarConfirmacion.
+                       Los conceptos son los del oficio (D-48). -->
+                  <details class="conf-ayuda-caja" id="conf-ayuda" open>
+                  <summary><span id="conf-ayuda-tit">Cómo responder cada sede</span></summary>
                   <div class="conf-ayuda" role="note" aria-labelledby="conf-ayuda-tit">
-                    <h3 id="conf-ayuda-tit">Cómo responder cada sede</h3>
                     <ol class="ca-pasos">
                       <li><b>Revise el nivel de afectación.</b> Ya viene diligenciado: lo registró la Unidad de Planeación
                         a partir de los diagnósticos y certificados remitidos por el municipio. Es solo de consulta: no se
@@ -701,9 +703,10 @@
                       </ul>
                     </div>
                   </div>
+                  </details>
                   <div class="chips" id="conf-filtros" role="group" aria-label="Filtrar las sedes"></div>
                   <div class="cuerpo ras">
-                    <div class="scroll">
+                    <div class="scroll alto">
                       <table class="edit conf-tabla">
                         <thead><tr><th class="n">N.º</th><th>Sede</th><th>Nivel de afectación <span class="th-sub">solo consulta</span></th>
                           <th>¿Intervención terminada o en proceso?</th><th>Quién interviene <span class="th-sub">y su nombre, cuando se pide</span></th>
@@ -731,7 +734,7 @@
                 <div class="p" id="av-lista-caja">
                   <header><h2>Municipios</h2></header>
                   <div class="cuerpo ras">
-                    <div class="scroll">
+                    <div class="scroll alto">
                       <table>
                         <thead><tr><th>Municipio</th><th>Alcalde</th><th class="n">Sedes</th><th>Respondidas</th>
                           <th class="n">Con intervención</th><th>Estado</th><th>Certificación firmada</th></tr></thead>
@@ -747,7 +750,7 @@
                     <button class="b sec mini" type="button" id="av-volver">Volver a los municipios</button></header>
                   <div class="cuerpo"><div class="cifras" id="av-det-cifras"></div><div class="av-info" id="av-det-info"></div></div>
                   <div class="cuerpo ras">
-                    <div class="scroll">
+                    <div class="scroll alto">
                       <table>
                         <thead><tr><th class="n">N.º</th><th>Sede</th><th>DANE</th><th>Nivel de afectación</th><th>¿Intervención?</th>
                           <th>Quién interviene</th><th>Nombre de quién interviene</th><th>Estado de la obra</th><th>Registrada</th></tr></thead>
@@ -876,28 +879,28 @@
 
     </div>
 
-<script src="js/nucleo.js?v=14"></script>
-<script src="js/transporte.js?v=14"></script>
-<script src="js/sesion.js?v=14"></script>
-<script src="js/avisos.js?v=14"></script>
-<script src="js/login.js?v=14"></script>
-<script src="js/registrar.js?v=14"></script>
-<script src="js/ficha.js?v=14"></script>
-<script src="js/pdf.js?v=14"></script>
-<script src="js/verificacion.js?v=14"></script>
-<script src="js/hallazgos.js?v=14"></script>
-<script src="js/usuarios.js?v=14"></script>
-<script src="js/cargas.js?v=14"></script>
-<script src="js/tablero.js?v=14"></script>
-<script src="js/inicio.js?v=14"></script>
-<script src="js/sedes.js?v=14"></script>
-<script src="js/lotes.js?v=14"></script>
-<script src="js/exportar.js?v=14"></script>
-<script src="js/confirmacion.js?v=14"></script>
-<script src="js/certificado.js?v=14"></script>
-<script src="js/avance.js?v=14"></script>
-<script src="js/cabecera.js?v=14"></script>
-<script src="js/buscador.js?v=14"></script>
-<script src="js/arranque.js?v=14"></script>
+<script src="js/nucleo.js?v=17"></script>
+<script src="js/transporte.js?v=17"></script>
+<script src="js/sesion.js?v=17"></script>
+<script src="js/avisos.js?v=17"></script>
+<script src="js/login.js?v=17"></script>
+<script src="js/registrar.js?v=17"></script>
+<script src="js/ficha.js?v=17"></script>
+<script src="js/pdf.js?v=17"></script>
+<script src="js/verificacion.js?v=17"></script>
+<script src="js/hallazgos.js?v=17"></script>
+<script src="js/usuarios.js?v=17"></script>
+<script src="js/cargas.js?v=17"></script>
+<script src="js/tablero.js?v=17"></script>
+<script src="js/inicio.js?v=17"></script>
+<script src="js/sedes.js?v=17"></script>
+<script src="js/lotes.js?v=17"></script>
+<script src="js/exportar.js?v=17"></script>
+<script src="js/confirmacion.js?v=17"></script>
+<script src="js/certificado.js?v=17"></script>
+<script src="js/avance.js?v=17"></script>
+<script src="js/cabecera.js?v=17"></script>
+<script src="js/buscador.js?v=17"></script>
+<script src="js/arranque.js?v=17"></script>
 
 </body></html>

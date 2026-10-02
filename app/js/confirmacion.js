@@ -132,6 +132,10 @@
       $('conf-tbody').innerHTML = '';
       return;
     }
+    // La ayuda queda abierta mientras el municipio no tenga respuestas guardadas y plegada si ya las tiene.
+    // Se decide una vez por sesión: si el alcalde la abre, no se vuelve a cerrar al guardar.
+    const ayuda = $('conf-ayuda');
+    if (ayuda && !ayuda.dataset.decidida){ ayuda.open = m.respondidas === 0; ayuda.dataset.decidida = '1'; }
     const sedes = confSedesMias();
     const faltan = m.n_sedes - m.respondidas;
     $('conf-franja').innerHTML = [
@@ -243,7 +247,7 @@
     const [cls, txt] = confEstadoFila(s);
     return `<tr data-conf="${d}" class="${confSucia(s) ? 'sucia' : ''}">
       <td class="n">${n}</td>
-      <td class="conf-sede"><b>${nom}</b><span class="hace">${esc(s.institucion)} · DANE ${d}</span></td>
+      <td class="conf-sede"><b>${nom}</b><span class="hace" title="${esc(s.institucion)}">DANE ${d} · ${esc(s.institucion)}</span></td>
       <td class="conf-nivel">${nivelHtml(s)}</td>
       <td><div class="sino" role="radiogroup" aria-label="¿${nom} tiene una intervención terminada o en proceso?">
         <label><input type="radio" name="ti-${d}" value="${CONF_SI}" data-campo="tiene_intervencion"${r.tiene_intervencion === CONF_SI ? ' checked' : ''}><span>Sí</span></label>
@@ -429,4 +433,6 @@
 
   function olvidarConfirmaciones(){
     CONF = null; confCargadoEn = 0; confError = ''; confEdit = {}; confErrores = {}; confFiltro = 'todas';
+    const ayuda = document.getElementById('conf-ayuda');
+    if (ayuda){ ayuda.open = true; delete ayuda.dataset.decidida; }
   }

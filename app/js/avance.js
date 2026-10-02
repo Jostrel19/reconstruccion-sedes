@@ -76,7 +76,7 @@
       const r = s.respuesta;
       const si = r && r.tiene_intervencion === CONF_SI;
       return `<tr${r ? '' : ' class="tenue"'}><td class="n">${i + 1}</td>
-        <td class="conf-sede"><b>${esc(s.sede)}</b><span class="hace">${esc(s.institucion)}</span></td>
+        <td class="conf-sede"><b>${esc(s.sede)}</b><span class="hace" title="${esc(s.institucion)}">${esc(s.institucion)}</span></td>
         <td class="mono">${esc(s.dane_sede)}</td><td class="conf-nivel">${nivelHtml(s)}</td>
         <td>${r ? esc(r.tiene_intervencion) : 'Sin responder'}</td><td>${si ? esc(r.quien_interviene) : '—'}</td>
         <td>${si && r.nombre_quien_interviene ? esc(r.nombre_quien_interviene) : '—'}</td><td>${si ? esc(r.estado_obra) : '—'}</td>
