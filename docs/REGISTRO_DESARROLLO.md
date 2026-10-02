@@ -2320,3 +2320,45 @@ directo a «Confirmación de alcaldes»; el riel muestra solo esa entrada (grupo
 lo mismo con Consulta; Administrador (12 pantallas) y alcalde sin cambios; 0 errores de consola.
 
 **Publicado y comprobado en Pages el 2026-10-01** (commit `d1e895e`): 24 referencias con `?v=14`; `nucleo.js` con Verificador y Consulta limitados al panel durante la campaña; `arranque.js` con el buscador oculto a los roles sin sedes.
+
+## 2026-10-01 — Menos desplazamiento en la pantalla del alcalde y en el panel (`?v=17`)
+
+**Pedido del usuario:** que no haya que desplazarse tanto; la lista de sedes, a lo sumo del alto de la pantalla. Además se
+le propusieron tres ajustes y los aprobó. Medido con 92 sedes (Riosucio) en 1024×768, la página del alcalde medía
+**9.839 px** (13 pantallas): tabla 8.090 px con filas de 87 px, ayuda 663 px.
+
+- **Listas a la altura de la pantalla** (`estilos.css::.scroll.alto`, marcada en `index.html` en la tabla del alcalde y en las
+  dos del panel): miden como mucho `100dvh − 10rem` (lo que queda bajo la barra superior, con sitio para la barra de
+  guardar), se desplazan por dentro y los títulos de columna quedan fijos.
+- **Barra «Guardar cambios» fija abajo — defecto de antes:** estaba marcada `sticky`, pero `.lienzo{overflow-x:hidden}`
+  volvía a `.lienzo` un contenedor de desplazamiento y la barra nunca se fijaba: con 92 sedes había que bajar hasta el final
+  para guardar. Ahora `overflow-x:clip` (con `hidden` antes, para navegadores sin `clip`). Es el único elemento fijo dentro de
+  `.lienzo`; nada en el código desplaza ese contenedor.
+- **Ayuda «Cómo responder cada sede» plegable** (`<details id="conf-ayuda">`): abierta mientras el municipio no tenga
+  respuestas guardadas y plegada si ya las tiene (`confirmacion.js::pintarConfirmacion`, una vez por sesión: si el alcalde
+  la abre, no se cierra al guardar; `olvidarConfirmaciones` la reinicia). Revisa el pedido del 2026-09-29 de tenerla siempre
+  a la vista, con aprobación del usuario.
+- **Filas compactas:** debajo del nombre de la sede va «DANE … · institución» en una línea; la institución se corta con «…»
+  y se lee completa al pasar el ratón (`title`, también en el detalle del panel). Nivel en letra menor y listas desplegables
+  un poco más angostas.
+- `?v=14` → **`?v=17`** (15 y 16 solo se usaron en pruebas locales). Sin cambios en el backend ni en los datos.
+
+**Verificado en local** (`app-local`, alcalde simulado de 92 sedes y Verificador simulado, backend falso; `node --check` de
+los 23 scripts):
+
+| | Antes | Ahora |
+|---|---|---|
+| Página del alcalde, 1024×768 | 9.839 px | 1.519 px a 1366×768 con la ayuda plegada |
+| Lista de sedes | 8.090 px | 608 px, se desplaza por dentro con títulos fijos |
+| Fila típica, 1366 px | 67 px, 8 sedes a la vista | 46 px, 11 sedes a la vista (un nombre muy largo, hasta 87 px) |
+| Ayuda con respuestas | 663 px | 51 px plegada |
+| Panel: municipios / detalle de 92 sedes | 1.614 / 8.939 px | 608 / 608 px |
+
+Barra de guardar: aparece al cambiar una sede y queda fija abajo aunque la lista esté a media pantalla (en el navegador de
+prueba quedó 4 px por debajo del borde, sin causa encontrada; el texto y los botones se ven). Guardar dos sedes: 1 llamada
+`guardarConfirmaciones`, la lista no salta de posición, la ayuda sigue plegada. Celular 390×844: filas de 46 px, barra fija,
+sin desplazamiento lateral de la página. 0 errores de consola.
+
+**Quienes ya están usando la aplicación:** nada se recarga solo; la versión nueva llega al recargar la página, y si hay
+cambios sin guardar la aplicación pregunta antes de salir. Unos minutos de archivos mezclados en caché solo afectan el
+aspecto (con un `confirmacion.js` anterior, la ayuda queda abierta como antes).
