@@ -2463,3 +2463,29 @@ con intervención todavía»); la ruta se oculta en el detalle; sin desplazamien
 formulario de ingreso queda arriba y la ficha en una columna con las obras en 2 × 2.
 
 **Publicado y comprobado en Pages el 2026-10-01** (commit `da965ee`, por pedido del usuario: «Súbelo así»): `index.html` con 25 referencias `?v=19`, el contenedor `av-det-ficha` y la barra `login-pasos`; `avance.js`, `login.js` y `claro.css` con el código nuevo. Falta la revisión en real del usuario.
+
+---
+
+## 2026-10-06 — Limpieza del historial público de GitHub (datos personales)
+
+**Pedido del usuario:** «Solo arreglemos el punto 2. Lo que hay público en GitHub que no debería estar» (hallazgo 1.1 de la
+auditoría de seguridad del 2026-09-29, fuera del repositorio en `trabajo29.09_auditoriaSeguridad/`).
+
+- **Qué había.** La versión vigente ya estaba limpia, pero el historial público conservaba, en 22 de los 41 commits: la
+  cuenta Administrador, el Gmail personal con que se despliega el backend (D-19) y una tabla con nombre, correo y rol de 6
+  personas del equipo (19 commits, `docs/REGISTRO_DESARROLLO.md`). También aparecía en `backend/README.md`,
+  `docs/PLAN_DESARROLLO.md`, `docs/ANALISIS_INSTRUMENTO_PRESUPUESTAL.md` y `docs/diseno/mockup_v6.html`.
+- **Qué se hizo.** Se reescribió el historial sustituyendo 13 cadenas (6 correos, 6 nombres con su cargo, el Gmail y la
+  cuenta Administrador) por marcadores como `[cuenta Administrador]` o `[Arquitecta]`, con `git filter-branch` sobre un clon
+  aparte, y se subió con `push --force-with-lease`. Respaldo completo del historial anterior, fuera del repositorio:
+  `_RESPALDOS/reconstruccion-sedes_antes_limpieza_historial_20261006-103302.git` (contiene los datos: no se publica).
+- **Verificado** (en la copia y de nuevo en GitHub): 41 commits con las mismas fechas y autor; el árbol final es idéntico
+  al anterior (`c1027b0`), así que `app/` y Pages no cambian (`?v=19`, 25 referencias, HTTP 200); las 13 cadenas, en cero
+  en todo el historial, Word incluidos; ningún correo real ni nombre suelto en el contenido; el repositorio no tiene forks
+  ni pull requests.
+- **Los hashes cambiaron.** Los commits que citan estos documentos (`d56a1ac`, `da965ee`, `d3733eb`…) ya no existen con
+  ese código. Equivalencias de los últimos: `d3733eb` → `6d9ab8f`, `da965ee` → `6736eeb`, `bbfeb5b` → `dfa9ee4`.
+- **Pendiente del lado de GitHub.** Los commits anteriores siguen abiertos si alguien conoce su código exacto (se comprobó:
+  `d3733eb` responde HTTP 200) hasta que GitHub los borre de su servidor. Solo lo hace el soporte de GitHub, a solicitud
+  del dueño del repositorio (https://support.github.com/contact, «Remove sensitive data from a repository»).
+- **No se tocó:** el correo del autor de los commits (el del propio practicante, inherente a git).
