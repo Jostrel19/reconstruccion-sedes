@@ -2754,6 +2754,7 @@ estado). Reemplaza a los blancos con borde de color.
 lateral, todos los círculos con número, sin errores en la consola. Quedan como propuestas, sin aplicar: el pie del Inicio tiene lenguaje
 técnico («SRTM promediado a 1 km»); entre ~760 y ~1280 px de ancho los tres controles se apilan y el mapa se achica; en celular no se ve la
 leyenda (los círculos y las rampas solo se explican en el subtítulo) y el subtítulo invita a «clic en una etapa» de una leyenda oculta.
+*(Aplicadas el mismo día y publicadas en `?v=23`: ver la entrada «Ajustes del Inicio en pantallas medianas, celular y pie».)*
 
 **Censo nuevo, solo revisado (no se cambió nada).** `dimDañosInfraestructura (10).xlsx` (Descargas, 2026-10-07 14:14) es el libro de los
 arquitectos, no la exportación de Power BI que lee hoy `build_catalogo.py` (hoja `EstadoInfraestructura`, DANE en `CODIGO_DANE_SEDE`, sin
@@ -2783,3 +2784,37 @@ reescribe, quedó idéntico.
 San Gerardo aparece con «4. Afectaciones menores» en la confirmación de Norcasia. Norcasia ya generó su
 certificación con el nivel anterior: el nivel no entra en el código de verificación, así que no queda desactualizada; si la vuelven a generar,
 sale con el nivel 4.
+
+## 2026-10-07 — Ajustes del Inicio en pantallas medianas, celular y pie (D-54, `?v=23`)
+
+**Qué pidió el usuario.** Ver una muestra de los tres ajustes de diseño que quedaron propuestos en la revisión del Inicio, y luego
+«aplícalos y publícalos». Muestra aprobada: `trabajo7.10_propuestaVisual/muestra_ajustes_inicio.html` (fuera del repositorio; capturas de
+hoy y de la propuesta a 1100 px, 886 px y 375 px, con datos simulados).
+
+**Qué cambió** (solo `app/css/claro.css` y `app/js/iniciocampana.js`; nada del servidor, las hojas, el panel ni la pantalla del alcalde):
+
+- **Pantallas medianas (761 a 1280 px).** El selector «Municipio» sube a la esquina de arriba, bajo «3D · Desde el sur · Plano», en el lugar
+  del aviso «Pase el mouse o haga clic en un municipio», que se oculta en ese rango (el mapa ya muestra el resumen al pasar el mouse). El
+  selector sigue dentro de `.ic-controles` en el HTML; en ese rango se ubica con `position:absolute` y `top:calc(62px - var(--ic-ctl-top))`,
+  porque su caja es la fila de controles. Los botones de «Color» y «Círculos» tienen menos relleno, así que caben en una fila desde unos
+  1000 px; más estrecho, siguen en dos filas en vez de tres.
+- **Leyenda hasta 1280 px.** No muestra los dos círculos de tamaño (cada círculo ya trae su número); el subtítulo agrega «Círculo: sedes por
+  responder.» o «Círculo: sedes respondidas.» (`.ic-sub-circ`, oculto desde 1281 px, donde la leyenda sí trae los tamaños; con «Ninguno» no
+  se agrega). El subtítulo pasó de `textContent` a `innerHTML` con `esc()` para llevar ese tramo.
+- **Celular (hasta 760 px).** La leyenda se ve: va bajo el título, donde en escritorio van los controles, y se puede tocar para resaltar una
+  etapa, como dice el subtítulo. La tarjeta del mapa pasa de 500 a 600 px de alto para que Caldas no se achique; el encuadre automático ya
+  medía la leyenda (`icFranjas`), así que no hubo que tocarlo.
+- **Pie.** Sin lenguaje técnico: «Se cuentan las sedes oficiales activas con matrícula de los 26 municipios de la campaña; Manizales no
+  participa porque tiene secretaría de educación propia. Límites municipales del DANE; el relieve está exagerado para que se note la
+  montaña. En el ritmo de respuestas, una sede corregida cuenta el día de la corrección.»
+- Desde 1281 px el Inicio queda igual que en `?v=22`.
+
+**Verificado en local** (servidor simulado, Administrador), midiendo cada elemento dentro de la tarjeta del mapa porque la herramienta de
+capturas recortaba la imagen: a 886 px, franja superior 265 → 242 px e inferior 104 → 80, controles en 2 filas (eran 3), el selector a la
+derecha sin tocar el título ni «3D»; a 1100 px, controles y leyenda en una fila cada uno (franjas 182 → 160 y 76 → 52); a 1440 px, igual
+que antes (aviso visible, selector en la fila, leyenda con tamaños, sin el tramo del subtítulo); a 375 px, leyenda bajo el título y mapa
+entre la leyenda y el control de color sin cruzarse. Resaltar una etapa desde la leyenda, cambiar color y círculos y volver: el subtítulo
+cambia bien; sin errores en la consola. `node --check` sin errores.
+
+**Publicado el 2026-10-07 (`?v=23`)** por pedido del usuario: las 27 referencias `?v=` de `app/index.html` (`caldas3d.json` sigue en
+`?v=21`: no cambió).

@@ -62,9 +62,9 @@
     const res = icResumen();
     pintarIcAnillo(animar);
     pintarIcRespuestas(animar);
-    $('ic-pie').textContent = `Los ${CONF.municipios.length} municipios de la campaña; sedes oficiales, activas y con matrícula, sin Manizales. ` +
-      'Mapa: límites del DANE y relieve SRTM promediado a 1 km, con la altura exagerada 4 veces. ' +
-      'El ritmo de respuestas usa la fecha de la respuesta vigente de cada sede: si una sede se corrigió, cuenta el día de la corrección.';
+    $('ic-pie').textContent = `Se cuentan las sedes oficiales activas con matrícula de los ${CONF.municipios.length} municipios de la campaña; ` +
+      'Manizales no participa porque tiene secretaría de educación propia. Límites municipales del DANE; el relieve está exagerado para que se ' +
+      'note la montaña. En el ritmo de respuestas, una sede corregida cuenta el día de la corrección.';
     pintarIcMapa(res);
   }
 
@@ -160,15 +160,18 @@
   function pintarIcLeyenda(){
     const el = document.getElementById('ic-leyenda'), sub = document.getElementById('ic-mapa-sub');
     const ms = CONF.municipios, cuenta = p => ms.filter(m => p === 'pdf' ? ['pdf', 'des'].includes(icEtapa(m)) : icEtapa(m) === p).length;
-    let html;
+    let html, tx;
     if (icColor === 'estado'){
       html = ['car', 'pdf', 'res', 'sin'].map(p => `<button type="button" data-foco="${p}" aria-pressed="${icFoco === p}"><i style="background:${IC_ETAPA[p][1]}"></i>${IC_ETAPA[p][0]} · ${cuenta(p)}</button>`).join('');
-      sub.textContent = icFoco ? `Resaltados: «${IC_ETAPA[icFoco][0]}». Clic otra vez para ver todos.` : 'El color es la etapa de la certificación. Clic en una etapa para resaltarla.';
+      tx = icFoco ? `Resaltados: «${IC_ETAPA[icFoco][0]}». Clic otra vez para ver todos.` : 'El color es la etapa de la certificación. Clic en una etapa para resaltarla.';
     } else {
       const [a, b] = IC_RAMPA[icColor];
       html = `<span class="ic-rampa"><span>0 %</span><i style="background:linear-gradient(90deg,${a},${b})"></i><span>100 %</span></span>`;
-      sub.textContent = icColor === 'sinresp' ? 'Más oscuro = mayor parte de sus sedes sin responder.' : 'Más oscuro = mayor parte de sus sedes respondidas con intervención.';
+      tx = icColor === 'sinresp' ? 'Más oscuro = mayor parte de sus sedes sin responder.' : 'Más oscuro = mayor parte de sus sedes respondidas con intervención.';
     }
+    // Hasta 1280 px la leyenda no trae los tamaños del círculo (claro.css): el subtítulo dice qué cuentan.
+    sub.innerHTML = esc(tx) + (icCirculo === 'no' ? '' :
+      ` <span class="ic-sub-circ">Círculo: ${icCirculo === 'pend' ? 'sedes por responder' : 'sedes respondidas'}.</span>`);
     if (icCirculo !== 'no'){
       const mx = Math.max(1, ...ms.map(m => icCirculo === 'pend' ? m.n_sedes - m.respondidas : m.respondidas));
       html += `<span class="ic-ley-c ${icCirculo === 'pend' ? 'c-pend' : 'c-resp'}"><b></b><b></b>${icCirculo === 'pend' ? 'Sedes por responder' : 'Sedes respondidas'} · máx. ${mx}</span>`;
