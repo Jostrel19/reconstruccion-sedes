@@ -2724,3 +2724,8 @@ título del paso 2 de la ficha del municipio, el Inicio de la campaña (D-54, co
 error al pedir las confirmaciones. **Revisión de datos personales antes del commit** (el repositorio es público): sin correos, teléfonos ni
 credenciales en lo que cambia ni en los archivos nuevos; `caldas3d.json` solo trae límites, relieve, códigos y nombres de municipio; sin
 archivos temporales de prueba en `app/`.
+
+**Publicado y comprobado** (commit `cc9dee0`, 2026-10-07): Pages sirve las 27 referencias con `?v=21`; `js/mapa3d.js`,
+`js/iniciocampana.js` y `data/caldas3d.json` (410.934 bytes) responden 200; el `arranque.js` publicado trae `REINTENTO_CONF_MS`; en el
+navegador, el sitio carga los 25 scripts con `?v=21` y llega a la pantalla de ingreso sin errores en la consola. **No comprobado:** el Inicio
+con una sesión real (requiere entrar con un correo de la Secretaría; lo hace el usuario).
