@@ -2763,3 +2763,23 @@ Manzanares y Marquetalia). El nivel no entra en el código de verificación (`Co
 certificaciones, pero 9 de las 16 están en municipios que ya cargaron la certificación con el nivel anterior (La Dorada 5, Pensilvania 4)
 y 2 en municipios que ya la generaron (Neira, Norcasia). Detalle y
 decisión pendiente en la respuesta al usuario del 2026-10-07.
+
+## 2026-10-07 — Censo: solo San Gerardo María Mayela pasa a tipo 4 (H-33)
+
+**Qué pidió el usuario.** De las 16 diferencias del corte de los arquitectos del 2026-10-07, aplicar **solo** la de San Gerardo María Mayela
+(`117495005407`, Norcasia, sede principal).
+
+**Qué se hizo.** En la copia de trabajo `data/insumos/dimDañosInfraestructura.xlsx` (respaldo `dimDañosInfraestructura.BACKUP-20261007-143141.xlsx`;
+Excel COM porque tiene `Tabla1`), fila 599, las 6 celdas de esa sede quedaron como en el corte nuevo: tipo «4. AFECTACIONES MENORES»,
+prestación «Habilitada con restricción», concepto «ALCALDÍA», observación «AFECTACIÓN EN LA EDIFICACIÓN ANTIGUA, DAÑO EN COLUMNETA Y EN LOS
+ELEMENTOS DE MAMPOSTERIA ASOCIADOS» y capítulos 2 (mampostería) y 6 (acabados). Se aplicó la fila completa y no solo el tipo, porque con solo
+el tipo la sede quedaba en tipo 4 con la observación «SIN AFECTACIÓN». Se regeneraron `catalogo_sedes.json` y `backend_sedes.csv` (respaldos
+`.BACKUP-20261007-143141`). **Verificado:** releyendo el Excel, las 6 celdas tienen el valor nuevo; entre el CSV anterior y el nuevo cambia
+**solo** esa fila (974 sedes iguales); el catálogo queda 12 / 33 / 231 / 427 / 259 / 13 por tipo. `backend_usuarios.csv`, que el mismo script
+reescribe, quedó idéntico.
+
+**Hecho por el usuario el mismo día:** cambió las 5 columnas de esa fila en la hoja `Sedes` de Google (`tipo_censo`, `capitulos_dano`,
+`estado_prestacion`, `concepto_tecnico`, `observaciones_censo`) y corrió `olvidarCatalogo()`. **Verificado por el usuario en la aplicación:**
+San Gerardo aparece con «4. Afectaciones menores» en la confirmación de Norcasia. Norcasia ya generó su
+certificación con el nivel anterior: el nivel no entra en el código de verificación, así que no queda desactualizada; si la vuelven a generar,
+sale con el nivel 4.

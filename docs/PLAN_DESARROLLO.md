@@ -442,7 +442,7 @@ piloto (H1-2); uno del servidor local (H1-9), y uno de datos que va a `CONFLICTO
 
 **0. Estado al 2026-10-07.** El plazo de la campaña venció y la jefatura lo amplía sin fecha (D-53: «Plazo en ampliación» y pantalla del alcalde de
 cuatro pasos y cifras con altura pareja, publicadas el 2026-10-07 con `?v=20`). El **Inicio de la campaña con el mapa 3D** (D-54) se publicó el mismo día (`?v=21`), junto con la corrección de los reintentos sin pausa tras un error al pedir las confirmaciones, que toca también la pantalla del alcalde. Quedan **en pendientes** el barrido visual de las demás pantallas
-y la revisión de PDFs en el panel, además de la decisión de fecha y criterio de «a tiempo»; ver `REGISTRO_DESARROLLO.md` (2026-10-07). El mismo ciclo de reintentos en la carga de sedes de presupuesto (`nucleo.js::refrescarSedesSiHaceFalta`) se corrigió y publicó el mismo día (`?v=22`). El historial de GitHub se limpió
+y la revisión de PDFs en el panel, además de la decisión de fecha y criterio de «a tiempo»; ver `REGISTRO_DESARROLLO.md` (2026-10-07). El mismo ciclo de reintentos en la carga de sedes de presupuesto (`nucleo.js::refrescarSedesSiHaceFalta`) se corrigió y publicó el mismo día (`?v=22`). **Censo, pendiente:** del corte de los arquitectos del 2026-10-07 solo se aplicó San Gerardo María Mayela (Norcasia, 5 → 4), ya en la hoja `Sedes` y visto en la aplicación; las otras 15 diferencias quedan pendientes hasta saber cuál es la fuente oficial del censo (H-33). El historial de GitHub se limpió
 el 2026-10-06 (datos personales): los hashes de commit citados en estos documentos cambiaron.
 
 **1. Confirmación de sedes por los alcaldes — definición cerrada el 2026-09-28 (D-48), sin código. Urgente:

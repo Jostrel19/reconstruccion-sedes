@@ -415,7 +415,7 @@ ACTUALIZADA 28_09_2026.xlsx» (exportación de Power BI, hoja `Hoja1`, tipo en l
 `tools/rutas.py`). Mismas 975 sedes, cruce exacto por DANE; 184 cambiaron de tipo y **el tipo 6 desapareció**:
 sus 15 sedes se reclasificaron. «Sin revisar» conserva el número 7. **Corrección del usuario:** Patio Bonito
 (`217541001033`) venía como «7. Sin revisar» y queda en «4. Afectaciones menores», corregido en la copia de
-trabajo (H-25); si el próximo censo lo vuelve a traer como 7, hay que corregirlo otra vez.
+trabajo (H-25); si el próximo censo lo vuelve a traer como 7, hay que corregirlo otra vez. **Corrección del usuario (2026-10-07, H-33):** San Gerardo María Mayela (`117495005407`, Norcasia) pasa de «5. Sin afectación» a «4. Afectaciones menores», con su fila completa del corte de los arquitectos del 2026-10-07; las otras 15 diferencias de ese corte no se aplicaron.
 
 | Tipo censo | Sedes (28-09) | 16-09 | Modelo (08-09) |
 |---|---:|---:|---:|
