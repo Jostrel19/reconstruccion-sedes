@@ -130,7 +130,7 @@
   function cerrarSesion(){
     borrarLocal();
     sesion = null; SEDES = null; ACTIVIDAD = []; VERIF = null;
-    sedesCargadasEn = 0; sedesSucias = false; olvidarFicha();
+    sedesCargadasEn = 0; sedesSucias = false; sedesFalloEn = 0; sedesErrorTx = ''; olvidarFicha();
     muniActual = null; daneActual = null;
     CARGA = null; cargaFilas = [];
     LOTES = []; universoSel = 'todas'; HALLAZGOS = null; hallazgosLeidosEn = 0; muniFiltro = 'todas'; loteSel = null; loteEd = null; cifrasAnimadas = false;

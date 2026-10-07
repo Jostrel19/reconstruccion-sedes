@@ -65,6 +65,12 @@
       contexto = !SEDES ? 'Consultando el servidor…'
         : `${universo().length} sede${universo().length === 1 ? '' : 's'} · datos de ${hace(sedesCargadasEn ? new Date(sedesCargadasEn) : null)}`;
     }
+    // Si listarSedes falló, se dice en vez de dejar un «0 sedes» sin explicación (guarda: nucleo.js anterior en caché).
+    const errSedes = typeof sedesErrorTx !== 'undefined' ? sedesErrorTx : '';
+    if (errSedes && (conSedes || (vista === 'inicio' && !(typeof inicioDeCampana === 'function' && inicioDeCampana()))))
+      contexto = !sedesCargadasEn
+        ? `No se pudo consultar el servidor (${errSedes}). Se vuelve a intentar en un minuto, o use «Actualizar».`
+        : `${contexto} · no se pudo actualizar; se vuelve a intentar en un minuto`;
     document.getElementById('cab-titulo').textContent = titulo;
     // Título de la pestaña con la pantalla actual (CC23, WCAG 2.4.2): «Pantalla — sitio».
     document.title = (vista === 'inicio' ? 'Inicio' : titulo || '') + (titulo ? ' — ' : '') + 'Reconstrucción de sedes';

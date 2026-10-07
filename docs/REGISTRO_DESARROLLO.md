@@ -2729,3 +2729,37 @@ archivos temporales de prueba en `app/`.
 `js/iniciocampana.js` y `data/caldas3d.json` (410.934 bytes) responden 200; el `arranque.js` publicado trae `REINTENTO_CONF_MS`; en el
 navegador, el sitio carga los 25 scripts con `?v=21` y llega a la pantalla de ingreso sin errores en la consola. **No comprobado:** el Inicio
 con una sesión real (requiere entrar con un correo de la Secretaría; lo hace el usuario).
+
+## 2026-10-07 — Pausa tras un error en la carga de sedes, círculos de la muestra y revisión del censo nuevo (`?v=22`)
+
+**Qué pidió el usuario.** Corregir el ciclo de reintentos de la carga de sedes («entonces sí arréglalo»); revisar el último corte del censo
+de tipo de afectación y decir las diferencias **antes de hacer cambios**; los círculos del mapa como en la muestra («mucho más legible y
+amigable»); revisar a fondo el diseño y, si está bien, subir todo.
+
+**Carga de sedes** (`nucleo.js::cargarSedes` / `refrescarSedesSiHaceFalta`, `cabecera.js`, `arranque.js`). Antes, tras dos intentos
+fallidos de `listarSedes` se marcaba `sedesSucias`, `pintar()` volvía a pedir y el ciclo se repetía cada pocos segundos mientras el servidor
+fallara (Sedes, Municipio, Tablero, Lotes e Inicio de presupuestos; en campaña, solo el Administrador). Ahora el fallo queda en
+`sedesFalloEn` / `sedesErrorTx` (ya no se mezcla con `sedesSucias`, que sigue marcando «hay que refrescar» después de radicar, verificar,
+cargar o mover lotes); no se reintenta solo durante un minuto y pasado el minuto se intenta una vez. El encabezado dice «No se pudo
+consultar el servidor (…). Se vuelve a intentar en un minuto, o use «Actualizar».» en vez de un «0 sedes» sin explicación, o «· no se pudo
+actualizar» junto a los datos que ya había. **Verificado en local** (servidor simulado): con el servidor fallando, una vuelta (2 pedidos) y
+nada más aunque la pantalla se repinte; «Actualizar» recupera al instante; con datos previos, los conserva y avisa; pasado el minuto, la
+siguiente pintada recupera; marcar `sedesSucias` tras una escritura sigue pidiendo de inmediato (1 pedido).
+
+**Círculos** (`claro.css`): pizarra oscuro semitransparente (`rgba(15,23,42,.72)`) con borde y número blancos, como en
+`trabajo7.10_propuestaVisual/muestra_inicio_bento.html`; un solo tono para «por responder» y «respondidas» (el círculo cuenta sedes, no es un
+estado). Reemplaza a los blancos con borde de color.
+
+**Revisión del diseño** (Inicio, escritorio y 375 px): títulos y cifras en la tipografía de la interfaz, sin desbordes ni desplazamiento
+lateral, todos los círculos con número, sin errores en la consola. Quedan como propuestas, sin aplicar: el pie del Inicio tiene lenguaje
+técnico («SRTM promediado a 1 km»); entre ~760 y ~1280 px de ancho los tres controles se apilan y el mapa se achica; en celular no se ve la
+leyenda (los círculos y las rampas solo se explican en el subtítulo) y el subtítulo invita a «clic en una etapa» de una leyenda oculta.
+
+**Censo nuevo, solo revisado (no se cambió nada).** `dimDañosInfraestructura (10).xlsx` (Descargas, 2026-10-07 14:14) es el libro de los
+arquitectos, no la exportación de Power BI que lee hoy `build_catalogo.py` (hoja `EstadoInfraestructura`, DANE en `CODIGO_DANE_SEDE`, sin
+prefijo). Mismas 975 sedes, cruce exacto por DANE. **16 sedes cambian de tipo** (ninguna entra ni sale de 1-2: siguen 12 + 33 = 45); 7 de
+las 13 «Sin revisar» ya tienen tipo; reaparece el **tipo 6** (1 sede de Pensilvania); 15 sedes cambian capítulos de daño (casi todas
+Manzanares y Marquetalia). El nivel no entra en el código de verificación (`Confirmaciones.gs`), así que actualizarlo no desactualiza
+certificaciones, pero 9 de las 16 están en municipios que ya cargaron la certificación con el nivel anterior (La Dorada 5, Pensilvania 4)
+y 2 en municipios que ya la generaron (Neira, Norcasia). Detalle y
+decisión pendiente en la respuesta al usuario del 2026-10-07.

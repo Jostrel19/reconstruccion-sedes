@@ -118,6 +118,12 @@
   let sedesSucias = false;
   let cargandoSedes = false;
   const REFRESCO_SEDES_MS = 60 * 1000;
+  /* Tras un fallo de listarSedes no se reintenta solo durante un minuto (2026-10-07). Antes el fallo marcaba
+     sedesSucias, pintar() volvía a llamar a refrescarSedesSiHaceFalta y el pedido se repetía cada pocos segundos
+     mientras el servidor fallara. sedesErrorTx es lo que dice el encabezado en vez de un «0 sedes» sin explicación. */
+  const REINTENTO_SEDES_MS = 60 * 1000;
+  let sedesFalloEn = 0;
+  let sedesErrorTx = '';
 
   // Caché de lo último que la Ficha trajo del backend para esta sede — el PDF
   // (generarPdfFicha) lo reusa tal cual en vez de pedirlo otra vez, para que
@@ -199,6 +205,7 @@
     if (promesaSedes) return promesaSedes;
     cargandoSedes = true;
     promesaSedes = (async () => {
+      let error = '';
       for (let intento = 1; intento <= 2; intento++){
         try {
           const r = await backend('listarSedes', { token: sesion.token });
@@ -207,16 +214,18 @@
             ACTIVIDAD = Array.isArray(r.actividad) ? r.actividad : [];
             LOTES = Array.isArray(r.lotes) ? r.lotes : [];
             sedesCargadasEn = Date.now();
-            sedesSucias = false;
+            sedesSucias = false; sedesFalloEn = 0; sedesErrorTx = '';
             return;
           }
-        } catch (err) { /* se reintenta abajo */ }
+          error = (r && r.error) || '';
+        } catch (err) { error = err.message || ''; /* se reintenta abajo */ }
         if (intento === 1) await new Promise(res => setTimeout(res, 1500));
       }
-      // Dos intentos fallidos: si nunca hubo datos, se muestra vacío en vez de
-      // "Cargando…" eterno, y se marca para reintentar en la próxima navegación.
+      // Dos intentos fallidos: si nunca hubo datos, se muestra vacío en vez de "Cargando…" eterno, y el encabezado
+      // dice que no se pudo consultar (sedesErrorTx). Se vuelve a intentar al cabo de un minuto (refrescarSedesSiHaceFalta).
       if (!SEDES) SEDES = [];
-      sedesSucias = true;
+      sedesFalloEn = Date.now();
+      sedesErrorTx = error || 'No se pudo consultar el servidor.';
     })().finally(() => { promesaSedes = null; cargandoSedes = false; });
     return promesaSedes;
   }
@@ -227,7 +236,13 @@
   function refrescarSedesSiHaceFalta(){
     if (!sesion || cargandoSedes) return;
     if (!sedesSucias && Date.now() - sedesCargadasEn < REFRESCO_SEDES_MS) return;
-    cargarSedes().then(() => pintar());
+    if (sedesFalloEn && Date.now() - sedesFalloEn < REINTENTO_SEDES_MS) return;
+    const antes = vista;
+    cargarSedes().then(() => {
+      // Pasado el minuto se vuelve a intentar solo, una vez, si sigue en la misma pantalla (si falla, se programa otro).
+      if (sedesFalloEn) setTimeout(() => { if (sesion && vista === antes) refrescarSedesSiHaceFalta(); }, REINTENTO_SEDES_MS + 500);
+      pintar();
+    });
   }
 
   /* Estado de seguimiento de una sede, derivado de su presupuesto vigente.
