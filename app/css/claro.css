@@ -562,3 +562,155 @@
     .af-obras{ grid-template-columns:repeat(2,minmax(0,1fr)); }
     .af-obras li:nth-child(2)::after{ display:none; }
   }
+
+  /* ─── Inicio de la campaña (D-54, 2026-10-07): bento de 12 columnas con el mapa 3D a todo el ancho ───
+     Muestra aprobada por el usuario: trabajo7.10_propuestaVisual/muestra_inicio_bento.html (fuera del repositorio).
+     El mapa es el único héroe; todo lo del mapa flota encima en vidrio (Opción C). Lo que no es un estado de la
+     campaña va en gris: con intervención (pizarra) y sin intervención (claro); «sin responder» en rosa, como en la
+     ficha del municipio. Movimiento solo la primera vez por sesión (.ic-anima) y nunca con «reducir movimiento». */
+  .ic-bento{ --ic-con:#475569; --ic-sin:#CBD5E1; display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px; }
+  .ic-t{ background:var(--sup); border-radius:var(--r-tile); box-shadow:var(--sombra-1); padding:18px 20px; min-width:0; position:relative; transition:box-shadow .2s; }
+  .ic-t:hover{ box-shadow:var(--sombra-2); }
+  /* El mapa llena la pantalla bajo el encabezado y el saludo, sin tener que bajar (2026-10-07: el usuario pidió verlo más grande). */
+  .ic-mapa{ grid-column:1 / -1; padding:0; overflow:hidden; height:clamp(540px, calc(100vh - 190px), 900px); }
+  .ic-c-anillo{ grid-column:span 5; } .ic-c-resp{ grid-column:span 7; }
+  #s-ini-campana .ic-tt{ margin:2px 0 0; font-family:var(--f-ui); font-size:15px; font-weight:650; letter-spacing:-.01em; color:var(--t1); }
+  #s-ini-campana .eyebrow{ font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--t3); text-transform:uppercase; }
+  #s-ini-campana .sub{ margin:2px 0 0; font-size:12.5px; color:var(--t3); }
+  #s-ini-campana .nota-franja{ margin:12px 0 0; font-size:12px; color:var(--t3); }
+
+  /* Mapa: el lienzo ocupa la tarjeta y los controles flotan encima. */
+  .ic-stage{ position:absolute; inset:0; background:radial-gradient(120% 90% at 55% 45%, #FBFCFD 0%, #E9EEF3 100%); touch-action:none; }
+  .ic-stage canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; cursor:grab; }
+  .ic-stage canvas.arrastra{ cursor:grabbing; }
+  .ic-capa{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+  #ic-etq span{ position:absolute; transform:translate(-50%,-50%); font-size:11.5px; font-weight:600; color:var(--t1); white-space:nowrap;
+    text-shadow:0 0 3px #fff, 0 0 3px #fff, 0 0 4px #fff, 0 0 6px #fff; }
+  #ic-etq span::before{ content:""; display:block; width:5px; height:5px; margin:0 auto 1px; border-radius:50%; background:var(--t1); }
+  #ic-etq span.sel{ font-weight:800; }
+  /* Círculos: blancos con borde y número del color de lo que cuentan (rosa oscuro = sedes por responder; pizarra =
+     sedes respondidas), para que se lean sobre cualquier color del mapa: rellenos se perdían sobre los municipios del
+     mismo tono. Los ubica mapa3d.js con transform desde la esquina. (Se probó un ícono de sede; el usuario prefirió el círculo.) */
+  #ic-marc i{ position:absolute; left:0; top:0; box-sizing:border-box; border-radius:50%; border:2.5px solid; background:#fff; display:grid; place-items:center;
+    font:800 11px/1 var(--f-ui); font-style:normal; font-variant-numeric:tabular-nums; box-shadow:0 1px 2px rgba(15,23,42,.18), 0 3px 10px rgba(15,23,42,.22); transition:opacity .2s; will-change:transform; }
+  #ic-marc i.c-pend{ border-color:#9F1239; color:#9F1239; }
+  #ic-marc i.c-resp{ border-color:#334155; color:#1E293B; }
+  #ic-marc i.sel{ box-shadow:0 0 0 3px rgba(10,125,69,.45), 0 3px 10px rgba(15,23,42,.22); }
+  #ic-marc i.apag{ opacity:.18; }
+  .ic-flota{ position:absolute; z-index:4; margin:0; }
+  .ic-vidrio{ background:rgba(255,255,255,.88); -webkit-backdrop-filter:blur(10px) saturate(160%); backdrop-filter:blur(10px) saturate(160%);
+    border-radius:14px; box-shadow:var(--sombra-2); }
+  .ic-titulo{ left:16px; top:14px; padding:12px 14px; max-width:min(560px, calc(100% - 300px)); }
+  #s-ini-campana .ic-titulo .ic-tt{ font-size:16px; }
+  /* Controles en una fila justo debajo del título (iniciocampana.js mide el título y pone --ic-ctl-top). */
+  .ic-controles{ left:16px; right:16px; top:var(--ic-ctl-top, 92px); display:flex; flex-wrap:wrap; align-items:center; gap:8px; pointer-events:none; }
+  .ic-controles > *{ pointer-events:auto; }
+  .ic-seg{ display:inline-flex; align-items:center; gap:2px; padding:3px; border-radius:11px; }
+  .ic-seg button{ border:0; background:none; padding:5px 10px; border-radius:8px; font:600 12px/1.3 var(--f-ui); color:var(--t3); white-space:nowrap; cursor:pointer; }
+  .ic-seg button:hover{ color:var(--t1); }
+  .ic-seg button[aria-pressed=true]{ background:#fff; color:var(--t1); box-shadow:0 1px 2px rgba(15,23,42,.14); }
+  .ic-lbl{ font-size:10.5px; font-weight:700; letter-spacing:.06em; color:var(--t3); text-transform:uppercase; padding:0 6px 0 8px; }
+  .ic-sel select{ border:0; background:#fff; border-radius:8px; padding:5px 8px; font:600 12px var(--f-ui); color:var(--t1); box-shadow:0 1px 2px rgba(15,23,42,.14); }
+  .ic-vistas{ right:16px; top:14px; }
+  .ic-pista{ right:16px; top:62px; padding:8px 12px; font-size:12px; color:var(--t2); }
+  .ic-zoom{ right:16px; bottom:16px; display:grid; gap:4px; }
+  .ic-zoom button{ width:32px; height:32px; border:0; border-radius:9px; font-weight:700; font-size:16px; line-height:1; color:var(--t1); cursor:pointer; }
+  .ic-leyenda{ left:16px; bottom:16px; padding:6px; display:flex; flex-wrap:wrap; align-items:center; gap:4px; max-width:calc(100% - 96px); }
+  .ic-leyenda button{ border:0; background:none; border-radius:999px; padding:4px 10px 4px 8px; font:600 12px var(--f-ui); color:var(--t2); display:inline-flex; gap:6px; align-items:center; cursor:pointer; }
+  .ic-leyenda button i{ width:10px; height:10px; border-radius:50%; }
+  .ic-leyenda button:hover{ background:rgba(15,23,42,.05); }
+  .ic-leyenda button[aria-pressed=true]{ background:var(--t1); color:#fff; }
+  .ic-rampa{ display:inline-flex; align-items:center; gap:8px; font-size:12px; color:var(--t3); padding:2px 8px; }
+  .ic-rampa i{ display:inline-block; width:150px; height:10px; border-radius:3px; }
+  .ic-ley-c{ display:inline-flex; gap:5px; align-items:center; font-size:12px; color:var(--t3); padding:0 8px; border-left:1px solid var(--contorno); margin-left:4px; }
+  .ic-ley-c b{ display:inline-block; box-sizing:border-box; border-radius:50%; border:2px solid; background:#fff; width:12px; height:12px; }
+  .ic-ley-c b + b{ width:20px; height:20px; margin-right:2px; }
+  .ic-ley-c.c-pend b{ border-color:#9F1239; } .ic-ley-c.c-resp b{ border-color:#334155; }
+  .ic-mapa-estado{ left:50%; top:50%; transform:translate(-50%,-50%); font-size:13px; color:var(--t3); background:rgba(255,255,255,.9); padding:8px 14px; border-radius:10px; }
+  .ic-tip{ position:absolute; pointer-events:none; background:#fff; color:var(--t1); border-radius:12px; padding:10px 12px; font-size:12px; line-height:1.35;
+    white-space:nowrap; transform:translate(14px,14px); opacity:0; transition:opacity .1s; z-index:6; box-shadow:var(--sombra-2); min-width:220px; }
+  .ic-tip.izq{ transform:translate(calc(-100% - 14px),14px); } .ic-tip.arr{ transform:translate(14px,calc(-100% - 14px)); }
+  .ic-tip.izq.arr{ transform:translate(calc(-100% - 14px),calc(-100% - 14px)); }
+  .ic-tip .r1{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .ic-tip .r1 b{ font-size:13.5px; }
+  .ic-tip table{ width:100%; border-collapse:collapse; }
+  .ic-tip th{ font-weight:400; color:var(--t3); text-align:left; padding:2px 12px 2px 0; border:0; background:none; text-transform:none; letter-spacing:0; font-size:12px; }
+  .ic-tip td{ text-align:right; font-weight:650; font-variant-numeric:tabular-nums; border:0; padding:2px 0; }
+  .ic-tip em{ display:block; margin-top:6px; font-style:normal; color:var(--t3); font-size:11px; }
+  .ic-ficha{ right:16px; top:calc(var(--ic-ctl-top, 92px) + 46px); width:300px; padding:16px 16px 14px; }
+  .ic-ficha[hidden]{ display:none; }
+  #s-ini-campana .ic-ficha h3{ margin:0; font-family:var(--f-ui); font-size:19px; font-weight:650; letter-spacing:-.01em; padding-right:28px; color:var(--t1); }
+  .ic-ficha-est{ display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+  .ic-cerrar{ position:absolute; right:8px; top:8px; border:0; background:none; width:28px; height:28px; border-radius:8px; color:var(--t3); font-size:15px; cursor:pointer; }
+  .ic-cerrar:hover{ background:rgba(15,23,42,.06); }
+  .ic-kv{ width:100%; border-collapse:collapse; margin-top:10px; font-size:12.5px; }
+  .ic-kv th{ font-weight:400; color:var(--t3); text-align:left; padding:4px 0; border:0; background:none; text-transform:none; letter-spacing:0; font-size:12.5px; }
+  .ic-kv td{ text-align:right; font-weight:650; padding:4px 0; border:0; font-variant-numeric:tabular-nums; }
+  .ic-abrir{ margin-top:10px; width:100%; justify-content:center; }
+
+  /* Composición: con / sin intervención / sin responder. */
+  .ic-apil{ display:flex; gap:2px; height:8px; border-radius:99px; overflow:hidden; margin-top:12px; background:var(--linea); }
+  .ic-apil.grande{ height:10px; }
+  .ic-apil i{ display:block; height:100%; }
+  .ic-ley{ display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:8px; font-size:12px; color:var(--t2); }
+  .ic-ley span{ display:inline-flex; align-items:center; gap:6px; }
+  .ic-ley i{ width:10px; height:10px; border-radius:3px; }
+  .ic-ley b{ font-variant-numeric:tabular-nums; }
+
+  /* Anillo de 26 (el del panel, dos tonos) y el desglose por etapa, que resalta en el mapa. */
+  .ic-anillo-fila{ display:grid; grid-template-columns:150px minmax(0,1fr); gap:20px; align-items:center; margin-top:12px; }
+  .ic-anillo{ position:relative; width:150px; height:150px; }
+  .ic-anillo svg{ width:100%; height:100%; display:block; }
+  .ic-anillo path{ fill:none; stroke-width:14; stroke:#E6EBF1; }
+  .ic-anillo path.s-car{ stroke:var(--verde); }
+  .ic-centro{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; }
+  .ic-centro b{ font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:46px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
+  .ic-centro span{ margin-top:4px; font-size:13px; color:var(--t3); }
+  .ic-etapas{ width:100%; border-collapse:collapse; font-size:13px; }
+  .ic-etapas tr{ cursor:pointer; transition:opacity .15s; }
+  .ic-etapas tr.apag{ opacity:.45; }
+  .ic-etapas td{ padding:6px; border:0; color:var(--t2); }
+  .ic-etapas tr:hover td{ background:var(--sup2); }
+  .ic-etapas td:first-child{ border-radius:8px 0 0 8px; } .ic-etapas td:last-child{ border-radius:0 8px 8px 0; text-align:right; font-weight:650; font-size:16px; color:var(--t1); font-variant-numeric:tabular-nums; }
+  .ic-etapas i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:8px; }
+
+  /* Sedes con respuesta: cifra a la izquierda, ritmo a la derecha. */
+  .ic-resp-fila{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:24px; align-items:end; margin-top:8px; }
+  .ic-num b{ font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:44px; line-height:1.05; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
+  .ic-num small{ font-size:15px; color:var(--t3); font-weight:600; }
+  .ic-spark-tit{ font-size:12.5px; font-weight:650; color:var(--t2); } .ic-spark-tit span{ font-weight:400; color:var(--t3); }
+  .ic-spark svg{ width:100%; height:92px; display:block; overflow:visible; margin-top:6px; }
+  .ic-spark-eje{ display:flex; justify-content:space-between; font-size:11px; color:var(--t3); margin-top:4px; }
+  .ic-spark-nota{ margin:6px 0 0; font-size:12px; color:var(--t3); } .ic-spark-nota b{ color:var(--t1); }
+
+  /* Movimiento de entrada, una vez por sesión. */
+  @media (prefers-reduced-motion:no-preference){
+    .ic-anima > .ic-t{ animation:ic-entra .55s cubic-bezier(.2,.7,.2,1) both; }
+    .ic-anima > .ic-t:nth-child(2){ animation-delay:.07s; } .ic-anima > .ic-t:nth-child(3){ animation-delay:.14s; }
+    @keyframes ic-entra{ from{ opacity:0; transform:translateY(10px); } }
+    .ic-anima .ic-apil i{ transform-origin:left center; animation:ic-crece .9s cubic-bezier(.2,.7,.2,1) .35s both; }
+    @keyframes ic-crece{ from{ transform:scaleX(0); } }
+    .ic-anima .ic-anillo path.s-car{ animation:ic-seg .4s ease-out .35s both; }
+    @keyframes ic-seg{ from{ stroke:#E6EBF1; } }
+    .ic-anima .ic-linea{ stroke-dasharray:1200; stroke-dashoffset:1200; animation:ic-traza 1.4s cubic-bezier(.3,.6,.2,1) .45s forwards; }
+    @keyframes ic-traza{ to{ stroke-dashoffset:0; } }
+    .ic-ficha:not([hidden]){ animation:ic-abre .22s cubic-bezier(.2,.7,.2,1); }
+    @keyframes ic-abre{ from{ opacity:0; transform:translateY(-6px) scale(.98); } }
+  }
+  @media (max-width:1100px){
+    .ic-c-anillo, .ic-c-resp{ grid-column:1 / -1; }
+  }
+  @media (max-width:760px){
+    .ic-bento{ gap:12px; }
+    .ic-mapa{ height:500px; }  /* en celular manda el ancho: más alto solo dejaría aire */
+    .ic-titulo{ max-width:calc(100% - 32px); }
+    .ic-controles{ top:auto; bottom:16px; right:58px; }
+    .ic-controles .ic-lbl{ display:none; }
+    .ic-seg{ flex-wrap:wrap; } .ic-seg button{ padding:5px 8px; }
+    #ic-circ, .ic-sel, .ic-vistas, .ic-pista, .ic-leyenda{ display:none; }
+    .ic-ficha{ left:16px; right:16px; width:auto; top:auto; bottom:64px; }
+    .ic-resp-fila{ grid-template-columns:1fr; }
+    .ic-anillo-fila{ grid-template-columns:120px minmax(0,1fr); gap:14px; }
+    .ic-anillo{ width:120px; height:120px; } .ic-centro b{ font-size:38px; }
+    .ic-t{ padding:16px; }
+  }

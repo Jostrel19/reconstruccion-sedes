@@ -56,15 +56,16 @@
     // D-51: durante la campaña Verificador y Consulta solo ven «Confirmación de
     // alcaldes» (las demás pantallas no están en uso) y no piden las sedes de
     // presupuesto. Al apagar la campaña vuelve su lista completa.
+    // D-54: y el Inicio de la campaña (mapa y cifras), que es su pantalla de entrada.
     verif:    { ext:false, rot:'Verificador · todo el departamento',
-                ve: CAMPANA_CONFIRMACION ? VE_CAMPANA : ['inicio','sedes','tablero','muni','ficha','verif','cargas','hallazgos'],
+                ve: CAMPANA_CONFIRMACION ? ['inicio', ...VE_CAMPANA] : ['inicio','sedes','tablero','muni','ficha','verif','cargas','hallazgos'],
                 interno:true,  edita:false, verifica:true, sinSedes: CAMPANA_CONFIRMACION },
     resp:     { ext:true,  rot:'Responsable de sede',
                 ve:['inicio','sedes','muni','ficha','registrar'],
                 interno:false, edita:true,  verifica:false },
     // D-51: igual que el Verificador durante la campaña.
     consulta: { ext:false, rot:'Consulta · solo lectura',
-                ve: CAMPANA_CONFIRMACION ? VE_CAMPANA : ['inicio','sedes','tablero','muni','ficha'],
+                ve: CAMPANA_CONFIRMACION ? ['inicio', ...VE_CAMPANA] : ['inicio','sedes','tablero','muni','ficha'],
                 interno:true,  edita:false, verifica:false, sinSedes: CAMPANA_CONFIRMACION },
     // D-48: el alcalde durante la campaña. En el servidor sigue siendo
     // RESPONSABLE_SEDE; aquí solo cambia lo que se le muestra. No pide las
@@ -75,6 +76,8 @@
   };
 
   let vista = 'login', rol = 'admin';
+  // D-54: con la campaña encendida, el Inicio de la Secretaría es el de la campaña (iniciocampana.js), no el de presupuestos.
+  const inicioDeCampana = () => CAMPANA_CONFIRMACION && !!ROLES[rol].interno && typeof pintarInicioCampana === 'function';
 
   /* Backend real (D-19). Único punto que cambia si el despliegue cambia de
      URL — ver backend/README.md. */

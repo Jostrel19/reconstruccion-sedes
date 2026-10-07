@@ -276,7 +276,8 @@
       <div class="af-sec"><h3>Estado de las obras <span>· de ${con === 1 ? 'la sede' : `las ${con} sedes`} con intervención</span></h3>${obras}</div></section>`;
   }
 
-  // Tarjeta 2: en qué va la certificación, con los mismos tres pasos y colores que ve el alcalde.
+  // Tarjeta 2: en qué va la certificación, con los nombres y colores de los pasos del alcalde. Son tres y no cuatro: el
+  // paso 3 del alcalde (pasar el contenido a su formato) es una casilla que vive solo en su pantalla y el sistema no la guarda.
   function fichaCertificacionHtml(m){
     const e = m.estado, todas = m.n_sedes > 0 && m.respondidas === m.n_sedes;
     const generada = e === 'GENERADA' || e === 'CARGADA', cargada = e === 'CARGADA';
@@ -285,7 +286,7 @@
       `<div><b>${titulo}<span class="sr"> — ${cl === 'hecho' ? 'hecho' : (cl === 'act' ? 'paso actual' : 'pendiente')}</span></b><span class="af-m">${meta}</span></div></li>`;
     const p1 = paso(todas ? 'hecho' : 'act', 'res', 1, 'Responder todas las sedes',
       todas ? `Las ${m.n_sedes} tienen respuesta` : `${m.respondidas} de ${m.n_sedes} respondidas`);
-    const p2 = paso(generada ? 'hecho' : (todas ? 'act' : 'pend'), 'pdf', 2, 'Generar la certificación en Word',
+    const p2 = paso(generada ? 'hecho' : (todas ? 'act' : 'pend'), 'pdf', 2, 'Descargar la certificación en Word',
       generada ? `Word descargado ${m.generado ? esc(hace(m.generado.fecha)) : ''}`
         : (todas ? (e === 'DESACTUALIZADA' ? 'Debe descargarla de nuevo: cambió respuestas' : 'Todavía no la ha descargado') : 'Se habilita con todas las sedes respondidas'));
     const p3 = paso(cargada ? 'hecho' : (generada ? 'act' : 'pend'), 'pdf', 3, 'Firmar, escanear y cargar',

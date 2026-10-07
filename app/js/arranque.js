@@ -8,7 +8,10 @@
     if (!sesion) vista = 'login';
     const R = ROLES[rol];
     if (vista !== 'login' && !R.ve.includes(vista)) vista = R.ve[0];
-    const [mod, inner, migas] = RUTA[vista];
+    const [mod, innerRuta, migas] = RUTA[vista];
+    // D-54: el Inicio de la campaña es otra sección (s-ini-campana); el módulo del riel sigue siendo «inicio».
+    const campanaIni = vista === 'inicio' && typeof inicioDeCampana === 'function' && inicioDeCampana();
+    const inner = campanaIni ? 's-ini-campana' : innerRuta;
 
     const esLogin = vista === 'login';
     document.getElementById('v-login').classList.toggle('on', esLogin);
@@ -54,7 +57,8 @@
     actualizarBadgeVerifRiel();
     if (vista === 'tablero') { pintarTableroReal(); refrescarSedesSiHaceFalta(); }
     if (vista === 'lotes') { pintarLotesReal(); refrescarSedesSiHaceFalta(); }
-    if (vista === 'inicio') { pintarInicioReal(); refrescarSedesSiHaceFalta(); }
+    if (vista === 'inicio' && campanaIni) { pintarInicioCampana(); refrescarConfSiHaceFalta(); }
+    else if (vista === 'inicio') { pintarInicioReal(); refrescarSedesSiHaceFalta(); }
     if (vista === 'sedes') { pintarSedesReal(); refrescarSedesSiHaceFalta(); }
     if (vista === 'muni') { pintarMuniReal(); refrescarSedesSiHaceFalta(); }
     if (vista === 'ficha') pintarFichaReal();
@@ -75,11 +79,22 @@
      otra vez si pasaron 5 minutos, pero nunca con cambios sin guardar en
      pantalla (repintar la tabla le quitaría el foco a quien está escribiendo). */
   const REFRESCO_CONF_MS = 5 * 60 * 1000;
+  /* Tras un error no se reintenta solo durante un minuto (2026-10-07). pintar() vuelve a llamar aquí al terminar,
+     y como un error no actualiza confCargadoEn, mientras el servidor respondiera con error el pedido se repetía sin
+     pausa (en la prueba local, miles de pedidos hasta trabar la pestaña). «Actualizar» no espera: llama directo. */
+  const REINTENTO_CONF_MS = 60 * 1000;
+  let confFalloEn = 0;
   function refrescarConfSiHaceFalta(){
     if (!sesion || promesaConf) return;
     if (CONF && (Date.now() - confCargadoEn < REFRESCO_CONF_MS || confHayCambios())) return;
+    if (confFalloEn && Date.now() - confFalloEn < REINTENTO_CONF_MS) return;
     const antes = vista;
-    cargarConfirmaciones().then(() => { if (vista === antes) pintar(); });
+    cargarConfirmaciones().then(() => {
+      confFalloEn = confError ? Date.now() : 0;
+      // Pasado el minuto se vuelve a intentar solo, una vez (si sigue fallando, se programa otro).
+      if (confError) setTimeout(() => { if (sesion && vista === antes) refrescarConfSiHaceFalta(); }, REINTENTO_CONF_MS + 500);
+      if (vista === antes) pintar();
+    });
   }
 
   // «Salir» con cambios sin guardar en la confirmación pregunta antes.
@@ -119,7 +134,7 @@
     muniActual = null; daneActual = null;
     CARGA = null; cargaFilas = [];
     LOTES = []; universoSel = 'todas'; HALLAZGOS = null; hallazgosLeidosEn = 0; muniFiltro = 'todas'; loteSel = null; loteEd = null; cifrasAnimadas = false;
-    olvidarConfirmaciones(); avMuni = null;
+    olvidarConfirmaciones(); avMuni = null; confFalloEn = 0;
     document.getElementById('cod').value = '';
     loginVolver();
     vista = 'login';
@@ -410,6 +425,9 @@
     if (document.querySelector('.shell').classList.contains('menu-abierto') &&
         !e.target.closest('#riel') && !e.target.closest('#btn-menu')) cerrarMenu();
   });
+
+  // D-54: controles del Inicio de la campaña (mapa, colores, círculos, etapas). Si un iniciocampana.js anterior quedó en caché, no hay nada que preparar.
+  if (typeof prepararInicioCampana === 'function') prepararInicioCampana();
 
   // Enter en los campos de ingreso = el botón de cada paso.
   document.getElementById('u').addEventListener('keydown', e => { if (e.key === 'Enter') loginEnviarCodigo(); });

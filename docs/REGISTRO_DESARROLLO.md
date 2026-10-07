@@ -2582,3 +2582,145 @@ pestañas; menores: `Math.random` en el código, `String(err)` en `doPost`, `web
 sesión simulada guardada; la aplicación llamó una vez al backend real con un token falso y el servidor lo rechazó
 («sesión venció»). No leyó ni escribió datos; quedó una llamada inválida en el registro de ejecuciones de Apps Script. Desde
 entonces se borra el almacenamiento del navegador antes de recargar la página de pruebas.
+
+### 2026-10-07 — Ficha del municipio: título del paso 2 alineado con el del alcalde (local, sin publicar)
+
+- **Qué cambió:** en la ficha del municipio del panel de la Secretaría (`app/js/avance.js::fichaCertificacionHtml`), el paso 2 pasó de
+  «Generar la certificación en Word» a **«Descargar la certificación en Word»**, el mismo nombre que ve el alcalde
+  (`confirmacion.js`). Una línea de texto y el comentario de la función; no cambia lógica, datos, estilos ni la versión de caché.
+- **Por qué la ficha sigue con tres pasos y no cuatro:** el paso 3 del alcalde («Pasar el contenido al formato oficial de su
+  alcaldía») es una casilla que vive solo en su pantalla y no se guarda (D-53), así que el sistema no puede saber si se hizo. Mostrarlo
+  en la ficha sería un paso inventado: se marcaría «hecho» solo al cargar la certificación y podría confundirse con «ya pasó el
+  contenido a su formato». La numeración del alcalde tiene un paso más que la ficha; los nombres de los pasos comunes coinciden.
+- **Registro histórico:** las menciones anteriores a «Generar la certificación en Word» en este registro y en
+  `PLAN_CONFIRMACION_ALCALDES.md` describen cómo estaba el 2026-10-01 y no se reescriben.
+- **Estado:** local, sin commit. En Pages sigue `?v=20` con el título anterior; saldrá con la próxima versión (`?v=21`), a pedido.
+- **Verificado:** `node --check app/js/avance.js` y que no queden textos «Generar la certificación» en `app/` (queda solo un
+  comentario CSS histórico en `estilos.css`).
+
+## 2026-10-07 — Inicio de la campaña con el mapa 3D de Caldas (D-54, `?v=21`)
+
+**Qué pidió el usuario.** Tras ver las muestras (`trabajo7.10_propuestaVisual/muestra_inicio.html` y `muestra_inicio_bento.html`, fuera del
+repositorio): un Inicio en bento asimétrico, tema claro, tablas sin bordes con cifras a la derecha y animaciones, con el mapa de la «Opción C»
+como eje; después, «que el mapa ocupe todo ese espacio en horizontal», el anillo y las sedes con respuesta abajo, sin la tarjeta de las 45
+sedes más graves, círculos de «sedes por responder» y «sedes ya respondidas», y otro color en lugar del relieve («no lo entiendo»).
+«Hagamos definitivamente este inicio».
+
+**Qué se hizo.**
+- `app/js/mapa3d.js` (nuevo): el mapa de la propuesta visual convertido en una pieza aparte, `crearMapa3D(cfg)`. Recibe por funciones el color
+  de cada municipio, su círculo, su tooltip y qué hacer al elegirlo; no sabe nada de la campaña. WebGL propio, sin librerías; sin WebGL cae a
+  un mapa plano 2D. **Encuadre automático** (`encuadre`): busca la distancia y el centro con que el borde de Caldas cabe en el área libre de
+  la tarjeta (descontando los controles que flotan encima, que el Inicio declara como márgenes); así sirve igual a 1440 px que a 375 px.
+- `app/data/caldas3d.json` (nuevo, ~410 KB): límites municipales del DANE y relieve SRTM a ~1 km, tomados del artefacto «Mapa 3D de Caldas».
+  Se quitaron la **población** (venía de Wikipedia, sin validar con el DANE), los **nombres de subregión** (sin verificar) y campos sin uso;
+  las líneas de subregión pasaron a ser límites municipales comunes. Se pide con `fetch` la primera vez que se abre el Inicio.
+- `app/js/iniciocampana.js` (nuevo): el Inicio de la campaña. Calcula todo en el navegador con `CONF` (lo que ya trae `listarConfirmaciones`):
+  mapa (color por etapa, % sin responder o % con intervención; círculos por sedes por responder o respondidas; tooltip con nombre, etapa y
+  tres valores; resumen flotante del municipio con enlace a su ficha en «Confirmación de alcaldes»; la leyenda y el desglose del anillo
+  resaltan una etapa; selector de municipio para teclado), anillo de 26 en dos tonos (reusa `avance.js::anilloAvanceSvg`), sedes con
+  respuesta con su composición y el ritmo de respuestas por día (marca el plazo original y dice en palabras el día de más respuestas),
+  quién interviene (5 primeras + «otras») y estado de las obras. Los eventos los registra `arranque.js` (`prepararInicioCampana`), según
+  la regla de `app/README.md` de que fuera de `arranque.js` solo hay declaraciones.
+- `nucleo.js`: `inicioDeCampana()`; Verificador y Consulta tienen `inicio` como primera pantalla durante la campaña (revisa D-51).
+  `arranque.js::pintar` muestra `s-ini-campana` en vez de `s-inicio` y pide las confirmaciones, no las sedes de presupuesto.
+  `cabecera.js`: contexto con las dos fechas del plazo; «Actualizar» vuelve a pedir las confirmaciones. `index.html`: sección
+  `s-ini-campana` y los dos scripts nuevos (con `?v=20`, como los demás: al publicar se suben todos a `?v=21`). `claro.css`: sección
+  «Inicio de la campaña» (`.ic-*`), con los títulos en la tipografía de la interfaz.
+
+**Colores** (regla de siempre: cada color dice un estado; lo que no es estado, en gris): etapas con los colores de la ruta; «% sin
+responder» en rampa rosa (el rosa es lo que falta); «% con intervención» en rampa gris pizarra; círculos rosa oscuro (por responder) o
+pizarra (respondidas). El color lleva la etapa o un porcentaje y el círculo la cantidad, porque pintar cantidades engaña (un municipio
+grande o con muchas sedes parece peor solo por eso).
+
+**Verificado en local** (`app-local`, con el servidor bloqueado en la página y datos simulados armados del Excel exportado la mañana del
+2026-10-07, sin correos ni nombres; el archivo temporal `app/_mock_conf_tmp.json` se borró al terminar y el almacenamiento del navegador se
+limpió sin recargar con la sesión simulada): como Administrador, Verificador y Consulta entra al Inicio de la campaña (riel de Verificador
+y Consulta: Inicio y Confirmación de alcaldes); cifras 13 de 26, 715 de 975, 255 con intervención, quién interviene y obras iguales al Excel;
+el día de más respuestas sale el 6 de octubre (302); elegir Riosucio abre su resumen (92 de 92, 57 con intervención, 3 de nivel 1 y 2) y
+«Ver en Confirmación de alcaldes» abre su ficha; colores, círculos y resaltado por etapa funcionan; a 1440 px Caldas queda entero entre los
+controles; a 375 px sin desplazamiento lateral; sin errores en la consola. **No verificado:** con sesión real; el rendimiento del mapa en
+un equipo típico de la Secretaría o en un celular de gama baja; con «reducir movimiento» encendido en el sistema operativo.
+
+**Estado:** sin commit y sin publicar (Pages sigue en `?v=20`). Para publicar: subir las referencias de `index.html` a `?v=21` (las 25 de
+siempre más las 2 nuevas) y la de `data/caldas3d.json` en `iniciocampana.js`, commit y push, a pedido del usuario. Va junto con el cambio de
+título del paso 2 de la ficha (entrada anterior).
+
+## 2026-10-07 — Inicio de la campaña: mapa más grande, sin «Quién interviene» ni «Estado de las obras», círculos legibles (D-54, `?v=21`)
+
+**Qué pidió el usuario.** Al revisar el Inicio: «algunos números no se ven» en los círculos con «% sin responder» y «% con intervención»;
+después, «quitemos estos 2 gráficos» (Quién interviene y Estado de las obras), «hagamos el mapa más grande» y «los círculos parpadean mucho».
+
+**Diagnóstico.** (1) `mapa3d.js` no escribía el número en los círculos de menos de 22 px (con «Sedes respondidas» quedaban sin número La
+Merced, Marmato, Marulanda, Norcasia, Palestina y San José; con «Sedes por responder», Supía). (2) El círculo relleno se perdía sobre los
+municipios del mismo tono: el rosa oscuro de «por responder» es el extremo de la rampa de «% sin responder» y la pizarra de «respondidas», el
+de «% con intervención». (3) El título del mapa decía siempre «Dónde falta la certificación firmada», aunque el color mostrara otra cosa. (4)
+Con un subtítulo de dos líneas la tarjeta del título tapaba la fila «Color», y el encuadre reservaba 330 px a la izquierda cuando la tarjeta
+medía unos 400 (el círculo de Riosucio quedaba debajo). (5) El parpadeo lo causaba la **vista previa** inyectada en la pestaña para mostrar la
+propuesta (un bucle que peleaba con `marcadores()` por el tamaño en cada cuadro), no el código.
+
+**Qué se hizo.**
+- `index.html` y `iniciocampana.js`: fuera las tarjetas `ic-quien` e `ic-obra` y sus funciones (`pintarIcQuien`, `pintarIcObras`); en
+  `claro.css`, fuera `.ic-tabla`, `.ic-barra`, `.ic-obras`, `.ic-nota` y sus reglas. Quedan el mapa, el anillo y las sedes con respuesta.
+- **Mapa más grande** (`claro.css`): alto `clamp(540px, calc(100vh - 190px), 900px)`, para que llene la pantalla bajo el saludo sin bajar
+  (antes `clamp(480px, 62vh, 640px)`); en celular sigue en 500 px, porque ahí manda el ancho. Título arriba a la izquierda y los controles
+  (Color, Círculos, Municipio) **en una fila debajo del título**, así Caldas usa todo el ancho de la tarjeta. `iniciocampana.js::icFranjas`
+  mide lo que flota arriba y abajo (título, controles, leyenda) y se lo pasa al encuadre como márgenes; la fila de controles se ubica con
+  `--ic-ctl-top` justo bajo el título. Si el texto cambia de alto, el mapa se reencuadra (`icReencuadrarSiCambia`), solo entonces, para no
+  deshacer el zoom del usuario. El resumen del municipio elegido baja para no tapar los controles.
+- **Círculos** (`mapa3d.js::marcadores`, `claro.css`): todos llevan número; el radio crece con la raíz del valor **desde un mínimo en el que
+  cabe el número** (11 px; 9 px en celular), así el orden de tamaños se conserva pero en los pequeños el área ya no es exactamente
+  proporcional (la cifra la da el número). Blancos con borde y número del color de lo que cuentan (rosa oscuro / pizarra), legibles sobre
+  cualquier color. Se ubican con `transform` y solo se escribe en la página lo que cambió (tamaño, número, clase, visibilidad).
+- **Título según el color** (`IC_TITULO`): «Dónde falta la certificación firmada» · «Dónde faltan sedes por responder» · «Dónde hay sedes con
+  intervención», y la descripción del lienzo para lectores de pantalla dice lo mismo. Subtítulo de «% con intervención» acortado a una línea.
+
+**Verificado en local** (`app-local`, servidor bloqueado en la página, datos simulados del Excel del 2026-10-07 sin correos ni nombres; el
+temporal `app/_mock_conf_tmp.json` se borró y el almacenamiento se limpió antes de recargar): a 1440×900 la tarjeta del mapa cabe entera
+(termina en 874 px) y Caldas ocupa todo el alto libre; con los tres colores y los dos tipos de círculo, **0 círculos sin número**; mientras la
+cámara se movía (25 cuadros) los círculos cambiaron 200 veces de posición y **0** de tamaño, número, clase o visibilidad (sin parpadeo); al
+cambiar a «% con intervención» el título cambia y el mapa se reencuadra; con Anserma elegido, su resumen queda bajo la fila de controles; a
+375 px, sin desplazamiento lateral; sin errores en la consola. **No verificado:** con sesión real y en un equipo de la Secretaría.
+
+**Estado:** sin commit y sin publicar.
+
+## 2026-10-07 — Ícono de sede en el mapa (revertido) y pausa tras un error al pedir las confirmaciones (D-54, `?v=21`)
+
+**Qué pidió el usuario.** «En vez de un círculo podría ser el ícono de una sede educativa»; las tarjetas de abajo (anillo y sedes con
+respuesta) **se dejan como están** (se le mostró una tarjeta única de avance con respuestas por día, y la descartó). Aprobó corregir el
+defecto de abajo.
+
+**Ícono de sede.** `claro.css`: los marcadores del mapa son una escuela con banderita (SVG en `--ic-escuela-pend` / `--ic-escuela-resp`),
+blanca con borde, bandera y número del color de lo que cuenta (rosa oscuro = por responder; pizarra = respondidas). `mapa3d.js` sigue
+ubicando una caja de 2r × 2r y ahora deja el radio en `--r`; el ícono la desborda hacia arriba (130 %) y el número baja al cuerpo de la
+escuela (`padding-top: --r × 0,54`; un `padding` en % se mide contra el ancho del contenedor, no del ícono). La leyenda usa el mismo ícono, el
+control se llama «Íconos» y el margen de arriba del encuadre pasó de 30 a 44 px porque el ícono es más alto que el círculo.
+
+**Defecto (publicado desde D-48, ya corregido en local).** `arranque.js::refrescarConfSiHaceFalta` pedía las confirmaciones cuando los datos
+tenían más de 5 minutos, y al terminar llamaba a `pintar()`, que vuelve a llamarla. Un error no actualiza `confCargadoEn`, así que **mientras el
+servidor respondiera con error el pedido se repetía sin pausa** — en el panel de la Secretaría, en el Inicio y en la pantalla del alcalde. Se vio
+en la prueba local: con el servidor simulado respondiendo error, la pestaña hizo unos 159.000 pedidos y se trabó. Con el servidor real, cada
+vuelta dura lo que tarde Apps Script, pero gasta cuota de ejecución justo cuando el servidor ya está en problemas, y sin conexión la pestaña se
+queda en un ciclo. **Corrección:** tras un error no se reintenta solo durante un minuto (`REINTENTO_CONF_MS`, `confFalloEn`); pasado el minuto
+se reintenta una vez sola (si falla, se programa otra). «Actualizar» no espera. Los datos que ya había se siguen mostrando. **Verificado en
+local:** con el servidor simulado fallando y datos de hace 10 minutos, entrar al panel y repintar dos veces hace **1** pedido (antes, miles);
+al minuto reintenta una vez; con el servidor de vuelta, el siguiente reintento trae los datos y borra el error. **Mismo patrón, sin corregir
+(no se pidió):** `nucleo.js::refrescarSedesSiHaceFalta` con `listarSedes` (solo Administrador durante la campaña; espera 1,5 s entre los dos
+intentos de cada vuelta, pero tras fallar también repite al repintar).
+
+**Verificado en local** (datos simulados del Excel del 2026-10-07; temporal borrado): a 1440×900, 8 íconos con «Sedes por responder» y 19 con
+«Sedes respondidas», todos con número; a 375 px, sin desplazamiento lateral; sin errores en la consola.
+
+**Estado:** sin commit y sin publicar. La corrección del defecto conviene publicarla con lo demás (`?v=21`), porque toca la pantalla del alcalde.
+
+**Revertido el mismo día, a pedido del usuario («deja mejor los círculos como estaba»):** el ícono de sede sale; vuelven los círculos blancos con borde y número de la entrada anterior, el control «Círculos», el margen de 30 px y `mapa3d.js` sin `--r`. La corrección del defecto **se queda**.
+
+## 2026-10-07 — Publicación `?v=21`: Inicio de la campaña, corrección de los reintentos y título del paso 2
+
+**Qué pidió el usuario.** «Publícalo en ?v=21».
+
+**Qué se hizo.** Las 27 referencias `?v=` de `app/index.html` pasaron de `?v=20` a `?v=21` (las 25 de siempre más `mapa3d.js` e
+`iniciocampana.js`), y la de `data/caldas3d.json` en `iniciocampana.js`. Sale todo lo hecho en local el 2026-10-07 después de `?v=20`: el
+título del paso 2 de la ficha del municipio, el Inicio de la campaña (D-54, con sus ajustes del mismo día) y la pausa de un minuto tras un
+error al pedir las confirmaciones. **Revisión de datos personales antes del commit** (el repositorio es público): sin correos, teléfonos ni
+credenciales en lo que cambia ni en los archivos nuevos; `caldas3d.json` solo trae límites, relieve, códigos y nombres de municipio; sin
+archivos temporales de prueba en `app/`.

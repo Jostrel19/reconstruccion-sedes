@@ -441,8 +441,8 @@ piloto (H1-2); uno del servidor local (H1-9), y uno de datos que va a `CONFLICTO
 ### En discusión (anotado 2026-09-25, actualizado 2026-10-07)
 
 **0. Estado al 2026-10-07.** El plazo de la campaña venció y la jefatura lo amplía sin fecha (D-53: «Plazo en ampliación» y pantalla del alcalde de
-cuatro pasos y cifras con altura pareja, publicadas el 2026-10-07 con `?v=20`). Queda **en pendientes** la propuesta visual (Inicio con mapa 3D, gráficos, barrido de todas las pantallas,
-revisión de PDFs en el panel) y la decisión de fecha y criterio de «a tiempo»; ver `REGISTRO_DESARROLLO.md` (2026-10-07). El historial de GitHub se limpió
+cuatro pasos y cifras con altura pareja, publicadas el 2026-10-07 con `?v=20`). El **Inicio de la campaña con el mapa 3D** (D-54) se publicó el mismo día (`?v=21`), junto con la corrección de los reintentos sin pausa tras un error al pedir las confirmaciones, que toca también la pantalla del alcalde. Quedan **en pendientes** el barrido visual de las demás pantallas
+y la revisión de PDFs en el panel, además de la decisión de fecha y criterio de «a tiempo»; ver `REGISTRO_DESARROLLO.md` (2026-10-07). El historial de GitHub se limpió
 el 2026-10-06 (datos personales): los hashes de commit citados en estos documentos cambiaron.
 
 **1. Confirmación de sedes por los alcaldes — definición cerrada el 2026-09-28 (D-48), sin código. Urgente:

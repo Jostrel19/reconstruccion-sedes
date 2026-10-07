@@ -44,6 +44,10 @@
       const nombre = (R.nom || '').trim().split(/\s+/)[0] || '';
       titulo = nombre ? `Hola, ${nombre.charAt(0)}${nombre.slice(1).toLowerCase()}` : 'Inicio';
       contexto = !SEDES ? 'Consultando el servidor…' : `${R.rot} · datos de ${hace(sedesCargadasEn ? new Date(sedesCargadasEn) : null)}`;
+      // D-54: el Inicio de la campaña habla de la confirmación de sedes, con las dos fechas del plazo (D-53).
+      if (typeof inicioDeCampana === 'function' && inicioDeCampana())
+        contexto = !CONF ? 'Consultando el servidor…' : `Confirmación de sedes por los alcaldes · plazo: ${CONFIRMACION_PLAZO || 'en ampliación'}` +
+          `${typeof CONFIRMACION_PLAZO_ORIGINAL !== 'undefined' ? ` (original: ${CONFIRMACION_PLAZO_ORIGINAL})` : ''} · datos de ${hace(new Date(confCargadoEn))}`;
     }
     if (vista === 'confirmacion'){
       const muni = (CONF && CONF.alcalde && CONF.alcalde.municipio) || (sesion && sesion.alcance) || '';
@@ -77,7 +81,7 @@
     const soltar = ocupar(document.getElementById('cab-actualizar'), 'Actualizando…');
     try {
       if (vista === 'verif') await cargarBandejaVerificacion();
-      else if (vista === 'confirmacion' || vista === 'confirmaciones') { await cargarConfirmaciones(); pintar(); }
+      else if (vista === 'confirmacion' || vista === 'confirmaciones' || (vista === 'inicio' && typeof inicioDeCampana === 'function' && inicioDeCampana())) { await cargarConfirmaciones(); pintar(); }
       else if (vista === 'hallazgos') await cargarHallazgos();
       else if (vista === 'usuarios') await cargarUsuarios();
       else {

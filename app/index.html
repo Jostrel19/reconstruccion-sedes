@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Reconstrucción de sedes — SED Caldas</title>
 <link rel="icon" type="image/png" href="img/favicon.png">
-<link rel="stylesheet" href="css/estilos.css?v=20">
+<link rel="stylesheet" href="css/estilos.css?v=21">
 <!-- Rediseño claro, fase 1 (2026-10-01): ingreso, menú, barra superior, «Confirmación de alcaldes», pantalla del alcalde y Usuarios.
      Solo sobrescribe estilos.css: quitar esta línea devuelve el aspecto anterior. -->
-<link rel="stylesheet" href="css/claro.css?v=20">
+<link rel="stylesheet" href="css/claro.css?v=21">
 </head>
 <body>
 
@@ -220,6 +220,37 @@
                   <header><h2 id="ini-bitacora-tit">Últimos movimientos</h2></header>
                   <div class="cuerpo" id="ini-bitacora"></div>
                 </div>
+              </section>
+
+              <!-- ─── INICIO DE LA CAMPAÑA (D-54): Administrador, Verificador y Consulta mientras dure la confirmación ─── -->
+              <section class="view" id="s-ini-campana">
+                <div class="ic-bento" id="ic-bento">
+                  <article class="ic-t ic-mapa" aria-labelledby="ic-mapa-t">
+                    <div class="ic-stage" id="ic-stage">
+                      <canvas id="ic-cv" role="img" aria-label="Mapa 3D de Caldas coloreado por la etapa de la certificación de cada municipio. Para recorrerlo con teclado use el selector «Municipio»."></canvas>
+                      <div id="ic-marc" class="ic-capa"></div><div id="ic-etq" class="ic-capa"></div><div id="ic-tip" class="ic-tip" role="tooltip"></div>
+                    </div>
+                    <div class="ic-flota ic-vidrio ic-titulo"><div class="eyebrow">Caldas · 26 municipios participan</div>
+                      <h2 class="ic-tt" id="ic-mapa-t">Dónde falta la certificación firmada</h2><p class="sub" id="ic-mapa-sub"></p></div>
+                    <div class="ic-flota ic-controles">
+                      <div class="ic-seg ic-vidrio" id="ic-color" role="group" aria-label="Color del mapa"><span class="ic-lbl">Color</span>
+                        <button type="button" data-c="estado" aria-pressed="true">Etapa</button><button type="button" data-c="sinresp" aria-pressed="false">% sin responder</button><button type="button" data-c="con" aria-pressed="false">% con intervención</button></div>
+                      <div class="ic-seg ic-vidrio" id="ic-circ" role="group" aria-label="Círculos"><span class="ic-lbl">Círculos</span>
+                        <button type="button" data-c="pend" aria-pressed="true">Sedes por responder</button><button type="button" data-c="resp" aria-pressed="false">Sedes respondidas</button><button type="button" data-c="no" aria-pressed="false">Ninguno</button></div>
+                      <label class="ic-seg ic-vidrio ic-sel"><span class="ic-lbl">Municipio</span><select id="ic-muni"><option value="-1">Todos los municipios</option></select></label>
+                    </div>
+                    <div class="ic-flota ic-seg ic-vidrio ic-vistas" id="ic-vistas" role="group" aria-label="Vista del mapa">
+                      <button type="button" data-v="obl" aria-pressed="true">3D</button><button type="button" data-v="sur" aria-pressed="false">Desde el sur</button><button type="button" data-v="top" aria-pressed="false">Plano</button></div>
+                    <div class="ic-flota ic-vidrio ic-pista" id="ic-pista">Pase el mouse o haga clic en un municipio</div>
+                    <aside class="ic-flota ic-vidrio ic-ficha" id="ic-ficha" aria-live="polite" hidden></aside>
+                    <div class="ic-flota ic-zoom"><button class="ic-vidrio" type="button" id="ic-zin" aria-label="Acercar">+</button><button class="ic-vidrio" type="button" id="ic-zout" aria-label="Alejar">−</button></div>
+                    <div class="ic-flota ic-vidrio ic-leyenda" id="ic-leyenda"></div>
+                    <p class="ic-flota ic-mapa-estado" id="ic-mapa-estado">Cargando el mapa…</p>
+                  </article>
+                  <article class="ic-t ic-c-anillo" id="ic-anillo"></article>
+                  <article class="ic-t ic-c-resp" id="ic-resp"></article>
+                </div>
+                <p class="nota-franja" id="ic-pie"></p>
               </section>
 
               <!-- ─── SEDES ─── -->
@@ -907,28 +938,30 @@
 
     </div>
 
-<script src="js/nucleo.js?v=20"></script>
-<script src="js/transporte.js?v=20"></script>
-<script src="js/sesion.js?v=20"></script>
-<script src="js/avisos.js?v=20"></script>
-<script src="js/login.js?v=20"></script>
-<script src="js/registrar.js?v=20"></script>
-<script src="js/ficha.js?v=20"></script>
-<script src="js/pdf.js?v=20"></script>
-<script src="js/verificacion.js?v=20"></script>
-<script src="js/hallazgos.js?v=20"></script>
-<script src="js/usuarios.js?v=20"></script>
-<script src="js/cargas.js?v=20"></script>
-<script src="js/tablero.js?v=20"></script>
-<script src="js/inicio.js?v=20"></script>
-<script src="js/sedes.js?v=20"></script>
-<script src="js/lotes.js?v=20"></script>
-<script src="js/exportar.js?v=20"></script>
-<script src="js/confirmacion.js?v=20"></script>
-<script src="js/certificado.js?v=20"></script>
-<script src="js/avance.js?v=20"></script>
-<script src="js/cabecera.js?v=20"></script>
-<script src="js/buscador.js?v=20"></script>
-<script src="js/arranque.js?v=20"></script>
+<script src="js/nucleo.js?v=21"></script>
+<script src="js/transporte.js?v=21"></script>
+<script src="js/sesion.js?v=21"></script>
+<script src="js/avisos.js?v=21"></script>
+<script src="js/login.js?v=21"></script>
+<script src="js/registrar.js?v=21"></script>
+<script src="js/ficha.js?v=21"></script>
+<script src="js/pdf.js?v=21"></script>
+<script src="js/verificacion.js?v=21"></script>
+<script src="js/hallazgos.js?v=21"></script>
+<script src="js/usuarios.js?v=21"></script>
+<script src="js/cargas.js?v=21"></script>
+<script src="js/tablero.js?v=21"></script>
+<script src="js/inicio.js?v=21"></script>
+<script src="js/sedes.js?v=21"></script>
+<script src="js/lotes.js?v=21"></script>
+<script src="js/exportar.js?v=21"></script>
+<script src="js/confirmacion.js?v=21"></script>
+<script src="js/certificado.js?v=21"></script>
+<script src="js/avance.js?v=21"></script>
+<script src="js/mapa3d.js?v=21"></script>
+<script src="js/iniciocampana.js?v=21"></script>
+<script src="js/cabecera.js?v=21"></script>
+<script src="js/buscador.js?v=21"></script>
+<script src="js/arranque.js?v=21"></script>
 
 </body></html>
