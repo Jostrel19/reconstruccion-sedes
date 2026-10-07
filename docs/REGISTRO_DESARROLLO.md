@@ -2555,6 +2555,13 @@ cambios»), como excepción al congelamiento: el plazo original ya venció. Ante
 «martes 6 de octubre de 2026» y la cuenta regresiva («El plazo venció»). Se subieron las 25 referencias `?v=` de `app/index.html`.
 Los alcaldes que ya cargaron sin formato (3 alcaldías) deben rehacer el PDF: ver H-32 en `CONFLICTOS_Y_HALLAZGOS.md`.
 
+**Comprobado en Pages el 2026-10-07** (commit `187f2a0`, publicado por el flujo de Actions en el primer intento de lectura):
+`index.html` con 25 referencias `?v=20`; `nucleo.js` con `CONFIRMACION_PLAZO_ORIGINAL`, y `CONFIRMACION_PLAZO` y `CONFIRMACION_PLAZO_FECHA`
+vacíos; `confirmacion.js` (HTTP 200) con la casilla `conf-formato-ok`; `estilos.css` con `--f-num`. **No comprobado en la página
+publicada:** el flujo completo con una sesión real de alcalde o de Administrador (se probó en local con backend simulado) y cómo se
+ve en los equipos de las alcaldías. Quien ya tenía la página abierta puede seguir viendo la versión anterior hasta recargar
+(la caché de Pages dura unos 10 minutos).
+
 **Entregado a la jefatura ese día (fuera del repositorio):** el corte de la campaña con las cifras del Excel exportado del
 panel el 2026-10-07 (13 cargadas, 5 por firmar y cargar, 1 respondiendo, 7 sin empezar; 715 de 975 sedes respondidas) y el
 texto del correo para las 3 alcaldías que deben presentar el certificado en el formato de su alcaldía.
