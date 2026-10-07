@@ -9,6 +9,10 @@
     --ok:#1C7048; --ok-bg:#E5F1E9; --alerta:#8A5F09; --alerta-bg:#FAEFD7;
     --err:#952E27; --err-bg:#FAE6E4; --neutro:#556060; --neutro-bg:#EAE9E5;
     --f-tit:Georgia,"Iowan Old Style","Palatino Linotype","Book Antiqua",serif;
+    /* Cifras grandes (cifras de las franjas, anillos, contadores): Georgia dibuja los dígitos «de texto», con alturas
+       distintas (el 1 más bajo que el 8) y `lining-nums` no lo corrige porque Georgia no trae esa variante. Se usa la
+       tipografía de la interfaz, con cifras alineadas (D-53). Los títulos siguen en --f-tit. */
+    --f-num:var(--f-ui);
     --f-ui:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     --f-mono:ui-monospace,"Cascadia Mono",Consolas,"SF Mono",monospace;
     --r:3px;
@@ -94,7 +98,7 @@
   @media (max-width:520px){ .franja{ grid-template-columns:repeat(2,1fr); } }
   .franja .c{ padding:.95rem 1.05rem; border-right:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1); }
   .franja .c:last-child{ border-right:none; }
-  .franja .c b{ display:block; font-family:var(--f-tit); font-size:1.85rem; line-height:1.02; color:#fff; font-variant-numeric:tabular-nums; }
+  .franja .c b{ display:block; font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:1.85rem; line-height:1.02; color:#fff; font-variant-numeric:tabular-nums; }
   .franja .c b .u{ font-size:.8rem; opacity:.7; font-family:var(--f-ui); font-weight:400; }
   .franja .c > span{ display:block; font-size:.75rem; color:rgba(255,255,255,.62); margin-top:.3rem; }
   .franja .c.er b{ color:#F0A49D; } .franja .c.al b{ color:#F0CE7A; } .franja .c.ok b{ color:#7FD3A8; }
@@ -105,7 +109,7 @@
 
   .cifras{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--borde); border:1px solid var(--borde); border-radius:var(--r); overflow:hidden; }
   .cifra{ background:var(--panel); padding:.85rem .95rem; }
-  .cifra b{ display:block; font-family:var(--f-tit); font-size:1.7rem; line-height:1.05; color:var(--gris-osc); font-variant-numeric:tabular-nums; }
+  .cifra b{ display:block; font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:1.7rem; line-height:1.05; color:var(--gris-osc); font-variant-numeric:tabular-nums; }
   .cifra span{ display:block; font-size:.75rem; color:var(--tx-sec); margin-top:.25rem; }
   .cifra.ok b{ color:var(--ok); } .cifra.al b{ color:var(--alerta); } .cifra.er b{ color:var(--err); }
 
@@ -571,7 +575,7 @@
   .tarea{ display:grid; grid-template-columns:auto 1fr; grid-template-rows:1fr auto; column-gap:.85rem; row-gap:.6rem;
     border:1px solid var(--borde); border-left:4px solid var(--borde-f); border-radius:var(--r); padding:.8rem .9rem; background:var(--panel); }
   .tarea.al{ border-left-color:var(--oro); } .tarea.er{ border-left-color:var(--err); }
-  .tarea > b.n{ font-family:var(--f-tit); font-size:2rem; line-height:1; color:var(--gris-osc); font-variant-numeric:tabular-nums; min-width:1.2ch; }
+  .tarea > b.n{ font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:2rem; line-height:1; color:var(--gris-osc); font-variant-numeric:tabular-nums; min-width:1.2ch; }
   .tarea.er > b.n{ color:var(--err); } .tarea.al > b.n{ color:var(--alerta); }
   .tarea > b.esq{ width:2.2rem; height:2rem; }
   .tarea .tx h3{ margin:0 0 .2rem; font-size:.9rem; color:var(--gris-osc); }

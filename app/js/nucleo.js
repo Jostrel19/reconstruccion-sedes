@@ -27,9 +27,16 @@
      «Confirmación de alcaldes» en el riel. Apagada, el alcalde vuelve a ser un
      Responsable de sede como los demás. */
   const CAMPANA_CONFIRMACION = true;
-  const CONFIRMACION_PLAZO = 'martes 6 de octubre de 2026'; // antes viernes 2; lo cambió la jefatura el 2026-09-29
+  // Plazo: vacío = «en ampliación» (sin fecha ni cuenta regresiva). El original, martes 6 de octubre de 2026
+  // (antes viernes 2; lo cambió la jefatura el 2026-09-29), venció; la jefatura lo amplía y aún no hay fecha (D-53).
+  // Cuando la haya: CONFIRMACION_PLAZO = 'viernes 9 de octubre de 2026, 5:00 p. m.' y CONFIRMACION_PLAZO_FECHA = '2026-10-09'.
+  // Plazo ORIGINAL: no se borra ni se sobrescribe, es la constancia de quién entregó a tiempo (D-53). «A tiempo» = la
+  // primera certificación cargada antes de este corte (hora de Bogotá). Criterio propuesto; la jefatura lo confirma.
+  const CONFIRMACION_PLAZO_ORIGINAL = 'martes 6 de octubre de 2026, 11:59 p. m.';
+  const CONFIRMACION_PLAZO_ORIGINAL_FIN = '2026-10-06T23:59:59-05:00';
+  const CONFIRMACION_PLAZO = '';
   // La misma fecha, para la cuenta regresiva del panel de la Secretaría (avance.js). Si cambia el plazo, se cambian las dos.
-  const CONFIRMACION_PLAZO_FECHA = '2026-10-06';
+  const CONFIRMACION_PLAZO_FECHA = '';
   // Fecha del oficio de la jefatura que cita el certificado (texto aprobado).
   // Si el oficio sale con otra fecha, se cambia aquí.
   const CONFIRMACION_FECHA_OFICIO = '29 de septiembre de 2026'; // fecha de envío del oficio (H-27, resuelto 2026-09-29)

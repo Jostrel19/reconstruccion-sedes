@@ -47,11 +47,13 @@
     }
     if (vista === 'confirmacion'){
       const muni = (CONF && CONF.alcalde && CONF.alcalde.municipio) || (sesion && sesion.alcance) || '';
-      contexto = `Municipio de ${muni} · responda cada sede y cargue la certificación firmada a más tardar el ${CONFIRMACION_PLAZO}.`;
+      contexto = `Municipio de ${muni} · responda cada sede y cargue la certificación firmada` +
+        (CONFIRMACION_PLAZO ? ` a más tardar el ${CONFIRMACION_PLAZO}.` : '. Plazo en ampliación.') +
+        (typeof CONFIRMACION_PLAZO_ORIGINAL !== 'undefined' ? ` El plazo original era el ${CONFIRMACION_PLAZO_ORIGINAL}.` : '');
     }
     if (vista === 'confirmaciones'){
       titulo = avMuni ? `Confirmación de ${avMuni}` : titulo;
-      contexto = !CONF ? 'Consultando el servidor…' : `Respuestas y certificaciones de los alcaldes · plazo: ${CONFIRMACION_PLAZO} · datos de ${hace(new Date(confCargadoEn))}`;
+      contexto = !CONF ? 'Consultando el servidor…' : `Respuestas y certificaciones de los alcaldes · plazo: ${CONFIRMACION_PLAZO || 'en ampliación'}${typeof CONFIRMACION_PLAZO_ORIGINAL !== 'undefined' ? ` (original: ${CONFIRMACION_PLAZO_ORIGINAL})` : ''} · datos de ${hace(new Date(confCargadoEn))}`;
     }
     const s = (vista === 'ficha' || vista === 'registrar') && SEDES && SEDES.find(x => String(x.dane_sede) === String(daneActual));
     if (s) contexto = `${s.municipio} · DANE ${s.dane_sede}`;

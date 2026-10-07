@@ -57,15 +57,18 @@
       const cert = m.cargado
         ? `<button class="b sec mini" type="button" data-descargar="${esc(m.cargado.id_certificacion)}">Descargar PDF</button><span class="hace">${esc(hace(m.cargado.fecha))}</span>`
         : (ultimo ? `<button class="b sec mini" type="button" data-descargar="${esc(ultimo.id_certificacion)}">Descargar la anterior</button>` : '<span class="tenue">—</span>');
+      const entrega = entregaChip(m);
       // La barra de «Respondidas» lleva el color del paso del municipio.
       return `<tr class="click" data-av-muni="${esc(m.municipio)}" tabindex="0">
         <td><b>${esc(m.municipio)}</b></td><td class="av-alc">${alcalde}</td><td class="n">${m.n_sedes}</td>
         <td class="av-resp"><div class="av-barra" role="img" aria-label="${m.respondidas} de ${m.n_sedes} respondidas"><i class="et-${avColor(m.estado)}" style="width:${pct}%"></i></div>
           <span class="hace">${m.respondidas} de ${m.n_sedes}</span></td>
-        <td class="n">${m.con_intervencion}</td><td>${estadoConfBadge(m)}</td><td class="av-cert">${cert}</td></tr>`;
+        <td class="n">${m.con_intervencion}</td><td>${estadoConfBadge(m)}</td><td class="av-cert">${cert}${entrega}</td></tr>`;
     }).join('');
     $('av-pie').innerHTML = `Los ${ms.length} municipios de la campaña; sedes oficiales, activas y con matrícula, sin Manizales (${formatNum(nSedes, 0)}). ` +
-      `Solo el alcalde de cada municipio responde y carga la certificación; aquí se consulta. Plazo: ${esc(CONFIRMACION_PLAZO)}.`;
+      `Solo el alcalde de cada municipio responde y carga la certificación; aquí se consulta. Plazo: ${CONFIRMACION_PLAZO ? esc(CONFIRMACION_PLAZO) : 'en ampliación'}` +
+      (typeof CONFIRMACION_PLAZO_ORIGINAL === 'undefined' ? '.' : ` (plazo original: ${esc(CONFIRMACION_PLAZO_ORIGINAL)}). ` +
+        '«A tiempo» = la primera certificación cargada antes del plazo original; si la rehace después, la primera sigue contando.');
   }
 
   /* ─── Certificación firmada: la ruta ─── */
@@ -80,17 +83,39 @@
     pdf: (a, b) => AV_ORDEN_PDF.indexOf(a.estado) - AV_ORDEN_PDF.indexOf(b.estado), car: () => 0 };
   const AV_ORDEN_PDF = ['DESACTUALIZADA', 'GENERADA', 'POR_GENERAR'];
 
+  /* Plazo y trazabilidad (D-53). Siempre se muestran las dos fechas: el plazo original (constancia, no se borra) y el
+     vigente. Sin fecha vigente (plazo en ampliación) no hay cuenta regresiva: el aviso va en gris, que no es un estado
+     de la campaña. */
+  const plazoOriginalVencido = () => typeof CONFIRMACION_PLAZO_ORIGINAL_FIN !== 'undefined' && Date.now() > new Date(CONFIRMACION_PLAZO_ORIGINAL_FIN).getTime();
+  const plazoOriginalHtml = () => typeof CONFIRMACION_PLAZO_ORIGINAL === 'undefined' ? ''
+    : `<span class="av-plazo-orig">Plazo original: <b>${esc(CONFIRMACION_PLAZO_ORIGINAL)}</b>${plazoOriginalVencido() ? ' · venció' : ''}</span>`;
   function plazoAvanceHtml(){
     if (typeof CONFIRMACION_PLAZO_FECHA === 'undefined') return '';
-    const [a, me, d] = CONFIRMACION_PLAZO_FECHA.split('-').map(Number);
-    const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
-    const dias = Math.round((new Date(a, me - 1, d) - hoy) / 864e5);
-    const [cl, tx] = dias < 0 ? ['p-urg', `El plazo venció el ${CONFIRMACION_PLAZO}`]
-      : dias === 0 ? ['p-urg', `Hoy, ${CONFIRMACION_PLAZO}, vence el plazo`]
-      : dias === 1 ? ['p-urg', 'Mañana vence el plazo']
-      : [dias <= 3 ? 'p-med' : 'p-ok', `Faltan ${dias} días · plazo ${CONFIRMACION_PLAZO}`];
-    return `<span class="av-plazo ${cl}">${tx}</span>`;
+    let pastilla;
+    if (!CONFIRMACION_PLAZO_FECHA) pastilla = '<span class="av-plazo p-amp">Plazo en ampliación</span>';
+    else {
+      const [a, me, d] = CONFIRMACION_PLAZO_FECHA.split('-').map(Number);
+      const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+      const dias = Math.round((new Date(a, me - 1, d) - hoy) / 864e5);
+      const [cl, tx] = dias < 0 ? ['p-urg', `El plazo venció el ${CONFIRMACION_PLAZO}`]
+        : dias === 0 ? ['p-urg', `Hoy, ${CONFIRMACION_PLAZO}, vence el plazo`]
+        : dias === 1 ? ['p-urg', 'Mañana vence el plazo']
+        : [dias <= 3 ? 'p-med' : 'p-ok', `Faltan ${dias} días · plazo ${CONFIRMACION_PLAZO}`];
+      pastilla = `<span class="av-plazo ${cl}">${tx}</span>`;
+    }
+    return `<span class="av-plazos">${pastilla}${plazoOriginalHtml()}</span>`;
   }
+
+  /* ¿Entregó a tiempo? Se calcula de las fechas que ya guarda la hoja Certificaciones, sin tocar el servidor: la PRIMERA
+     certificación cargada frente al corte del plazo original. Si después rehace el PDF (p. ej. por el formato), la
+     fecha de la nueva se ve aparte y no borra que entregó a tiempo. Es una marca informativa, no un estado de la campaña. */
+  function entregaPlazo(m){
+    const cargas = (m.certificaciones || []).filter(c => c.evento === 'CARGADO').map(c => new Date(c.fecha)).filter(d => !isNaN(d)).sort((x, y) => x - y);
+    if (!cargas.length || typeof CONFIRMACION_PLAZO_ORIGINAL_FIN === 'undefined') return { clave: 'sin', texto: 'Sin cargar', primera: null };
+    const aTiempo = cargas[0] <= new Date(CONFIRMACION_PLAZO_ORIGINAL_FIN);
+    return { clave: aTiempo ? 'a-tiempo' : 'ampliacion', texto: aTiempo ? 'A tiempo' : 'En la ampliación', primera: cargas[0] };
+  }
+  const entregaChip = m => { const e = entregaPlazo(m); return e.primera ? `<span class="av-entrega ${e.clave}" title="Primera certificación cargada: ${esc(new Date(e.primera).toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' }))}">${e.texto}</span>` : ''; };
 
   // Un segmento por municipio: se ve que son 26 y cuántos ya están (verde = cargada, gris = todavía no).
   function anilloAvanceSvg(n, total){
@@ -273,9 +298,16 @@
     const codigo = m.codigo_actual
       ? `<div class="af-codigo"><span>Código de verificación vigente</span><code>${esc(m.codigo_actual)}</code><span>El PDF firmado debe mostrarlo en el encabezado de la tabla, y su resumen debe coincidir con estas cifras.</span></div>`
       : '<div class="af-codigo"><span>El código de verificación se genera cuando todas las sedes tengan respuesta.</span></div>';
+    // Trazabilidad del plazo (D-53): primera carga, entrega frente al plazo original y la certificación vigente.
+    const ent = entregaPlazo(m), fh = f => esc(new Date(f).toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' }));
+    const traza = ent.primera
+      ? `<div class="af-plazo"><span>Plazo original: ${esc(typeof CONFIRMACION_PLAZO_ORIGINAL === 'undefined' ? '' : CONFIRMACION_PLAZO_ORIGINAL)}</span>` +
+        `<span>Primera carga: <b>${fh(ent.primera)}</b> · <span class="av-entrega ${ent.clave}">${ent.texto}</span></span>` +
+        (m.cargado ? `<span>Certificación vigente: <b>${fh(m.cargado.fecha)}</b></span>` : '') + '</div>'
+      : `<div class="af-plazo"><span>Plazo original: ${esc(typeof CONFIRMACION_PLAZO_ORIGINAL === 'undefined' ? '' : CONFIRMACION_PLAZO_ORIGINAL)}</span><span>Todavía no ha cargado ninguna certificación.</span></div>`;
     const al = (m.alcaldes || []).filter(a => a.activo);
     return `<section class="af-card" aria-labelledby="af-t2"><h2 id="af-t2">Certificación <span class="est ${cls}">${esc(txt)}</span></h2>
-      ${aviso}<ol class="af-pasos">${p1}${p2}${p3}</ol>${codigo}
+      ${aviso}<ol class="af-pasos">${p1}${p2}${p3}</ol>${codigo}${traza}
       <p class="af-alc">Alcalde: ${al.length ? al.map(a => `<b>${esc(a.nombre)}</b> · ${esc(a.correo)}`).join('; ') : '<b>sin usuario activo</b>'}</p>
       ${historialConfHtml(m, false)}</section>`;
   }
@@ -287,9 +319,18 @@
   // municipio abierto). Los campos son los del oficio más la identificación.
   const ENC_CONF_CSV = ['DANE sede', 'Municipio', 'Institución', 'Sede', 'Nivel de afectación (censo)',
     '¿Intervención terminada o en proceso?', 'Quién interviene', 'Nombre de quién interviene', 'Estado de la obra',
-    'Registrado por', 'Fecha de registro', 'Estado del municipio', 'Código de verificación vigente'];
+    'Registrado por', 'Fecha de registro', 'Estado del municipio', 'Código de verificación vigente',
+    // Trazabilidad del plazo (D-53): se calculan aquí con las fechas de la hoja Certificaciones.
+    'Primera carga', 'Entrega', 'Certificación vigente (carga)', 'Plazo aplicado'];
   // Un texto escrito por un usuario que empieza por = + - @ lo ejecutaría Excel como fórmula.
   const textoCSV = t => /^[=+\-@]/.test(String(t || '')) ? "'" + t : (t || '');
+  // Primera carga · Entrega (a tiempo, en la ampliación o sin cargar) · fecha de la certificación vigente · plazo aplicado.
+  function columnasPlazoCSV(m){
+    const e = entregaPlazo(m);
+    const orig = typeof CONFIRMACION_PLAZO_ORIGINAL === 'undefined' ? 'Original' : 'Original (' + CONFIRMACION_PLAZO_ORIGINAL + ')';
+    return [e.primera ? fechaCSV(e.primera) : '', e.texto, m.cargado ? fechaCSV(m.cargado.fecha) : '',
+      e.clave === 'a-tiempo' ? orig : (e.clave === 'ampliacion' ? 'Ampliación' : '')];
+  }
   function exportarConfirmaciones(){
     if (!CONF) return;
     const sedes = avMuni ? CONF.sedes.filter(s => s.municipio === avMuni) : CONF.sedes;
@@ -300,7 +341,8 @@
       const m = porMuni[s.municipio] || {};
       return [s.dane_sede, s.municipio, s.institucion, s.sede, nivelTexto(s), r.tiene_intervencion || 'Sin responder',
         r.quien_interviene || '', textoCSV(r.nombre_quien_interviene), r.estado_obra || '', r.registrado_por || '',
-        fechaCSV(r.fecha_registro), (ESTADO_CONF[m.estado] || [0, ''])[1], m.codigo_actual || ''];
+        fechaCSV(r.fecha_registro), (ESTADO_CONF[m.estado] || [0, ''])[1], m.codigo_actual || '',
+        ...columnasPlazoCSV(m)];
     });
     descargarCSV(`confirmacion-alcaldes_${avMuni ? slug(avMuni) : 'todos'}_${hoyArchivo()}.csv`, ENC_CONF_CSV, filas);
   }

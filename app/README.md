@@ -107,5 +107,5 @@ Revisada el 2026-09-25. Al tocar la interfaz, mantener:
 entra directo a «Confirmación de sedes» y no ve nada más; Verificador y Consulta entran directo a «Confirmación de alcaldes» y no ven
 nada más (D-51); el Administrador ve «Confirmación de alcaldes» en el riel junto a sus demás pantallas. En `false`, el alcalde vuelve a ser un Responsable de sede como los demás. Esto solo decide la pantalla: el servidor aplica la misma regla por su cuenta (D-49,
 `Codigo.gs::_bloqueoCampana`, propiedad del script `CAMPANA_CONFIRMACION`). Al terminar la campaña hay que apagar las dos.
-Ahí mismo están el plazo (`CONFIRMACION_PLAZO`) y la fecha del oficio que cita el certificado
+Ahí mismo están el plazo (`CONFIRMACION_PLAZO` y `CONFIRMACION_PLAZO_FECHA`; vacíos = «Plazo en ampliación», sin fecha ni cuenta regresiva, D-53) y la fecha del oficio que cita el certificado
 (`CONFIRMACION_FECHA_OFICIO`, hoy «29 de septiembre de 2026»: H-27, resuelto). Los permisos reales los revisa el servidor en cada acción.

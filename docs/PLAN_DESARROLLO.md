@@ -438,7 +438,12 @@ decidido por el usuario (opción a → **D-47**) y hecho; uno para investigar (H
 piloto (H1-2); uno del servidor local (H1-9), y uno de datos que va a `CONFLICTOS_Y_HALLAZGOS.md`
 (H1-13 → H-20). **Falta ver en real** las correcciones del frontend (sin despliegue de Apps Script).
 
-### En discusión (anotado 2026-09-25, actualizado 2026-09-28)
+### En discusión (anotado 2026-09-25, actualizado 2026-10-07)
+
+**0. Estado al 2026-10-07.** El plazo de la campaña venció y la jefatura lo amplía sin fecha (D-53: «Plazo en ampliación» y pantalla del alcalde de
+cuatro pasos y cifras con altura pareja, publicadas el 2026-10-07 con `?v=20`). Queda **en pendientes** la propuesta visual (Inicio con mapa 3D, gráficos, barrido de todas las pantallas,
+revisión de PDFs en el panel) y la decisión de fecha y criterio de «a tiempo»; ver `REGISTRO_DESARROLLO.md` (2026-10-07). El historial de GitHub se limpió
+el 2026-10-06 (datos personales): los hashes de commit citados en estos documentos cambiaron.
 
 **1. Confirmación de sedes por los alcaldes — definición cerrada el 2026-09-28 (D-48), sin código. Urgente:
 va antes que todo lo demás.** El detalle de lo decidido está en **D-48** (`CLAUDE.md` §2); el texto aprobado del

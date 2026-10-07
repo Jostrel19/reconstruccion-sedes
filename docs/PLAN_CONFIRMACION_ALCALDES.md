@@ -613,3 +613,17 @@ con intervención todavía»); la ruta se oculta en el detalle; sin desplazamien
 formulario de ingreso queda arriba y la ficha en una columna con las obras en 2 × 2.
 
 **Publicado y comprobado en Pages el 2026-10-01** (commit `da965ee`, por pedido del usuario: «Súbelo así»): `index.html` con 25 referencias `?v=19`, el contenedor `av-det-ficha` y la barra `login-pasos`; `avance.js`, `login.js` y `claro.css` con el código nuevo. Falta la revisión en real del usuario.
+
+
+### 2026-10-07 — Plazo en ampliación y pantalla del alcalde de cuatro pasos (D-53)
+
+El plazo del 2026-10-06 venció y la jefatura lo amplía sin fecha por ahora: la aplicación dice «Plazo en ampliación» (sin
+cuenta regresiva). La pantalla del alcalde pasa a cuatro pasos, con el de «pasar el contenido al formato oficial de su
+alcaldía» como paso propio y una casilla, y el diálogo de carga pide confirmar el formato antes de cargar. Hecho, probado
+en local y **publicado el 2026-10-07 (`?v=20`)**, como excepción al congelamiento. Corte del 2026-10-07: 13 municipios con certificación cargada, 5 por
+firmar y cargar, 1 respondiendo (Supía, 36 de 45 sedes) y 7 sin empezar; 3 alcaldías cargaron el certificado sin el formato
+de su alcaldía y se les pide rehacerlo (H-32). La trazabilidad del plazo original se conserva: el panel muestra las dos fechas, marca
+cada municipio como «A tiempo» o «En la ampliación» (primera carga antes del 2026-10-06 23:59, Bogotá; criterio a confirmar con la
+jefatura) y el Excel trae cuatro columnas nuevas. Una sección aparte «Entrega frente al plazo» se construyó y se retiró por
+redundante. También se corrigieron las cifras grandes (el 1 y el 8 se veían de distinta altura). Detalle en
+`REGISTRO_DESARROLLO.md` y D-53.

@@ -135,7 +135,7 @@
   .av-tile{ position:relative; background:var(--sup); border-radius:var(--r-tile); box-shadow:var(--sombra-1); overflow:hidden; min-width:0; }
   /* Marcado de un avance.js anterior en caché (seis cifras sueltas): se ven como mosaicos. */
   .av-bento > .c{ grid-column:span 2; background:var(--sup); border-radius:14px; box-shadow:var(--sombra-1); padding:14px 16px; }
-  .av-bento > .c b{ display:block; font-family:var(--f-tit); font-size:28px; line-height:1.05; color:var(--t1); }
+  .av-bento > .c b{ display:block; font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:28px; line-height:1.05; color:var(--t1); }
   .av-bento > .c > span{ display:block; margin-top:6px; font-size:12px; color:var(--t3); }
 
   /* Certificación firmada */
@@ -150,6 +150,19 @@
   .av-plazo.p-ok{ background:var(--oro0); color:#6B5000; }
   .av-plazo.p-med{ background:var(--res-bg); color:var(--res-tx); }
   .av-plazo.p-urg{ background:var(--sin-bg); color:var(--sin-tx); }
+  /* Trazabilidad del plazo (D-53): el plazo original siempre a la vista, junto al vigente, y la marca «a tiempo / en la
+     ampliación» por municipio. Van en gris: no son un estado de la campaña. */
+  .av-plazos{ margin-left:auto; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+  .av-plazos .av-plazo{ margin-left:0; }
+  .av-plazo-orig{ font-size:12px; color:var(--t3); text-align:right; }
+  .av-plazo-orig b{ color:var(--t2); font-weight:650; }
+  .av-entrega{ display:inline-block; margin-top:6px; padding:2px 9px; border-radius:999px; font-size:11.5px; font-weight:650; background:var(--sup2); color:var(--t2); box-shadow:inset 0 0 0 1px var(--contorno); white-space:nowrap; }
+  .av-cert .av-entrega{ display:block; width:max-content; }
+  .af-plazo{ margin-top:12px; padding:10px 14px; border-radius:12px; background:var(--sup2); font-size:12.5px; color:var(--t2); display:grid; gap:3px; }
+  .af-plazo b{ color:var(--t1); } .af-plazo .av-entrega{ margin:0 0 0 4px; background:var(--sup); }
+  @media (max-width:760px){ .av-plazos{ margin-left:0; align-items:flex-start; } .av-plazo-orig{ text-align:left; } }
+  /* Plazo en ampliación (D-53): gris, porque no es un estado de la campaña. */
+  .av-plazo.p-amp{ background:var(--sup2); color:var(--t2); box-shadow:inset 0 0 0 1px var(--contorno); }
   .av-meta{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; }
   .av-meta p{ margin:0; max-width:190px; font-size:13px; line-height:1.4; color:var(--t2); }
   .av-anillo{ position:relative; width:156px; height:156px; }
@@ -157,7 +170,7 @@
   .av-anillo path{ fill:none; stroke-width:14; stroke:#E6EBF1; }
   .av-anillo path.s-car{ stroke:var(--verde); }
   .av-centro{ position:absolute; inset:0; display:grid; place-content:center; }
-  .av-centro b{ font-family:var(--f-tit); font-size:50px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
+  .av-centro b{ font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:50px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
   .av-centro span{ margin-top:4px; font-size:13px; color:var(--t3); }
   .av-pasos{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px 22px; align-self:start; }
   .av-paso{ position:relative; min-width:0; }
@@ -197,7 +210,7 @@
     background:var(--sup) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='160' viewBox='0 0 640 160'%3E%3Cg fill='none' stroke='%23006B39' stroke-opacity='.10' stroke-width='1'%3E%3Cpath d='M0 150 C 92 120 172 134 274 110 S 452 82 640 100'/%3E%3Cpath d='M0 126 C 90 96 170 110 270 86 S 450 58 640 76'/%3E%3Cpath d='M0 102 C 88 70 168 86 266 62 S 448 36 640 52'/%3E%3Cpath d='M0 78 C 86 46 166 62 262 38 S 446 14 640 28'/%3E%3Cpath d='M0 54 C 84 22 164 38 258 14 S 444 -10 640 4'/%3E%3C/g%3E%3C/svg%3E") right -40px bottom -60px / 560px 140px no-repeat; }
   .av-rot{ display:flex; align-items:center; gap:8px; margin:0; font-size:13px; font-weight:600; color:var(--t2); }
   .av-pct{ margin-left:6px; font-size:12px; font-weight:700; color:var(--v8); background:var(--v0); padding:2px 9px; border-radius:999px; }
-  .av-num{ margin-top:8px; font-family:var(--f-tit); font-size:46px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
+  .av-num{ margin-top:8px; font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:46px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
   .av-num small{ margin-left:6px; font-family:var(--f-ui); font-size:18px; color:var(--t3); }
   .av-barra-g{ height:10px; margin-bottom:12px; background:var(--sup2); border-radius:999px; overflow:hidden; }
   .av-barra-g i{ display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#0E8A4F,var(--verde)); transform-origin:left center; animation:crecer .9s cubic-bezier(.2,.7,.2,1) both; }
@@ -246,7 +259,7 @@
   .af-resp{ display:grid; grid-template-columns:auto minmax(0,1fr); align-items:end; gap:6px 28px; }
   .af-rot{ grid-column:1 / -1; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--t2); }
   .af-pct{ font-size:12px; font-weight:700; color:var(--t2); background:var(--sup2); padding:2px 9px; border-radius:999px; }
-  .af-num{ font-family:var(--f-tit); font-size:46px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
+  .af-num{ font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:46px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
   .af-num small{ margin-left:6px; font-family:var(--f-ui); font-size:18px; color:var(--t3); }
   .af-barra{ height:10px; margin-bottom:8px; background:var(--sup2); border-radius:999px; overflow:hidden; }
   .af-barra i{ display:block; height:100%; border-radius:inherit; background:var(--af-b,var(--contorno)); transform-origin:left center; animation:crecer .9s cubic-bezier(.2,.7,.2,1) both; }
@@ -272,7 +285,7 @@
   .af-obras li{ position:relative; padding:12px 14px; border-radius:12px; background:var(--sup2); }
   .af-obras li:not(:last-child)::after{ content:""; position:absolute; right:-8px; top:50%; width:6px; height:6px; margin-top:-3px;
     border-top:1.5px solid var(--t3); border-right:1.5px solid var(--t3); transform:rotate(45deg); }
-  .af-obras b{ display:block; font-family:var(--f-tit); font-size:26px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums; }
+  .af-obras b{ display:block; font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:26px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums; }
   .af-obras span{ display:block; margin-top:6px; font-size:12px; color:var(--t3); }
   .af-tr{ height:4px; margin-top:10px; border-radius:999px; background:var(--contorno); overflow:hidden; }
   .af-tr i{ display:block; height:100%; background:#334155; transform-origin:left center; animation:crecer .9s cubic-bezier(.2,.7,.2,1) both; }
@@ -310,7 +323,7 @@
   .cc-avance{ display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-areas:"rot barra" "num nota"; align-items:center; gap:6px 32px; }
   .cc-rot{ grid-area:rot; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--t2); }
   .cc-pct{ margin-left:4px; font-size:12px; font-weight:700; color:var(--t2); background:var(--sup2); padding:2px 9px; border-radius:999px; }
-  .cc-num{ grid-area:num; font-family:var(--f-tit); font-size:46px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
+  .cc-num{ grid-area:num; font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:46px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
   .cc-num small{ margin-left:6px; font-family:var(--f-ui); font-size:18px; color:var(--t3); }
   .cc-barra{ grid-area:barra; height:10px; background:var(--sup2); border-radius:999px; overflow:hidden; }
   .cc-barra i{ display:block; height:100%; border-radius:inherit; background:var(--cc-bar,var(--contorno)); transform-origin:left center; animation:crecer .9s cubic-bezier(.2,.7,.2,1) both; }
@@ -320,7 +333,7 @@
   .cc-avance p{ grid-area:nota; margin:0; font-size:12.5px; color:var(--t3); }
   .cc-mini{ display:flex; flex-direction:column; gap:12px; }
   .cc-mini span, .conf-cifras > .c > span{ font-size:13px; font-weight:600; color:var(--t2); }
-  .cc-mini b, .conf-cifras > .c b{ font-family:var(--f-tit); font-size:36px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums; }
+  .cc-mini b, .conf-cifras > .c b{ font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:36px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums; }
   .cc-mini.falta b{ color:var(--sin-tx); }
   /* Marcado de un confirmacion.js anterior en caché (cinco cifras sueltas). */
   .conf-cifras > .c{ display:flex; flex-direction:column-reverse; justify-content:flex-end; gap:10px; }
@@ -342,6 +355,16 @@
   .cp.hecho .cp-n{ background:var(--verde); color:#fff; box-shadow:none; }
   .cp.hecho .cp-tx h3{ color:var(--v8); }
   .cp .b:disabled:not(.cargando){ background:#E9EEF3; color:var(--t3); box-shadow:inset 0 0 0 1px var(--contorno); }
+  /* D-53: cuatro pasos, en dos columnas (se leen de izquierda a derecha y de arriba abajo); en celular, uno bajo otro. */
+  .conf-pasos{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  @media (max-width:760px){ .conf-pasos{ grid-template-columns:1fr; } }
+  .cp-lista{ margin:0 0 10px; padding-left:18px; font-size:13px; color:var(--t2); display:grid; gap:3px; }
+  .cp-lista b{ color:var(--t1); }
+  /* Casilla «ya pasé el contenido a mi formato» (paso 3) y la del diálogo de carga. */
+  .conf-casilla{ display:flex; gap:10px; align-items:flex-start; background:var(--sup); border-radius:10px; padding:10px 12px; font-size:13px; font-weight:600; color:var(--t1); box-shadow:inset 0 0 0 1px var(--contorno); cursor:pointer; margin:8px 0 0; }
+  .conf-casilla input{ margin-top:2px; width:16px; height:16px; flex:none; accent-color:var(--verde); }
+  .conf-casilla span{ font-weight:400; color:var(--t2); } .conf-casilla span b{ color:var(--t1); }
+  #dlg .conf-casilla{ background:var(--sup2); box-shadow:none; margin:10px 0; }
   .conf-soltar{ border:1.5px dashed #7FD3C7; border-radius:12px; background:var(--sup); padding:12px; gap:8px; }
   .conf-soltar:hover{ border-color:var(--pdf-pt); background:var(--sup); }
   .conf-hist{ border-radius:12px; background:var(--sup2); padding:10px 14px; }
@@ -403,7 +426,7 @@
   .usu-cifras:empty{ display:none; }
   .uc{ background:var(--sup); border-radius:var(--r-tile); box-shadow:var(--sombra-1); padding:18px 20px; min-width:0; }
   .uc > span{ display:block; font-size:13px; font-weight:600; color:var(--t2); }
-  .uc > b{ display:block; margin-top:12px; font-family:var(--f-tit); font-size:36px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
+  .uc > b{ display:block; margin-top:12px; font-family:var(--f-num); font-weight:650; letter-spacing:-.02em; font-size:36px; line-height:1; color:var(--t1); font-variant-numeric:tabular-nums lining-nums; }
   .uc > b small{ margin-left:4px; font-family:var(--f-ui); font-size:15px; font-weight:400; color:var(--t3); }
   .uc p{ margin:8px 0 0; font-size:12.5px; line-height:1.45; color:var(--t3); }
   /* Municipios con alcalde activo: verde si están todos; rosa (falta) si alguno se quedó sin alcalde. */

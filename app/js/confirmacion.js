@@ -52,6 +52,7 @@
   let confEdit = {};        // dane -> respuesta editada y todavía sin guardar
   let confErrores = {};     // dane -> error que devolvió el servidor al guardar
   let confFiltro = 'todas';
+  let confFormatoListo = '';  // código de verificación para el que marcó «ya pasé el contenido a mi formato» (solo en pantalla)
 
   function cargarConfirmaciones(){
     if (promesaConf) return promesaConf;
@@ -175,18 +176,21 @@
     pintarBarraConf();
   }
 
-  // Los tres pasos del proceso: el orden es información (el que sigue va resaltado).
+  // Los cuatro pasos del proceso: el orden es información (el que sigue va resaltado).
+  // Desde D-53 el paso de pasar el contenido al formato de la alcaldía es un paso propio, con su casilla:
+  // el servidor nunca lee el PDF, así que la pantalla es lo único que puede hacer visible ese paso.
+  // La casilla vive solo en la pantalla (no se guarda): si recarga, la vuelve a marcar.
   function pintarPasosConf(m){
     const cambios = confPendientesDeGuardar().length;
     const todas = m.respondidas === m.n_sedes;
     const fecha = f => f ? new Date(f).toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' }) : '';
-    // data-et: color del paso actual (claro.css): responder va en ámbar; generar, firmar y cargar, en verde azulado.
+    // data-et: color del paso actual (claro.css): responder va en ámbar; del Word en adelante, en verde azulado.
     const paso = (n, estado, titulo, cuerpo) =>
       `<li class="cp ${estado}" data-et="${n === 1 ? 'res' : 'pdf'}"><span class="cp-n" aria-hidden="true">${estado === 'hecho' ? '✓' : n}</span>
         <div class="cp-tx"><h3>${titulo}<span class="sr"> — ${estado === 'hecho' ? 'hecho' : (estado === 'act' ? 'paso actual' : 'pendiente')}</span></h3>${cuerpo}</div></li>`;
 
     const p1 = todas && !cambios
-      ? paso(1, 'hecho', 'Responder todas las sedes', `<p>Las ${m.n_sedes} sedes tienen respuesta. Puede corregir cualquiera antes de generar la certificación.</p>`)
+      ? paso(1, 'hecho', 'Responder todas las sedes', `<p>Las ${m.n_sedes} sedes tienen respuesta. Puede corregir cualquiera antes de descargar la certificación.</p>`)
       : paso(1, 'act', 'Responder todas las sedes', `<p>${todas ? 'Tiene cambios sin guardar.' : `Faltan <b>${m.n_sedes - m.respondidas}</b> de ${m.n_sedes}.`} Responda en la tabla de abajo y pulse <b>Guardar cambios</b>; puede hacerlo por partes.</p>`);
 
     // La certificación se baja en Word (D-50). Los id conf-btn-generar y
@@ -195,38 +199,57 @@
     const generada = m.estado === 'GENERADA' || m.estado === 'CARGADA';
     let c2;
     if (generada){
-      c2 = `<p>Generada${m.generado ? ' el ' + esc(fecha(m.generado.fecha)) : ''} · código de verificación <b class="mono">${esc(m.codigo_actual)}</b>.</p>
+      c2 = `<p>Descargada${m.generado ? ' el ' + esc(fecha(m.generado.fecha)) : ''} · código de verificación <b class="mono">${esc(m.codigo_actual)}</b>. Es el contenido que debe pasar a su formato: <b>no se firma tal como se descarga.</b></p>
         <button class="b sec mini" type="button" id="conf-btn-imprimir">Descargar el Word de nuevo</button>`;
     } else {
-      const bloqueo = !todas ? 'Se habilita cuando todas las sedes tengan respuesta.' : (cambios ? 'Guarde los cambios antes de generarla.' : '');
-      c2 = `<p>La aplicación arma la certificación en Word con sus respuestas. Copie su contenido en el formato oficial de su alcaldía <b>sin modificarlo</b>, con la tabla completa y el código de verificación.</p>
+      const bloqueo = !todas ? 'Se habilita cuando todas las sedes tengan respuesta.' : (cambios ? 'Guarde los cambios antes de descargarla.' : '');
+      c2 = `<p>La aplicación arma la certificación en Word con sus respuestas. Es el contenido que debe pasar a su formato: <b>no se firma tal como se descarga.</b></p>
         <button class="b mini" type="button" id="conf-btn-generar" ${bloqueo ? 'disabled' : ''}>Descargar la certificación en Word</button>
         ${bloqueo ? `<span class="hace">${bloqueo}</span>` : ''}`;
     }
-    const p2 = paso(2, generada ? 'hecho' : (todas && !cambios ? 'act' : ''), 'Generar la certificación en Word', c2);
+    const p2 = paso(2, generada ? 'hecho' : (todas && !cambios ? 'act' : ''), 'Descargar la certificación en Word', c2);
 
-    let c3, e3 = '';
+    // Paso 3: pasar el contenido al formato oficial de la alcaldía. Con la certificación ya cargada no se pide nada,
+    // pero se recuerda cuál es el formato que debe tener (las cargadas sin él se rehacen desde aquí).
+    const cargada = m.estado === 'CARGADA';
+    const formatoOk = m.estado === 'GENERADA' && confFormatoListo === m.codigo_actual;
+    const TIT3 = 'Pasar el contenido al formato oficial de su alcaldía';
+    let p3;
+    if (cargada){
+      p3 = paso(3, 'hecho', TIT3, '<p>La certificación cargada debe estar en <b>el formato oficial de su alcaldía</b>. Si no lo está, pase el contenido a ese formato, fírmelo y cargue otro escaneo.</p>');
+    } else if (m.estado === 'GENERADA'){
+      p3 = paso(3, formatoOk ? 'hecho' : 'act', TIT3, `<ul class="cp-lista">
+          <li>Abra el formato de su alcaldía (con su membrete).</li>
+          <li>Copie el texto y la <b>tabla completa</b>, sin cambiar nada.</li>
+          <li>Conserve el <b>código de verificación</b> <b class="mono">${esc(m.codigo_actual)}</b>.</li></ul>
+        <label class="conf-casilla"><input type="checkbox" id="conf-formato-ok" ${formatoOk ? 'checked' : ''}> Ya pasé el contenido al formato de mi alcaldía</label>`);
+    } else {
+      p3 = paso(3, '', TIT3, '<p>Se habilita cuando descargue la certificación.</p>');
+    }
+
+    let c4, e4 = '';
     const elegir = `<input type="file" id="conf-pdf" accept="application/pdf,.pdf" class="oculto">`;
-    if (m.estado === 'CARGADA'){
-      e3 = 'hecho';
-      c3 = `<p><b>Reporte finalizado.</b> Cargada el ${esc(fecha(m.cargado.fecha))}: ${esc(m.cargado.archivo_nombre)} (${tamanoTexto(m.cargado.tamano_bytes)}).</p>
+    if (cargada){
+      e4 = 'hecho';
+      c4 = `<p><b>Reporte finalizado.</b> Cargada el ${esc(fecha(m.cargado.fecha))}: ${esc(m.cargado.archivo_nombre)} (${tamanoTexto(m.cargado.tamano_bytes)}).</p>
         <div class="acciones-v"><button class="b sec mini" type="button" data-descargar="${esc(m.cargado.id_certificacion)}">Ver el PDF cargado</button>
         <button class="b sec mini" type="button" id="conf-btn-elegir">Cargar otro escaneo</button></div>${elegir}
-        <p class="hace">Si cambia una respuesta, esta certificación deja de valer y debe generar y cargar una nueva.</p>`;
-    } else if (m.estado === 'GENERADA'){
-      e3 = 'act';
-      c3 = `<p>Fírmela por parte del Alcalde Municipal, escanéela como <b>un solo archivo PDF</b> con todas sus páginas (máximo 10 MB) y cárguela. Con este cargue se da por finalizado el reporte.</p>
+        <p class="hace">Si cambia una respuesta, esta certificación deja de valer y debe descargar, pasar al formato y cargar una nueva.</p>`;
+    } else if (formatoOk){
+      e4 = 'act';
+      c4 = `<p>Firme <b>el documento en el formato de su alcaldía</b> (no el Word que descargó) por parte del Alcalde Municipal, escanéelo como <b>un solo archivo PDF</b> con todas sus páginas (máximo 10 MB) y cárguelo. Con este cargue se da por finalizado el reporte.</p>
         <div class="soltar conf-soltar" id="conf-soltar"><button class="b mini" type="button" id="conf-btn-elegir">Elegir el PDF firmado</button>
         <span class="hace">o arrástrelo aquí. Si pesa más de 10 MB, escanéelo en blanco y negro o en escala de grises, a 150 o 200 ppp.</span></div>${elegir}`;
     } else {
-      c3 = '<p>Se habilita cuando genere la certificación.</p>';
+      c4 = `<p>Firme <b>el documento en el formato de su alcaldía</b>, escanéelo como un solo PDF (máximo 10 MB) y cárguelo.</p>
+        <p class="hace">${m.estado === 'GENERADA' ? 'Se habilita cuando marque que ya pasó el contenido a su formato.' : 'Se habilita cuando descargue la certificación y la pase a su formato.'}</p>`;
     }
-    const p3 = paso(3, e3, 'Firmar, escanear y cargar la certificación', c3);
+    const p4 = paso(4, e4, 'Firmar, escanear y cargar', c4);
 
     const aviso = m.cargada_desactualizada
-      ? `<div class="aviso-conf"><b>La certificación que cargó ya no corresponde a sus respuestas.</b> Cambió una respuesta después de cargarla: ${m.estado === 'GENERADA' ? 'cargue la nueva, firmada.' : 'genere la certificación de nuevo, fírmela y cárguela.'}</div>`
+      ? `<div class="aviso-conf"><b>La certificación que cargó ya no corresponde a sus respuestas.</b> Cambió una respuesta después de cargarla: ${m.estado === 'GENERADA' ? 'páselo al formato de su alcaldía, fírmelo y cargue la nueva.' : 'descargue la certificación de nuevo, páselo al formato de su alcaldía, fírmelo y cárguelo.'}</div>`
       : '';
-    document.getElementById('conf-pasos').innerHTML = aviso + `<ol class="conf-pasos">${p1}${p2}${p3}</ol>` + historialConfHtml(m, true);
+    document.getElementById('conf-pasos').innerHTML = aviso + `<ol class="conf-pasos">${p1}${p2}${p3}${p4}</ol>` + historialConfHtml(m, true);
   }
 
   // Certificaciones cargadas antes (historial). En el panel de la Secretaría se
@@ -398,11 +421,20 @@
     }
     const cabecera = new TextDecoder('latin1').decode(await archivo.slice(0, 5).arrayBuffer());
     if (cabecera !== '%PDF-'){ avisar('El archivo no es un PDF válido. Escanee la certificación firmada como PDF.', 'error'); return; }
-    const ok = await confirmar({ titulo: 'Cargar la certificación firmada',
+    // «Cargar» queda deshabilitado hasta marcar la casilla: último control antes de cargar (D-53).
+    const dialogo = mostrarDialogo({ titulo: 'Cargar la certificación firmada',
       html: `<p>Va a cargar <b>${esc(archivo.name)}</b> (${tamanoTexto(archivo.size)}) como la certificación firmada de ${esc(m ? m.municipio : '')}.</p>
-        <p class="nota-dlg">Revise que sea el documento completo y firmado, y que muestre el código de verificación <b class="mono">${esc(m ? m.codigo_actual : '')}</b>. Con este cargue se da por finalizado el reporte.</p>`,
-      aceptar: 'Cargar' });
-    if (!ok) return;
+        <label class="conf-casilla"><input type="checkbox" id="dlg-formato-ok"> <span>Confirmo que es el <b>formato oficial de mi alcaldía</b>, está firmado y muestra el código <b class="mono">${esc(m ? m.codigo_actual : '')}</b>.</span></label>
+        <p class="nota-dlg">Con este cargue se da por finalizado el reporte.</p>`,
+      botones: [{ texto: 'Cancelar', valor: false, clase: 'sec' }, { texto: 'Cargar', valor: true }] });
+    const casilla = document.getElementById('dlg-formato-ok');
+    const botonCargar = document.querySelector('#dlg-acc .b:last-child');
+    if (casilla && botonCargar){
+      botonCargar.disabled = true;
+      casilla.addEventListener('change', () => { botonCargar.disabled = !casilla.checked; });
+      casilla.focus();
+    }
+    if ((await dialogo) !== true) return;
     const btn = document.getElementById('conf-btn-elegir');
     const soltar = ocupar(btn, 'Cargando… puede tardar unos minutos');
     try {
@@ -451,7 +483,7 @@
   async function reimprimirCertificadoUI(btn){ await generarCertificadoUI(btn); }
 
   function olvidarConfirmaciones(){
-    CONF = null; confCargadoEn = 0; confError = ''; confEdit = {}; confErrores = {}; confFiltro = 'todas';
+    CONF = null; confCargadoEn = 0; confError = ''; confEdit = {}; confErrores = {}; confFiltro = 'todas'; confFormatoListo = '';
     const ayuda = document.getElementById('conf-ayuda');
     if (ayuda){ ayuda.open = true; delete ayuda.dataset.decidida; }
   }

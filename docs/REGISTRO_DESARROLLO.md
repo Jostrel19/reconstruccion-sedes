@@ -2489,3 +2489,89 @@ auditoría de seguridad del 2026-09-29, fuera del repositorio en `trabajo29.09_a
   `d3733eb` responde HTTP 200) hasta que GitHub los borre de su servidor. Solo lo hace el soporte de GitHub, a solicitud
   del dueño del repositorio (https://support.github.com/contact, «Remove sensitive data from a repository»).
 - **No se tocó:** el correo del autor de los commits (el del propio practicante, inherente a git).
+
+
+## 2026-10-07 — Plazo en ampliación, trazabilidad, pantalla del alcalde de cuatro pasos y cifras (D-53, `?v=20`)
+
+**Pedido del usuario:** el plazo «lo dejaremos como "En ampliación" sin alguna fecha de corte específica»; la pantalla del
+alcalde debe indicar mejor qué se quiere conseguir; entre la muestra que se hizo ese día y la propuesta visual anterior,
+eligió la de la propuesta («La de pantalla del alcalde completa + plazo»), con una excepción: **sin la nota dentro del
+Word**. Antes de aplicar se le explicó esa nota (riesgo: si el alcalde copia todo, viaja a su formato y llega en el PDF
+firmado) y la descartó. El resto de la propuesta visual «queda en pendientes por ahora».
+
+**Qué se cambió (solo frontend; ni backend, ni hojas, ni Word, ni código de verificación):**
+- `app/js/nucleo.js`: `CONFIRMACION_PLAZO` y `CONFIRMACION_PLAZO_FECHA` quedan vacíos = «en ampliación». Con valores
+  vuelve todo lo anterior (el comentario trae el ejemplo de cómo ponerlos).
+- `app/js/avance.js` (`plazoAvanceHtml`, pie del panel) y `app/js/cabecera.js` (línea de contexto del alcalde y del panel):
+  sin fecha dicen «Plazo en ampliación» y no hay cuenta regresiva. `app/css/claro.css`: `.av-plazo.p-amp` (gris).
+- `app/js/confirmacion.js::pintarPasosConf`: cuatro pasos (ver D-53). Estado nuevo solo en pantalla, `confFormatoListo`
+  (código de verificación para el que marcó la casilla; se borra al salir). `cargarCertificadoUI` abre el diálogo con
+  `mostrarDialogo` y una casilla que habilita «Cargar».
+- `app/js/arranque.js`: el manejador `change` de `#conf-pasos` atiende `#conf-formato-ok` y devuelve el foco a la casilla.
+- `app/css/claro.css`: pasos en 2 columnas (1 en celular), `.cp-lista`, `.conf-casilla`.
+
+**Verificado en local** (`app-local`, backend simulado, municipio de 49 sedes; `node --check` de los 5 JS en verde):
+sin empezar (paso 1 activo, 2 a 4 pendientes); respondió todo (paso 2 activo con el botón); «Descargar» → estado
+Generada, paso 3 activo con la casilla; casilla marcada → paso 3 hecho y paso 4 activo con «Elegir el PDF firmado» y la zona
+para soltar; el foco sigue en la casilla; diálogo de carga con «Cargar» deshabilitado hasta marcar la casilla, luego estado
+Cargada con los 4 pasos hechos; línea de contexto «… cargue la certificación firmada. Plazo en ampliación.»; aviso gris del
+panel de la Secretaría; sin desplazamiento lateral a 375 px y pasos en una columna. **No verificado:** la pantalla con un
+municipio real y datos reales; el panel de la Secretaría completo (solo se comprobó la cadena del aviso gris).
+
+**Trazabilidad del plazo (misma fecha, pedida por el usuario: «debe quedar la trazabilidad del plazo fijado de antes»).** La primera versión de D-53
+dejaba el plazo vacío y perdía la fecha original de la pantalla; se corrigió con la pestaña 4 de la propuesta visual:
+- `app/js/nucleo.js`: `CONFIRMACION_PLAZO_ORIGINAL` («martes 6 de octubre de 2026, 11:59 p. m.») y `CONFIRMACION_PLAZO_ORIGINAL_FIN`
+  (`2026-10-06T23:59:59-05:00`). No se sobrescriben nunca.
+- `app/js/avance.js`: `plazoAvanceHtml` (aviso del plazo vigente más «Plazo original: … · venció»), `entregaPlazo(m)` (primera carga
+  frente al corte), `entregaChip`, `columnasPlazoCSV` (cuatro columnas del Excel), línea
+  «Plazo original / Primera carga / Certificación vigente» en la ficha del municipio, y el pie del panel con el criterio.
+- `app/js/cabecera.js`: «… Plazo en ampliación. El plazo original era el …» para el alcalde; «(original: …)» en la Secretaría.
+- `app/css/claro.css`: `.av-plazos`, `.av-plazo-orig`, `.av-entrega`, `.af-plazo`. Todo en gris: la marca no es un estado de la campaña.
+- Criterio «a tiempo»: la **primera** carga antes del corte original, hora de Bogotá; **lo confirma la jefatura**. No toca el
+  servidor ni las hojas: el servidor ya devuelve todas las cargas con su fecha (`Confirmaciones.gs`, `certificaciones`).
+- **Verificado en local** (simulador): plazo y «Plazo original … · venció» en el panel; marcas con cargas del 6 de octubre a las 23:00
+  y a las 23:30 (hora de Bogotá, esta última dada en UTC) = A tiempo y del 7 de octubre = En la ampliación; sección plegada por
+  defecto (60 px de alto), contadores 7 · 1 · 18 · 1, ordenada por entrega y primera carga; observaciones (desactualizada, volvió a
+  cargar, sedes respondidas); la fila abre el detalle y «Volver» regresa con la sección en su estado; Excel con las 4 columnas para
+  los casos a tiempo, ampliación y sin cargar; sin desplazamiento lateral a 375 px (contadores en 2 columnas). **No verificado:** con
+  datos reales; Power BI.
+- **Se construyó una sección plegada «Entrega frente al plazo» (contadores y una tabla por municipio) y el usuario la retiró por
+  redundante** («pienso que eso de Entrega frente al plazo es redundante»): se quitaron `av-entrega-caja`, `pintarEntregaPlazo` y
+  sus estilos. Se conservan las dos fechas, la marca por municipio (tabla y ficha) y las columnas del Excel.
+
+**Cifras con la altura pareja (corrección que hicieron los usuarios del sistema, 2026-10-07):** el 1 y el 8 de los números grandes
+se veían de distinto tamaño porque las cifras estaban en Georgia, que dibuja dígitos «de texto» (el 1 más bajo que el 8) y no trae
+variante de cifras alineadas (`font-variant-numeric: lining-nums` no cambia nada). Se agregó `--f-num` (= la tipografía de la
+interfaz) en `estilos.css` y se aplicó, con peso 650 y `letter-spacing:-.02em`, a todas las cifras grandes: `.franja .c b`, `.cifra b`,
+`.tarea > b.n` (`estilos.css`), `.av-bento > .c b`, `.av-centro b`, `.av-num`, `.af-num`, `.af-obras b`, `.cc-num`,
+`.cc-mini b`, `.uc > b` (`claro.css`). Los títulos (`h1`–`h3`, `.migas .hoy`) siguen en Georgia; **si un título lleva cifras se verán
+de texto**: no se encontró ninguno en las pantallas revisadas. El PDF del presupuesto (`pdf.js`) y el certificado no se tocaron.
+**Verificado en local:** la fuente calculada de las cifras es «Segoe UI Variable Text» 650 y se ve «49 / 49», «0 · 0 · 49» y el
+anillo con la misma altura en el alcalde y en el panel de la Secretaría. **No verificado:** en un Mac o en Linux (cae a la
+tipografía del sistema).
+
+**Publicado el 2026-10-07 (`?v=20`)** por pedido del usuario («que quede ya listo para que los alcaldes y los usuarios vean los
+cambios»), como excepción al congelamiento: el plazo original ya venció. Antes de esto Pages seguía en `?v=19`, con el plazo
+«martes 6 de octubre de 2026» y la cuenta regresiva («El plazo venció»). Se subieron las 25 referencias `?v=` de `app/index.html`.
+Los alcaldes que ya cargaron sin formato (3 alcaldías) deben rehacer el PDF: ver H-32 en `CONFLICTOS_Y_HALLAZGOS.md`.
+
+**Entregado a la jefatura ese día (fuera del repositorio):** el corte de la campaña con las cifras del Excel exportado del
+panel el 2026-10-07 (13 cargadas, 5 por firmar y cargar, 1 respondiendo, 7 sin empezar; 715 de 975 sedes respondidas) y el
+texto del correo para las 3 alcaldías que deben presentar el certificado en el formato de su alcaldía.
+
+**Propuesta visual y de plazo (entregada, sin aplicar):** `trabajo7.10_propuestaVisual/` (fuera del repositorio, lleva el
+membrete): `propuesta_visual.html`, `PROPUESTA_visual_y_plazo.md` y `muestra_pantalla_alcalde.html` (muestra descartada por
+el usuario, se conserva). Pendiente de su decisión: nueva fecha y hora del plazo y criterio de «a tiempo» (propuesta:
+primera carga ≤ 2026-10-06 23:59, hora de Bogotá, a confirmar con la jefatura; el servidor no aplica el plazo y las fechas
+de cada carga ya están en la hoja `Certificaciones`); Inicio como centro de la campaña también para Verificador y Consulta;
+mapa 3D de Caldas (opción B, dibujo propio sin librerías); subregiones (nombres sin verificar con la Gobernación);
+revisión de cada PDF en el panel (exige versión nueva de Apps Script); barrido visual de las demás pantallas.
+
+**Pendientes de seguridad (revisión del 2026-10-06, sin cambios hoy):** bloqueo dirigido de códigos (los intentos fallidos
+de un tercero pueden invalidar un código bueno; requiere versión nueva de `Auth.gs`); el lector de Power BI ve todas las
+pestañas; menores: `Math.random` en el código, `String(err)` en `doPost`, `web/` versionado, Actions por etiqueta.
+
+**Un tropiezo de esta ronda, sin efecto en datos:** al limpiar las pruebas del 2026-10-07 se recargó `app-local` con una
+sesión simulada guardada; la aplicación llamó una vez al backend real con un token falso y el servidor lo rechazó
+(«sesión venció»). No leyó ni escribió datos; quedó una llamada inválida en el registro de ejecuciones de Apps Script. Desde
+entonces se borra el almacenamiento del navegador antes de recargar la página de pruebas.

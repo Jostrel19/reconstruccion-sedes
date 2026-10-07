@@ -177,6 +177,15 @@
     else if (b.dataset.descargar) descargarCertificadoUI(b.dataset.descargar, b);
   });
   confPasos.addEventListener('change', e => {
+    // Casilla «ya pasé el contenido a mi formato» (D-53): habilita el paso de firmar y cargar. Solo en pantalla.
+    if (e.target.id === 'conf-formato-ok'){
+      const m = CONF && CONF.municipios[0];
+      confFormatoListo = e.target.checked && m ? m.codigo_actual : '';
+      pintarConfirmacion();
+      const c = document.getElementById('conf-formato-ok');
+      if (c) c.focus();
+      return;
+    }
     if (e.target.id !== 'conf-pdf') return;
     const archivo = e.target.files[0];
     e.target.value = '';
